@@ -1,0 +1,55 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const enPosts = await getCollection('en');
+  const esPosts = await getCollection('es');
+
+  const enPaths = enPosts.map((post) => ({
+    params: { lang: 'en', slug: post.data.slug },
+    props: { post },
+  }));
+
+  const esPaths = esPosts.map((post) => ({
+    params: { lang: 'es', slug: post.data.slug },
+    props: { post },
+  }));
+
+  return [...enPaths, ...esPaths];
+}
+
+const { post } = Astro.props;
+const { lang } = Astro.params;
+const { Content } = await render(post);
+
+const alternateUrl = post.data.relatedSlug ? `/${lang === 'en' ? 'es' : 'en'}/${post.data.relatedSlug}` : undefined;
+---
+
+<Layout title={post.data.title} description={post.data.description} language={lang!} alternateUrl={alternateUrl}>
+  <article class="prose dark:prose-invert max-w-none">
+    <div class="mb-8 border-b border-gray-200 dark:border-gray-800 pb-8">
+      <h1 class="text-4xl font-bold mb-4">{post.data.title}</h1>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <time datetime={post.data.date.toISOString()}>
+          {post.data.date.toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        <span>•</span>
+        <span class="capitalize">{post.data.category}</span>
+        <span>•</span>
+        <div class="flex gap-2">
+          {post.data.tags.map((tag: string) => (
+            <span class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs">{tag}</span>
+          ))}
+        </div>
+        <span>•</span>
+        <a href={`/${lang}/${post.data.slug}.md`} class="text-blue-600 dark:text-blue-400 hover:underline font-medium">View raw Markdown</a>
+      </div>
+    </div>
+    <Content />
+  </article>
+</Layout>

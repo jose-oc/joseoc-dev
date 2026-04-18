@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const enPosts = await getCollection('en');
+  const esPosts = await getCollection('es');
+
+  const enCats = [...new Set(enPosts.map(p => p.data.category))].map(cat => ({
+    params: { lang: 'en', category: cat },
+    props: { posts: enPosts.filter(p => p.data.category === cat) }
+  }));
+
+  const esCats = [...new Set(esPosts.map(p => p.data.category))].map(cat => ({
+    params: { lang: 'es', category: cat },
+    props: { posts: esPosts.filter(p => p.data.category === cat) }
+  }));
+
+  return [...enCats, ...esCats];
+}
+
+const { lang, category } = Astro.params;
+const { posts } = Astro.props;
+
+const sortedPosts = posts
+  .filter(p => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title={`Category: ${category}`} language={lang!}>
+  <div class="mb-12">
+    <a href={`/${lang}/blog`} class="text-sm text-blue-600 hover:underline">← Back to Blog</a>
+    <h1 class="text-4xl font-bold mt-4 capitalize">Category: {category}</h1>
+  </div>
+
+  <div class="space-y-12">
+    {sortedPosts.map(post => (
+      <article>
+        <time class="text-sm text-gray-500">{post.data.date.toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES')}</time>
+        <h3 class="text-2xl font-bold hover:text-blue-600 mt-1">
+          <a href={`/${lang}/${post.data.slug}`}>{post.data.title}</a>
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 mt-3">{post.data.description}</p>
+      </article>
+    ))}
+  </div>
+</Layout>

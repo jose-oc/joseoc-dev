@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
+  ];
+}
+
+const { lang } = Astro.params;
+
+const t = {
+  en: {
+    title: "About Me",
+    content: `
+      <h2>Who I am</h2>
+      <p>I am a senior engineer focused on DevOps, AI, and Linux. I love building systems that are efficient, secure, and easy to maintain.</p>
+      <h2>Philosophy</h2>
+      <p>I believe in simplicity and clarity. This site is a reflection of that: minimalist, fast, and focused on content.</p>
+      <h2>What this site is about</h2>
+      <p>This is my personal knowledge base and documentation hub. I share what works for me and why.</p>
+    `
+  },
+  es: {
+    title: "Sobre mí",
+    content: `
+      <h2>Quién soy</h2>
+      <p>Soy un ingeniero senior enfocado en DevOps, IA y Linux. Me encanta construir sistemas que sean eficientes, seguros y fáciles de mantener.</p>
+      <h2>Filosofía</h2>
+      <p>Creo en la simplicidad y la claridad. Este sitio es un reflejo de eso: minimalista, rápido y enfocado en el contenido.</p>
+      <h2>De qué trata este sitio</h2>
+      <p>Esta es mi base de conocimientos personal y centro de documentación. Comparto lo que me funciona y por qué.</p>
+    `
+  }
+}[lang as 'en' | 'es'];
+---
+
+<Layout title={t.title} language={lang!}>
+  <article class="prose dark:prose-invert max-w-none">
+    <h1>{t.title}</h1>
+    <Fragment set:html={t.content} />
+  </article>
+</Layout>
