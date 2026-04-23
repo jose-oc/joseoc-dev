@@ -1,267 +1,163 @@
 ---
-
-title: "Dotfiles and Reproducibility"
-description: "Manage and reproduce system configuration using chezmoi and Homebrew Brewfile."
+title: "Infrastructure as Code for Your Mac: Managing Dotfiles with Chezmoi"
+description: "Never set up a Mac manually again. Learn how to use Chezmoi and Homebrew Brewfiles to manage your configuration, sync dotfiles across machines, and achieve 100% reproducibility."
 date: "2026-04-18"
-tags: ["dotfiles", "chezmoi", "reproducibility", "devops"]
+tags: ["dotfiles", "chezmoi", "reproducibility", "devops", "automation"]
 category: "engineering"
 language: "en"
 slug: "dotfiles-and-reproducibility"
-------------------------------------
+---
 
-## Overview
+## Why This Matters
 
-This section describes how to manage configuration files (dotfiles) and make the system reproducible across machines.
+You have spent hours fine-tuning your terminal, editor, and shell. If your laptop died tomorrow, how long would it take you to get back to this exact state? For most developers, the answer is "days of frustration."
 
-The setup uses:
+By treating your configuration as **Infrastructure as Code (IaC)**, you ensure that your environment is permanent, version-controlled, and reproducible. **Chezmoi** is the professional choice for this: it manages your "dotfiles" (hidden config files) securely and allows you to recreate your entire workstation on a brand-new Mac with a single command.
 
-* `chezmoi` for managing configuration files declaratively
-* `Brewfile` for managing installed packages
-
-The goal is to ensure that a new machine can be set up quickly and consistently.
+### Key Benefits
+* **Disposability**: Your laptop is now cattle, not a pet. You can switch machines in minutes.
+* **Version Control**: See exactly when and why you changed a setting in your editor.
+* **Security**: Manage sensitive templates safely without committing secrets to Git.
 
 ---
 
-## Why Manage Dotfiles
+## 1. Chezmoi: The Git-Friendly Dotfiles Manager
 
-Configuration files define the behavior of:
+Chezmoi works by keeping a "source of truth" in a hidden Git repository and "applying" those files to your actual home directory.
 
-* the shell (`.zshrc`)
-* the editor (`nvim`)
-* the prompt (`starship`)
-* scripts and utilities
-
-Without version control, these configurations become:
-
-* difficult to maintain
-* hard to reproduce
-* prone to accidental changes
-
----
-
-## Installing chezmoi
-
-Install:
-
+### Installation
 ```bash
 brew install chezmoi
 ```
 
----
-
-## Initializing chezmoi
-
-Initialize a repository:
-
+### Initializing Your Repo
 ```bash
+# Start a new local repository
 chezmoi init
-```
 
-This creates a source directory at:
-
-```bash
-~/.local/share/chezmoi
-```
-
-This directory contains the canonical version of your configuration files.
-
----
-
-## Adding Files
-
-Add files to be managed:
-
-```bash
+# Add your first files
 chezmoi add ~/.zshrc
 chezmoi add ~/.config/nvim
 chezmoi add ~/.config/starship.toml
-chezmoi add ~/.local/bin
-chezmoi add ~/.config/zsh
 ```
 
-These files are copied into the chezmoi source directory.
+![SCREENSHOT: Terminal showing 'chezmoi status' and the source directory in ~/.local/share/chezmoi]
 
 ---
 
-## Applying Changes
+## 2. The Golden Rule: Edit the Source, Not the File
 
-Apply configuration to your home directory:
+Once a file is managed by Chezmoi, you should no longer edit it directly in your home folder. If you do, your changes will be overwritten next time you "apply" your dotfiles.
 
-```bash
-chezmoi apply
-```
+### The Workflow
+1. **Edit**: `chezmoi edit ~/.zshrc` (This opens the file in your [configured Neovim](editor-setup-neovim)).
+2. **Preview**: `chezmoi diff` (See what's about to change).
+3. **Apply**: `chezmoi apply` (Make the changes live).
 
-This synchronizes the source state with the actual files in `$HOME`.
-
----
-
-## Editing Managed Files
-
-Important rule:
-
-Do not edit files directly in your home directory.
-
-Instead, use:
-
-```bash
-chezmoi edit ~/.zshrc
-chezmoi edit ~/.config/nvim/init.lua
-```
-
-Then apply:
-
-```bash
-chezmoi apply
-```
-
-### Why this matters
-
-If you edit files directly, `chezmoi apply` may overwrite your changes.
-
-chezmoi treats the source directory as the single source of truth.
+[RECORDING: asciinema - Demonstrating the edit-diff-apply workflow with chezmoi]
 
 ---
 
-## Version Control
+## 3. Pushing to GitHub: Backing Up Your Config
 
-The chezmoi source directory is a Git repository.
-
-Initialize Git:
+Chezmoi stores your "source" files in `~/.local/share/chezmoi`. This is a real Git repository. To backup your dotfiles, you need to commit and push from that directory.
 
 ```bash
-cd ~/.local/share/chezmoi
-git init
+# Go to the source directory
+chezmoi cd
+
+# Commit and push your changes
 git add .
-git commit -m "Initial dotfiles"
-```
-
-Add a remote:
-
-```bash
-git remote add origin git@github.com:your-user/dotfiles.git
+git commit -m "Add my developer configuration"
+git remote add origin https://github.com/your-username/dotfiles.git
 git push -u origin main
 ```
 
 ---
 
-## Using chezmoi on a New Machine
+## 4. 100% Reproducibility with Brewfile
 
-Install chezmoi:
-
-```bash
-brew install chezmoi
-```
-
-Apply your configuration:
+To make your machine truly reproducible, you need to manage your applications too. We do this by adding the `Brewfile` we created in the [Base System Setup](base-system-setup-macos) to Chezmoi.
 
 ```bash
-chezmoi init --apply git@github.com:your-user/dotfiles.git
-```
-
-This clones your repository and applies all configuration.
-
----
-
-## Brewfile Integration
-
-Generate a Brewfile:
-
-```bash
+# Update your Brewfile
 brew bundle dump --file="$HOME/Brewfile" --force
-```
 
-Add it to chezmoi:
-
-```bash
+# Add it to chezmoi
 chezmoi add ~/Brewfile
 ```
 
 ---
 
-## Installing Packages from Brewfile
+## 5. Setting Up a New Mac in One Command
 
-On a new system:
+When you get a new computer, the setup is now just two steps:
 
+1. **Install Homebrew**.
+2. **Run Chezmoi**:
 ```bash
-brew bundle install --file="$HOME/Brewfile"
+chezmoi init --apply https://github.com/your-username/dotfiles.git
 ```
 
+This will clone your repo, install every tool in your `Brewfile`, and place every configuration file exactly where it belongs.
+
 ---
 
-## File Organization
+## 6. Dynamic Configuration with Templates
 
-Recommended structure:
+What if you want your `.zshrc` to be slightly different on your work laptop versus your personal one? Chezmoi handles this with **templates**.
 
+### Step 1: Create a Template
+To turn a regular file into a template, use the `--template` flag when adding it:
 ```bash
-~/.local/bin
-~/.config/zsh
-~/.config/nvim
-~/.config/starship.toml
-~/.config/docs
+chezmoi add --template ~/.zshrc
+chezmoi add --template ~/.gitconfig
+```
+This adds `.zshrc.tmpl` and `.gitconfig.tmpl` to your source directory.
+
+### Step 2: Add Logic and Variables
+You can now use Go template syntax to make your files dynamic.
+
+**Example 1: Conditional lines in `.zshrc`**
+```bash
+# ~/.zshrc.tmpl
+{{ if eq .chezmoi.hostname "macbook-pro-work" }}
+# Added by Antigravity
+export PATH="/Users/jose/.antigravity/antigravity/bin:$PATH"
+{{ end }}
 ```
 
-Keep configuration modular and organized.
-
----
-
-## What Not to Include
-
-Avoid adding:
-
-* `~/.config/op` (1Password state)
-* `~/.config/gcloud` (credentials and local config)
-* `~/.config/iterm2` (runtime state)
-* any file containing secrets
-
-Only include files that should be shared across machines.
-
----
-
-## Common Issues
-
-### Changes not applied
-
-Cause:
-
-* file edited outside chezmoi
-
-Fix:
-
-```bash
-chezmoi diff
-chezmoi apply
+**Example 2: Different email in `.gitconfig`**
+```ini
+# ~/.gitconfig.tmpl
+[user]
+    name = Jose OC
+    email = {{ .email }}
 ```
 
+### Step 3: Define Your Data
+To fill in the `{{ .email }}` variable, create a configuration file on each machine at `~/.config/chezmoi/chezmoi.yaml`:
+
+```yaml
+# Personal Machine
+data:
+  email: "personal@email.com"
+
+# Work Machine
+data:
+  email: "work@company.com"
+```
+
+Now, when you run `chezmoi apply`, it will generate the correct file for that specific machine.
+
 ---
 
-### File overwritten
-
-Cause:
-
-* local changes not reflected in source
-
-Fix:
-
-* use `chezmoi edit`
-
----
-
-## Best Practices
-
-* Treat chezmoi source as the single source of truth
-* Keep configuration minimal and explicit
-* Version control everything reproducible
-* Exclude secrets and machine-specific state
-* Use small, modular configuration files
+## 7. Best Practices for Dotfiles
 
 ---
 
 ## Summary
+Congratulations! You have transformed your Mac from a collection of manual settings into a **fully automated, version-controlled developer workstation**. You are now part of the 1% of developers who can survive a hardware failure without losing a single line of configuration. 
 
-At this point:
+**Happy Hacking!**
 
-* Configuration files are managed declaratively
-* The system can be reproduced on a new machine
-* Changes are tracked and versioned
-
-This provides a stable and maintainable development environment.

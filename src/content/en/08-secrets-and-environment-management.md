@@ -1,266 +1,111 @@
 ---
-
-title: "Secrets and Environment Management"
-description: "Manage secrets securely using 1Password and control environment variables per project with direnv."
+title: "Managing Secrets and Environments on macOS: 1Password CLI and Direnv"
+description: "Securely manage environment variables and API keys on macOS. Learn how to use Direnv for per-project configuration and 1Password CLI for secret injection in your DevOps workflow."
 date: "2026-04-18"
-tags: ["secrets", "1password", "direnv", "security"]
+tags: ["secrets", "1password", "direnv", "security", "devops"]
 category: "engineering"
 language: "en"
 slug: "secrets-and-environment-management"
-------------------------------------------
+---
 
-## Overview
+## Why This Matters
 
-This section describes how to manage secrets securely and how to handle environment variables in a controlled and reproducible way.
+As a developer, you handle dozens of API keys, database passwords, and cloud credentials daily. Storing these in `.zshrc` or plain text `.env` files is a major security risk. If you accidentally push a secret to GitHub, your infrastructure could be compromised in minutes.
 
-The setup combines:
+A professional setup solves this with two tools: **1Password CLI** (for secure storage) and **direnv** (for automatic, project-specific environment loading). This ensures that secrets are only available when you are in the relevant project directory and never leak into your global shell.
 
-* 1Password for secure storage of secrets
-* direnv for loading environment variables per project
-
-The goal is to avoid storing sensitive information in shell configuration files or committing secrets to repositories.
+### Key Benefits
+* **Isolation**: Environment variables for "Project A" don't interfere with "Project B."
+* **Security**: Secrets stay encrypted in 1Password until the moment they are needed.
+* **Automation**: No more typing `export AWS_PROFILE=...` every time you switch tasks.
 
 ---
 
-## Installing 1Password CLI
+## 1. Context-Aware Environments with Direnv
 
-Install 1Password and its CLI:
+**direnv** is a shell extension that loads and unloads environment variables depending on your current directory. It looks for a file named `.envrc`.
 
-```bash id="m6r1tj"
-brew install --cask 1password
-brew install --cask 1password-cli
-```
-
-Sign in:
-
-```bash id="r7w3od"
-op signin
-```
-
-This connects the CLI to the desktop application.
-
----
-
-## Why Use 1Password
-
-1Password provides:
-
-* encrypted storage of secrets
-* secure access from the terminal
-* integration with SSH and CLI tools
-
-Secrets stored in 1Password never need to be written to disk in plain text.
-
----
-
-## Accessing Secrets
-
-Retrieve a secret:
-
-```bash id="v0i3gm"
-op read "op://Private/MyService/API_KEY"
-```
-
-Use it in a command:
-
-```bash id="6d3tqk"
-export API_KEY="$(op read 'op://Private/MyService/API_KEY')"
-```
-
-However, exporting secrets globally is not recommended.
-
----
-
-## Running Commands with Secrets
-
-Use `op run` to inject environment variables for a single command:
-
-```bash id="o8h1vn"
-op run --env-file=.env -- command
-```
-
-Example:
-
-```bash id="m3g5pu"
-op run --env-file=.env -- ansible-playbook site.yml
-```
-
-### Benefits
-
-* secrets are only available to the process
-* nothing persists in the shell environment
-* reduces risk of accidental exposure
-
----
-
-## Managing Environment Variables with direnv
-
-Install direnv:
-
-```bash id="h2g9ds"
+### Installation
+```bash
 brew install direnv
 ```
 
-Enable it in `.zshrc`:
-
-```bash id="8o6y7h"
+### Enabling in Zsh
+Add this to your `~/.zshrc`:
+```bash
 eval "$(direnv hook zsh)"
 ```
 
----
-
-## Using direnv
-
-Each project can define its own environment variables in a `.envrc` file.
-
-Example:
-
-```bash id="d5w7q1"
-layout python python3
-
-export AWS_PROFILE=dev
-export CLOUDSDK_CORE_PROJECT=my-project
-export ANSIBLE_CONFIG=$PWD/ansible.cfg
+### Usage: The `.envrc` File
+Create a `.envrc` file in your project root:
+```bash
+# ~/.envrc
+export AWS_PROFILE="my-dev-profile"
+export KUBECONFIG="$PWD/kubeconfig.yaml"
 ```
-
-Allow the file:
-
-```bash id="c1q8p3"
+When you `cd` into this folder, direnv will ask you to authorize the file:
+```bash
 direnv allow
 ```
 
-When entering the directory, variables are loaded automatically. When leaving, they are unloaded.
+[RECORDING: asciinema - Demonstrating variables loading automatically when entering a folder and unloading when leaving]
 
 ---
 
-## Combining direnv and 1Password
+## 2. Secure Secret Injection with 1Password CLI
 
-A common pattern is:
+The **1Password CLI (`op`)** allows you to reference secrets stored in your vault using a URI format (e.g., `op://Vault/Item/Field`).
 
-* `.envrc` defines non-secret variables
-* `.env` contains references to secrets
-
-Example `.env`:
-
-```bash id="p7g2l0"
-JIRA_API_TOKEN=op://Private/Jira/api_token
+### Installation
+```bash
+brew install --cask 1password-cli
 ```
 
-Run commands with:
-
-```bash id="q4j9zn"
-op run --env-file=.env -- command
+### The "No-Secrets-On-Disk" Workflow
+Instead of storing a real API key in `.env`, store the reference:
+```bash
+# .env file (Safe to have on disk, but don't commit it!)
+STRIPE_API_KEY=op://Private/Stripe/api_key
 ```
 
-This keeps secrets out of `.envrc` and avoids exporting them globally.
+### Running Commands with Secrets
+Use `op run` to inject the real values into a process without ever exporting them to your shell:
+```bash
+op run --env-file=.env -- npm run dev
+```
+
+> [!TIP]
+> 1Password will pop up a Touch ID prompt. Once approved, `npm run dev` gets the real key, but if you run `echo $STRIPE_API_KEY` in another terminal tab, it remains empty.
+
+![SCREENSHOT: 1Password Touch ID prompt appearing when running 'op run']
 
 ---
 
-## AWS Configuration
+## 3. Synergy: Combining Direnv and 1Password
 
-Prefer SSO instead of static credentials:
+The ultimate DevOps workflow uses `direnv` to set non-sensitive config and `1Password` to handle the secrets.
 
-```bash id="q2c6pj"
-aws configure sso
-```
+### Example `.envrc` for a Cloud Project
+```bash
+# Set non-sensitive cloud context
+export AWS_PROFILE=production
+export AWS_REGION=us-east-1
 
-Then:
-
-```bash id="w8j4xk"
-aws sso login --profile dev
-```
-
-Use profiles in `.envrc`:
-
-```bash id="e3z5ti"
-export AWS_PROFILE=dev
-```
-
----
-
-## GCP Configuration
-
-Initialize:
-
-```bash id="p9r2sl"
-gcloud init
-```
-
-Set Application Default Credentials:
-
-```bash id="n7x1kw"
-gcloud auth application-default login
-```
-
-Use project configuration in `.envrc`:
-
-```bash id="c8m6qw"
-export CLOUDSDK_CORE_PROJECT=my-project
+# Use op run for the actual deployment
+alias deploy="op run --env-file=.env -- terraform apply"
 ```
 
 ---
 
-## Best Practices
+## 4. Best Practices for Secret Safety
 
-* Never store secrets in `.zshrc`
-* Avoid committing `.env` files with real secrets
-* Use `op run` instead of exporting secrets globally
-* Keep `.envrc` focused on non-sensitive configuration
-* Prefer short-lived credentials (SSO) over static keys
-
----
-
-## Common Issues
-
-### direnv not loading variables
-
-Check:
-
-```bash id="v5z8jm"
-direnv status
-```
-
-Ensure `.envrc` is allowed:
-
-```bash id="l0p3yt"
-direnv allow
-```
-
----
-
-### Secrets visible in shell history
-
-Avoid commands like:
-
-```bash id="t4g2xo"
-export API_KEY=secret
-```
-
-Use `op run` instead.
-
----
-
-### 1Password CLI not working
-
-Check:
-
-```bash id="z1x6pq"
-op account list
-```
-
-Ensure:
-
-* 1Password app is unlocked
-* CLI is signed in
+1. **Global Gitignore**: Ensure `.env` and `.envrc` are in your [global gitignore](git-and-version-control#4-handling-global-ignores).
+2. **Biometrics**: Always enable Touch ID for the 1Password CLI to avoid typing passwords.
+3. **Use Profiles**: Use `AWS_PROFILE` or `GOOGLE_CLOUD_PROJECT` instead of hardcoding access keys.
+4. **Short-Lived Tokens**: Prefer `op signin` sessions that expire over long-lived environment variables.
 
 ---
 
 ## Summary
+You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](python-and-automation-tooling) using these new security foundations.
 
-At this point:
-
-* Secrets are stored securely in 1Password
-* Environment variables are scoped per project using direnv
-* Sensitive data is not stored in shell configuration or repositories
-
-This setup provides a secure and flexible foundation for working with credentials and environment-specific configuration.
