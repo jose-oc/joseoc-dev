@@ -47,7 +47,8 @@ Add this to your `~/.gitconfig` to make Delta your default pager:
     syntax-theme = Monokai Extended
 ```
 
-![SCREENSHOT: A 'git diff' output showing syntax highlighting and line numbers provided by Delta]
+Example of `git diff` output with Delta:
+![A 'git diff' output showing syntax highlighting and line numbers provided by Delta](../../assets/git-delta-example.png)
 
 ---
 
@@ -87,7 +88,6 @@ Stop typing `git status` 100 times a day. Use aliases to speed up your workflow.
     last = log -1 --stat
 ```
 
-[RECORDING: asciinema - Demonstrating 'git st' and 'git lg' in a busy repository]
 
 ---
 

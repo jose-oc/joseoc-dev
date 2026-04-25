@@ -62,13 +62,16 @@ brew install --cask font-hack-nerd-font
 
 Ghostty is configured via a plain text file, making it perfect for [dotfiles management](dotfiles-and-reproducibility).
 
-===JOC: review this section, I'm not sure if this is the best way to configure ghostty===
+You can find the available settings in the [Ghostty documentation](https://ghostty.org/docs/config/reference).
 
-### Recommended `~/.config/ghostty/config`
+You can query the defaults values with `ghostty +show-config --default --docs`.
+
+This is an example of `~/.config/ghostty/config`. I personally, leave this file empty and use the defaults.
+
 ```ini
 font-family = Hack Nerd Font
 font-size = 13
-theme = dark-plus
+theme = Deep
 scrollback-limit = 100000
 copy-on-select = true
 window-padding-x = 8
@@ -78,6 +81,17 @@ window-padding-y = 8
 > [!NOTE]
 > `copy-on-select` is a huge productivity booster. Just highlight text with your mouse, and it's already in your clipboard.
 
+For some of these settings, you can use the `ghostty` command to find the available values. 
+For example, to find the available themes, you can use the following command:
+
+```bash
+ghostty +list-themes
+```
+
+![ghostty list themes](../../assets/ghostty-list-themes.png)
+
+
+
 ---
 
 ## 4. Fixing Keyboard Behavior (Word Navigation)
@@ -85,14 +99,40 @@ window-padding-y = 8
 One of the most frustrating things on a new Mac is that `Option + Left/Right` doesn't navigate by word in the terminal by default.
 
 ### The Shell Fix
-Add this to your `~/.zshrc` to make Zsh respect common word boundaries (treating `/` as a separator):
+Add this to your `~/.zshrc` to make Zsh respect common word boundaries (treating `/` as a separator) and so `Alt+backspace` deletes the previous word:
 
 ```bash
+# zsh completion
+autoload -Uz compinit bashcompinit
+compinit
+bashcompinit
+
+# Word style
 autoload -U select-word-style
 select-word-style bash
+
+# Word navigation
+bindkey "^[b" backward-word
+bindkey "^[f" forward-word
+
+# Alt + Left / Right for terminals that send CSI sequences
+bindkey "^[[1;3D" backward-word
+bindkey "^[[1;3C" forward-word
+
+# Home / End
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+bindkey "^[[1~" beginning-of-line
+bindkey "^[[4~" end-of-line
+bindkey "^[[7~" beginning-of-line
+bindkey "^[[8~" end-of-line
+
+# Alt + Backspace
+bindkey '^[^?' backward-kill-word
+bindkey '^[\x7f' backward-kill-word
 ```
 
-[RECORDING: asciinema - Demonstrating fast word navigation and deletion in a long file path]
+![ghostty-word-navigation](../../assets/terminal-recording-20260425_204243.cast)
 
 ---
 

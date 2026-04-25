@@ -30,10 +30,11 @@ Stop managing `.pub` and private key files manually. 1Password can act as your S
 2. Go to **Developer**.
 3. Check **Use the SSH Agent**.
 
-![SCREENSHOT: 1Password Developer settings showing the SSH Agent toggle enabled]
+![1Password SSH Agent](../../assets/1password-ssh-agent.png)
 
 ### Configure SSH to use 1Password
-Add this to your `~/.ssh/config`:
+
+On macOS, 1Password automatically configures the necessary socket. The 1Password app will ask you for permission to set the identity agent in `~/.ssh/config` for you. If you don't see the prompt, you can manually add the following to `~/.ssh/config`:
 
 ```sshconfig
 Host *
@@ -95,6 +96,14 @@ When things go wrong, don't guess. Use the built-in diagnostic tools.
 ssh -T git@github.com
 ```
 
+You can test host aliases too:
+```bash
+ssh -T git@github.com-personal
+ssh -T git@github.com-work
+```
+
+If you see a message like `Hi username! You've successfully authenticated...` you're good to go. If not, you'll need to debug.
+
 ### See the "Handshake"
 If it fails, add the verbose flag to see exactly which keys are being offered:
 ```bash
@@ -106,8 +115,6 @@ Check what's currently available in your agent (including 1Password keys):
 ```bash
 ssh-add -l
 ```
-
-[RECORDING: asciinema - Demonstration of 'ssh-add -l' and a successful 'ssh -T' connection]
 
 ---
 

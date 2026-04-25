@@ -33,7 +33,6 @@ Here is the map of tools you should start using today to improve your productivi
 | `find` | `fd` | Simplified syntax and much faster performance. |
 | `cd` | `zoxide` (`z`) | Remembers your frequent folders; navigate with 1-2 letters. |
 
-![SCREENSHOT: Terminal showing 'eza' output with icons and 'bat' showing a syntax-highlighted file]
 
 ---
 
@@ -56,6 +55,13 @@ alias grep="rg"
 alias find="fd"
 ```
 
+Example of `eza` output:
+![A 'eza' output showing file listings with icons and colors](../../assets/eza-example.png)
+
+
+Example of `bat` output:
+![A 'bat' output showing syntax highlighting](../../assets/bat-example.png)
+
 ---
 
 ## 3. Intelligent Navigation with Zoxide
@@ -68,6 +74,19 @@ Instead of typing `cd ~/code/projects/my-awesome-app`, you just type:
 z awesome
 ```
 Zoxide will find the best match and jump there instantly.
+
+Interactive selection
+
+```bash
+zi
+```
+
+Replace cd
+
+```bash
+alias cd="z"
+```
+
 
 [RECORDING: asciinema - Demonstrating fast navigation between deep directories using zoxide]
 
@@ -82,11 +101,21 @@ Zoxide will find the best match and jump there instantly.
 # Search for "TODO" in all files, ignoring node_modules and .git
 rg "TODO"
 
+# Search for "TODO" only in the current directory
+rg "TODO" .
+
+# Search for "TODO" in all files, including hidden files
+rg --hidden "TODO"
+
+
 # Search only in Markdown files
 rg -t md "DevOps"
 
 # Search and replace (pipe to sed or use a tool like fastmod)
 rg "OldName" --replace "NewName"
+
+# Combine with fzf to search in files
+rg "TODO" | fzf
 ```
 
 ---
@@ -101,6 +130,63 @@ rg "OldName" --replace "NewName"
 ```bash
 bat src/main.rs
 ```
+
+## 6. Better find with fd
+
+fd is a replacement for find, but with better defaults and faster performance.
+
+### Usage
+```bash
+# Find all files in the current directory
+fd
+
+# Find all files in the current directory, including hidden files
+fd --hidden
+
+# Find all files in the current directory, ignoring node_modules and .git
+fd --exclude node_modules --exclude .git
+
+# Find all files in the current directory, ignoring node_modules and .git
+fd --exclude node_modules --exclude .git
+
+# Find by extension
+fd -e yaml
+
+# Combine with fzf
+fd | fzf
+```
+
+## 7. Glow
+
+Glow is a Markdown viewer that renders Markdown with beautiful ANSI colors and styles in the terminal.
+
+![Glow rendering a Markdown file in the terminal with proper formatting and colors](../../assets/glow-example.png)
+
+
+### Why use Glow?
+
+Standard Markdown viewers often show plain text, which can be hard to read. Glow transforms Markdown into a rich, formatted document right in your terminal, making it perfect for quick README reviews or viewing documentation on the go.
+
+
+#### Common Commands
+
+```bash
+# View a Markdown file
+glow README.md
+
+# View multiple Markdown files
+glow README.md CHANGES.md
+
+# View all Markdown files in a directory
+glow my-dir/
+
+# Enable pager (scrollable view for large files)
+glow -p README.md
+
+# Disable line wrapping
+glow --width 100 README.md
+```
+
 
 ---
 
