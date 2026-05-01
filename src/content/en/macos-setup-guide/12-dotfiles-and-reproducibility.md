@@ -94,9 +94,22 @@ chezmoi add ~/Brewfile
 When you get a new computer, the setup is now just two steps:
 
 1. **Install Homebrew**.
-2. **Run Chezmoi**:
+2. **Install chezmoi**.
+3. **Add custom data for chezmoi**
+```bash
+mkdir -p ~/.config/chezmoi
+cat > ~/.config/chezmoi/chezmoi.toml <<EOF
+data:
+  email: "[EMAIL_ADDRESS]"
+EOF
+```
+4. **Run Chezmoi**:
 ```bash
 chezmoi init --apply https://github.com/your-username/dotfiles.git
+```
+5. **Install with brew**
+```bash
+brew bundle install --file="$HOME/Brewfile"
 ```
 
 This will clone your repo, install every tool in your `Brewfile`, and place every configuration file exactly where it belongs.

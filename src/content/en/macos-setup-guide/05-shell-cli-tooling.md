@@ -56,11 +56,11 @@ alias find="fd"
 ```
 
 Example of `eza` output:
-![A 'eza' output showing file listings with icons and colors](../../assets/eza-example.png)
+![A 'eza' output showing file listings with icons and colors](../../../assets/eza-example.png)
 
 
 Example of `bat` output:
-![A 'bat' output showing syntax highlighting](../../assets/bat-example.png)
+![A 'bat' output showing syntax highlighting](../../../assets/bat-example.png)
 
 ---
 
@@ -160,7 +160,7 @@ fd | fzf
 
 Glow is a Markdown viewer that renders Markdown with beautiful ANSI colors and styles in the terminal.
 
-![Glow rendering a Markdown file in the terminal with proper formatting and colors](../../assets/glow-example.png)
+![Glow rendering a Markdown file in the terminal with proper formatting and colors](../../../assets/glow-example.png)
 
 
 ### Why use Glow?

@@ -94,6 +94,7 @@ select-word-style bash
 ```
 
 ![SCREENSHOT: Terminal showing the difference in 'Alt + Backspace' behavior on a long path]
+=== Didn't I add this already on a previous page? ===
 
 ---
 

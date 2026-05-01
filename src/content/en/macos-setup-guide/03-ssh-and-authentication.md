@@ -30,7 +30,7 @@ Stop managing `.pub` and private key files manually. 1Password can act as your S
 2. Go to **Developer**.
 3. Check **Use the SSH Agent**.
 
-![1Password SSH Agent](../../assets/1password-ssh-agent.png)
+![1Password SSH Agent](../../../assets/1password-ssh-agent.png)
 
 ### Configure SSH to use 1Password
 
@@ -39,6 +39,23 @@ On macOS, 1Password automatically configures the necessary socket. The 1Password
 ```sshconfig
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+```
+
+Now, when `git` needs to use your private key, it will use 1Password's SSH agent to sign the data. You will be prompted to enter your 1Password master password or use Touch ID to authorize the SSH operation.
+
+![1Password SSH Agent](../../../assets/1password-ssh-agent-use-key.png)
+
+In my case, I keep only the public keys on my `~/.ssh` folder, while the private keys are stored in 1Password. I keep the public keys so that I can choose which key to use depending on the project.
+
+```shell
+~/.ssh
+❯ la
+Permissions Size User Date Modified Name
+drwx------     - jose 25 Apr 21:09   agent
+.rw-------@ 1.4k jose  1 May 20:40  󱁻 config
+.rw-------@   99 jose 20 Mar 11:25  󰷖 id_ed25519_personal.pub
+.rw-------@  101 jose 15 Apr 22:08  󰷖 id_ed25519_work.pub
+.rw-------@ 5.5k jose 28 Apr 11:02  󰣀 known_hosts
 ```
 
 ---

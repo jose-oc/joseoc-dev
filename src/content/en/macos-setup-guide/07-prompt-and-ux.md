@@ -49,36 +49,14 @@ eval "$(starship init zsh)"
 
 Unlike older prompts that required complex shell scripts, Starship uses a clean TOML file located at `~/.config/starship.toml`.
 
-### Recommended "DevOps Minimalist" Config
+I use the preset called `tokyo_night_storm`. It is a great starting point and can be customized to your liking. 
+
 ```toml
-# Don't print a new line at the start of the prompt
-add_newline = false
-
-# The main format of the prompt
-format = """
-$directory\
-$git_branch\
-$git_status\
-$kubernetes\
-$python\
-$terraform\
-$character"""
-
-[directory]
-truncate_to_repo = true
-style = "bold blue"
-
-[git_branch]
-symbol = " "
-style = "bold purple"
-
-[kubernetes]
-disabled = false
-format = 'at [$symbol$context( \($namespace\))]($style) '
-symbol = "󱃾 "
+starship preset nerd-font-symbols -o ~/.config/starship.toml
 ```
 
-![SCREENSHOT: Starship prompt showing a deep directory path, Git branch, and Kubernetes icon]
+I added some minor changes that you can find in my [dotfiles](https://github.com/jose-oc/dotfiles/blob/main/dot_config/starship.toml) repository.
+
 
 ---
 

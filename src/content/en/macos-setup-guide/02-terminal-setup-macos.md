@@ -54,7 +54,7 @@ brew install --cask font-hack-nerd-font
 * **Ghostty**: Edit `~/.config/ghostty/config` and add `font-family = Hack Nerd Font`.
 * **iTerm2**: Go to `Profiles -> Text -> Font` and select `Hack Nerd Font`.
 
-![iTerm2 Font Selection](../../assets/iterm2-font.png)
+![iTerm2 Font Selection](../../../assets/iterm2-font.png)
 
 ---
 
@@ -88,7 +88,7 @@ For example, to find the available themes, you can use the following command:
 ghostty +list-themes
 ```
 
-![ghostty list themes](../../assets/ghostty-list-themes.png)
+![ghostty list themes](../../../assets/ghostty-list-themes.png)
 
 
 
@@ -132,7 +132,7 @@ bindkey '^[^?' backward-kill-word
 bindkey '^[\x7f' backward-kill-word
 ```
 
-![ghostty-word-navigation](../../assets/terminal-recording-20260425_204243.cast)
+![ghostty-word-navigation](../../../assets/terminal-recording-20260425_204243.cast)
 
 ---
 

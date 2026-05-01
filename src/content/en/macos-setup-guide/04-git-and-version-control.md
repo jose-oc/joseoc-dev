@@ -48,7 +48,7 @@ Add this to your `~/.gitconfig` to make Delta your default pager:
 ```
 
 Example of `git diff` output with Delta:
-![A 'git diff' output showing syntax highlighting and line numbers provided by Delta](../../assets/git-delta-example.png)
+![A 'git diff' output showing syntax highlighting and line numbers provided by Delta](../../../assets/git-delta-example.png)
 
 ---
 
