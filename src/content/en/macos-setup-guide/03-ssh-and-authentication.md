@@ -145,5 +145,5 @@ ssh-add -l
 ---
 
 ## Summary
-You've now secured the "front door" of your development environment. Your keys are managed, your identities are separated, and your authentication is biometric. Now that we have identity, let's [configure Git](git-and-version-control) to use it properly.
+You've now secured the "front door" of your development environment. Your keys are managed, your identities are separated, and your authentication is biometric. Now that we have identity, let's [configure Git](/en/docs/git-and-version-control) to use it properly.
 

@@ -38,7 +38,7 @@ Here is the map of tools you should start using today to improve your productivi
 
 ## 2. Setting Up the Tools
 
-If you followed the [Base System Setup](base-system-setup-macos), you've already installed these via Homebrew. If not:
+If you followed the [Base System Setup](/en/docs/base-system-setup-macos), you've already installed these via Homebrew. If not:
 
 ```bash
 brew install bat eza fd ripgrep zoxide
@@ -191,4 +191,4 @@ glow --width 100 README.md
 ---
 
 ## Summary
-By replacing legacy Unix tools with their modern counterparts, you've removed friction from your daily terminal usage. Your searches are faster, your navigation is smarter, and your files are easier to read. Next, we'll take these tools to the next level with [Shell Usability Improvements](shell-usability-improvements).
+By replacing legacy Unix tools with their modern counterparts, you've removed friction from your daily terminal usage. Your searches are faster, your navigation is smarter, and your files are easier to read. Next, we'll take these tools to the next level with [Shell Usability Improvements](/en/docs/shell-usability-improvements).

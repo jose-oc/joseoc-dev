@@ -1,26 +1,38 @@
-import { defineCollection, z } from 'astro:content';
+import { z, defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const blogSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  date: z.coerce.date(),
-  tags: z.array(z.string()),
-  category: z.string(),
-  language: z.enum(['en', 'es']),
-  draft: z.boolean().optional().default(false),
-  slug: z.string(),
-  relatedSlug: z.string().optional(),
+const baseSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  pubDate: z.date().optional(),
+  tags: z.array(z.string()).optional(),
+  category: z.string().optional(),
+  draft: z.boolean().optional(),
+  slug: z.string().optional(),
 });
 
-const en = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/en" }),
-  schema: blogSchema,
+const docsCollection = defineCollection({
+  loader: glob({ 
+    pattern: "**/*.md", 
+    base: "./src/content",
+    generateId: ({ entry }) => entry,
+  }),
+  schema: baseSchema,
 });
 
-const es = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/es" }),
-  schema: blogSchema,
+const blogCollection = defineCollection({
+  loader: glob({ 
+    pattern: "**/*.md", 
+    base: "./src/content/blog",
+    generateId: ({ entry }) => entry,
+  }),
+  schema: baseSchema.extend({
+    type: z.literal('blog').default('blog'),
+    author: z.string().optional(),
+  }),
 });
 
-export const collections = { en, es };
+export const collections = {
+  'docs': docsCollection,
+  'blog': blogCollection,
+};

@@ -107,5 +107,5 @@ alias deploy="op run --env-file=.env -- terraform apply"
 ---
 
 ## Summary
-You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](python-and-automation-tooling) using these new security foundations.
+You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](/en/docs/python-and-automation-tooling) using these new security foundations.
 

@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const blogs = await getCollection('blog');
+  return blogs.map((post) => {
+    const parts = post.id.split('/');
+    const lang = parts[0];
+    const fallbackSlug = parts.slice(1).join('/').replace(/\.mdx?$/, '');
+    const slug = post.data.slug || fallbackSlug;
+    
+    return {
+      params: { lang, slug },
+      props: { post, lang, slug },
+    };
+  });
+}
+
+const { post, lang, slug } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout 
+  title={post.data.title || 'Blog Post'} 
+  description={post.data.description} 
+  lang={lang} 
+  slug={slug}
+>
+  <div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <a href={`/${lang}/blog`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 mb-8 transition-colors">
+      &larr; Back to blog
+    </a>
+    
+    <header class="mb-10">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-surface-900 dark:text-surface-50 tracking-tight mb-4">
+        {post.data.title}
+      </h1>
+      
+      <div class="flex items-center gap-4 text-sm text-surface-600 dark:text-surface-400">
+        {post.data.pubDate && (
+          <time datetime={post.data.pubDate.toISOString()}>
+            {new Date(post.data.pubDate).toLocaleDateString()}
+          </time>
+        )}
+        {post.data.author && (
+          <span>By {post.data.author}</span>
+        )}
+      </div>
+      
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div class="mt-4 flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => (
+            <a href={`/${lang}/tag/${tag}`} class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 hover:bg-primary-200 text-primary-800 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-primary-200 transition-colors">
+              #{tag}
+            </a>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <article class="prose prose-surface dark:prose-invert prose-primary max-w-none">
+      <Content />
+    </article>
+  </div>
+</BaseLayout>

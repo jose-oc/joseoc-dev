@@ -73,10 +73,10 @@ Standard syntax highlighting is based on regex. Treesitter builds a real syntax 
 This is the "brain." It provides the autocomplete and error checking. For DevOps, we focus on:
 * **Yamlls**: For Kubernetes and Ansible.
 * **Terraform-ls**: For HCL.
-* **Basedpyright**: For Python (managed via [UV](python-and-automation-tooling)).
+* **Basedpyright**: For Python (managed via [UV](/en/docs/python-and-automation-tooling)).
 
 ### C. FZF-Lua (Fuzzy Search)
-Integrated with the [FZF](shell-usability-improvements) we set up earlier, this allows you to find any file or function in a split second.
+Integrated with the [FZF](/en/docs/shell-usability-improvements) we set up earlier, this allows you to find any file or function in a split second.
 
 ![SCREENSHOT: Neovim showing a YAML file with LSP diagnostics and FZF search open]
 
@@ -102,5 +102,5 @@ For DevOps work, you often need to move or rename files in bulk. **Oil.nvim** le
 ---
 
 ## Summary
-You now have a high-performance, keyboard-driven forge for your code and infrastructure. Your editor is integrated with your shell, your search tools, and your language servers. Now that your environment is complete, let's [ensure it's all reproducible and managed with Dotfiles](dotfiles-and-reproducibility).
+You now have a high-performance, keyboard-driven forge for your code and infrastructure. Your editor is integrated with your shell, your search tools, and your language servers. Now that your environment is complete, let's [ensure it's all reproducible and managed with Dotfiles](/en/docs/dotfiles-and-reproducibility).
 

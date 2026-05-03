@@ -121,5 +121,5 @@ done
 ---
 
 ## Summary
-Your shell is no longer just a prompt; it's a productivity partner. It remembers your history, suggests your next moves, and navigates paths intelligently. Now that it *works* well, let's make it *look* professional with the [Starship Prompt](prompt-and-ux).
+Your shell is no longer just a prompt; it's a productivity partner. It remembers your history, suggests your next moves, and navigates paths intelligently. Now that it *works* well, let's make it *look* professional with the [Starship Prompt](/en/docs/prompt-and-ux).
 

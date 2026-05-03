@@ -1,70 +1,66 @@
-# Personal Website (Astro + TailwindCSS + Pagefind)
+# High-Performance Multilingual IT Documentation Site
 
-This is a modern, high-performance personal website focused on DevOps, AI, and Linux.
+This is a custom-built, modern, static documentation website built with [Astro](https://astro.build). It features a sleek Tailwind CSS design system, a fully functional multilingual setup (English/Spanish), and is highly optimized for both human readers and Large Language Models (LLMs).
 
-## 🚀 Features
+## 🚀 Project Structure & Core Features
 
-- **Astro 6**: Latest version for blazing fast performance.
-- **TailwindCSS 4**: Minimalist and responsive design.
-- **Multi-language**: Built-in support for English (`/en/`) and Spanish (`/es/`).
-- **Markdown-first**: Content authored in Markdown with dual HTML/Markdown output.
-- **Search**: Fully static local search powered by **Pagefind**.
-- **SEO Optimized**: Canonical URLs, hreflang tags, sitemap, and Open Graph meta tags.
-- **Dark Mode**: Support for system preference.
+- **Multilingual Content Collections**: Content is authored in Markdown and stored in `src/content/en/` and `src/content/es/`.
+- **Aesthetic UI**: Uses Tailwind CSS v4 and the Typography plugin for a premium, developer-centric layout. Features a sticky sidebar, dynamic Table of Contents, and custom tags/categories.
+- **LLM Optimization**: Every documentation page automatically serves its raw Markdown counterpart via an API endpoint (`/raw/[lang]/[...slug].md`) and links to it in the HTML `<head>` for easy consumption by AI agents.
 
-## 🛠️ Local Development
+## 🧭 Routing and Navigation
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### How Routing Works
+The website dynamically generates URLs for documentation based on the following pattern: `/{language}/docs/{slug}`.
 
-2. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
+The `{slug}` is determined by a strict priority system to ensure identical translated pages share the exact same URL:
+1. **Frontmatter `slug` (Highest Priority)**: If you add `slug: "my-custom-url"` to the frontmatter of your Markdown file, Astro will use that exact string. **Best Practice:** Use the same `slug` for the English and Spanish versions of the same article.
+2. **File Path (Fallback)**: If no slug is defined in the frontmatter, the router falls back to the physical file path. For example, `src/content/en/python/setup.md` becomes `/en/docs/python/setup`.
 
-3. **Build and index for search**:
-   ```bash
-   npm run build
-   ```
+*(The routing logic is defined in `src/pages/[lang]/docs/[...slug].astro`).*
 
-4. **Preview the production build**:
-   ```bash
-   npm run preview
-   ```
+### Upper Menu Links
+The main header (`src/components/Header.astro`) uses the active language context (`lang`) to ensure you never accidentally jump to the wrong language when navigating globally:
+- **Home (`/{lang}/`)**: Links to the localized landing page.
+- **Docs (`/{lang}/docs`)**: Links to a smart index page (`src/pages/[lang]/docs/index.astro`) which automatically redirects the user to the very first documentation article listed in your sidebar configuration.
+- **Blog (`/{lang}/blog`)**: Reserved for future blog post integration.
 
-## 📦 Deployment (Vercel)
+### Sidebar Configuration
+The left sidebar is fully under your manual control. To add, reorder, or rename documentation sections, simply edit the `src/config/sidebar.ts` file. 
 
-This project is configured for easy deployment on Vercel.
+## 🧪 Testing
 
-1. Connect your GitHub repository to Vercel.
-2. Vercel will automatically detect the Astro project.
-3. Ensure the Build Command is `npm run build`.
-4. Deployment will be static by default.
+To ensure the website functions flawlessly and has no broken links, we use two separate testing frameworks.
 
-## 📁 Project Structure
+### 1. Linkinator (Static Link Checker)
+Linkinator crawls the statically built HTML files and checks every single `<a href="...">` tag to ensure there are no dead links or 404 errors.
+- **Command**: `npm run test:links`
+- **What it does**: Builds the production site (`npm run build`) and then aggressively scans `./dist` for broken links. Perfect for running in CI/CD before deployment.
 
-- `src/content/en/`: English blog posts.
-- `src/content/es/`: Spanish blog posts.
-- `src/pages/`: Website pages and routing.
-- `src/layouts/`: Base HTML layouts.
-- `src/styles/`: Global styles and Tailwind configuration.
-- `src/content.config.ts`: Content collection definitions.
+### 2. Playwright (Headless Browser E2E)
+Playwright spins up a headless Chromium browser, runs the dev server, and interacts with the website exactly like a human user would. 
+- **Command**: `npm run test:e2e`
+- **What it does**: It runs the test suite located in `tests/e2e.spec.ts`.
+- **Coverage**:
+  - Verifies the Home and Docs links redirect correctly.
+  - Clicks the Language Switcher and verifies that the URL language changes while preserving the article slug.
+  - Triggers a deliberate 404 to ensure our custom `src/pages/404.astro` page loads correctly.
+  - Validates that SEO `<link rel="alternate" hreflang="X">` tags are correctly generated in the HTML `<head>`.
 
-## 📝 Authoring Content
-
-Create new posts in `src/content/en/` or `src/content/es/` with the following frontmatter:
-
-```markdown
----
-title: "My Post Title"
-description: "A short description"
-date: "2026-04-18"
-tags: ["devops", "ai"]
-category: "engineering"
-language: "en"
-slug: "my-post-title"
-relatedSlug: "titulo-de-mi-post" # Optional: slug of the translation
----
+### Run All Tests
+```bash
+# Run both the link crawler and the E2E browser tests sequentially
+npm run test
 ```
+
+## 🧞 Commands
+
+All standard Astro commands are available from the root of the project:
+
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `npm install`             | Installs dependencies                            |
+| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| `npm run build`           | Build your production site to `./dist/`          |
+| `npm run preview`         | Preview your build locally, before deploying     |
+| `npm run test`            | Run all tests (links + e2e)                      |

@@ -12,19 +12,19 @@ export async function getStaticPaths() {
   const supportedLanguages = ['en', 'es'];
   const allLanguages = [...new Set([...languages, ...supportedLanguages])];
 
-  // Get all unique categories
-  const categories = new Set<string>();
+  // Get all unique tags
+  const tags = new Set<string>();
   allContent.forEach((item) => {
-    if (item.data.category) {
-      categories.add(item.data.category);
+    if (item.data.tags) {
+      item.data.tags.forEach((tag) => tags.add(tag));
     }
   });
 
   const paths = [];
   allLanguages.forEach((lang) => {
-    categories.forEach((category) => {
+    tags.forEach((tag) => {
       paths.push({
-        params: { lang, category },
+        params: { lang, tag },
       });
     });
   });
@@ -32,26 +32,26 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { lang, category } = Astro.params;
+const { lang, tag } = Astro.params;
 
-const docs = await getCollection('docs', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.category === category);
-const blogs = await getCollection('blog', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.category === category);
+const docs = await getCollection('docs', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.tags?.includes(tag));
+const blogs = await getCollection('blog', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.tags?.includes(tag));
 
 const allContent = [...docs, ...blogs].sort((a, b) => {
   const dateA = a.data.pubDate ? new Date(a.data.pubDate).valueOf() : 0;
   const dateB = b.data.pubDate ? new Date(b.data.pubDate).valueOf() : 0;
-  return dateB - dateA;
+  return dateB - dateA; // Sort newest to oldest
 });
 ---
 
-<BaseLayout title={`Category: ${category}`} description={`Explore all articles in the ${category} category`} lang={lang}>
+<BaseLayout title={`Posts tagged with #${tag}`} description={`Explore all articles tagged with ${tag}`} lang={lang}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       <a href={`/${lang}/`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors mb-4">
         &larr; Back to Home
       </a>
-      <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50 capitalize">
-        Category: <span class="text-primary-600 dark:text-primary-500">{category}</span>
+      <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50">
+        Tag: <span class="text-primary-600 dark:text-primary-500">#{tag}</span>
       </h1>
       <p class="mt-2 text-surface-600 dark:text-surface-400">Found {allContent.length} result(s).</p>
     </div>
@@ -79,6 +79,15 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
               <p class="text-surface-700 dark:text-surface-300">
                 {post.data.description}
               </p>
+            )}
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div class="mt-4 flex flex-wrap gap-2">
+                {post.data.tags.map((t) => (
+                  <a href={`/${lang}/tag/${t}`} class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-200 hover:bg-surface-300 text-surface-800 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-200 transition-colors">
+                    #{t}
+                  </a>
+                ))}
+              </div>
             )}
           </article>
         )
