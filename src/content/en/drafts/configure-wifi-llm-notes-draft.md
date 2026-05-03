@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 Setting up a clean, secure, and fast network on a brand new Mac is a great practice. macOS has excellent built-in networking tools, but a few tweaks will maximize your privacy, security, and speed.
 
 Here is the recommended step-by-step guide to configuring your network, ordered from the most foundational to the most advanced.

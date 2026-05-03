@@ -1,6 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import Search from './Search.astro';
+import ThemeToggle from './ThemeToggle.astro';
 
 const { lang = 'en' } = Astro.props;
 ---
@@ -19,8 +20,9 @@ const { lang = 'en' } = Astro.props;
       </nav>
     </div>
     
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 sm:gap-4">
       <Search />
+      <ThemeToggle />
       <LanguageSwitcher />
     </div>
   </div>
