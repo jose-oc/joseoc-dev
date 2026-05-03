@@ -3,7 +3,8 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const blogs = await getCollection('blog');
+  const isProd = import.meta.env.PROD;
+  const blogs = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
   const languages = [...new Set(blogs.map((post) => post.id.split('/')[0]))];
   
   // Provide a fallback in case there are no blogs in a specific language yet
@@ -14,7 +15,11 @@ export async function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
-const blogs = await getCollection('blog', (entry) => entry.id.startsWith(`${lang}/`));
+const isProd = import.meta.env.PROD;
+const blogs = await getCollection('blog', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`)) return false;
+  return isProd ? !entry.data.draft : true;
+});
 
 // Sort by date (descending)
 blogs.sort((a, b) => {

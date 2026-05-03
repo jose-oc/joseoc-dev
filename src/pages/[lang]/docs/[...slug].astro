@@ -3,7 +3,8 @@ import { getCollection, render } from 'astro:content';
 import DocLayout from '../../../layouts/DocLayout.astro';
 
 export async function getStaticPaths() {
-  const docs = await getCollection('docs');
+  const isProd = import.meta.env.PROD;
+  const docs = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
   return docs.map((doc) => {
     // doc.id is like "en/macos-setup-guide/01-base-system-setup-macos.md"
     const parts = doc.id.split('/');

@@ -3,8 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const docs = await getCollection('docs');
-  const blogs = await getCollection('blog');
+  const isProd = import.meta.env.PROD;
+  const docs = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+  const blogs = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
   const allContent = [...docs, ...blogs];
 
   // Get all languages
@@ -33,9 +34,16 @@ export async function getStaticPaths() {
 }
 
 const { lang, tag } = Astro.params;
+const isProd = import.meta.env.PROD;
 
-const docs = await getCollection('docs', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.tags?.includes(tag));
-const blogs = await getCollection('blog', (entry) => entry.id.startsWith(`${lang}/`) && entry.data.tags?.includes(tag));
+const docs = await getCollection('docs', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`) || !entry.data.tags?.includes(tag)) return false;
+  return isProd ? !entry.data.draft : true;
+});
+const blogs = await getCollection('blog', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`) || !entry.data.tags?.includes(tag)) return false;
+  return isProd ? !entry.data.draft : true;
+});
 
 const allContent = [...docs, ...blogs].sort((a, b) => {
   const dateA = a.data.pubDate ? new Date(a.data.pubDate).valueOf() : 0;

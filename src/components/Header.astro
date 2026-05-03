@@ -1,5 +1,6 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import Search from './Search.astro';
 
 const { lang = 'en' } = Astro.props;
 ---
@@ -19,6 +20,7 @@ const { lang = 'en' } = Astro.props;
     </div>
     
     <div class="flex items-center gap-4">
+      <Search />
       <LanguageSwitcher />
     </div>
   </div>

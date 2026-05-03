@@ -13,7 +13,7 @@ const baseSchema = z.object({
 
 const docsCollection = defineCollection({
   loader: glob({ 
-    pattern: "**/*.md", 
+    pattern: "{en,es}/**/*.md", 
     base: "./src/content",
     generateId: ({ entry }) => entry,
   }),

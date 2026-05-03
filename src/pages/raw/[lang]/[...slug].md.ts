@@ -1,8 +1,9 @@
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  const docs = await getCollection('docs');
-  const blogs = await getCollection('blog');
+  const isProd = import.meta.env.PROD;
+  const docs = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+  const blogs = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
   
   const allContent = [...docs, ...blogs];
 

@@ -10,7 +10,11 @@ export function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
-const docs = await getCollection('docs', (entry) => entry.id.startsWith(`${lang}/`));
+const isProd = import.meta.env.PROD;
+const docs = await getCollection('docs', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`)) return false;
+  return isProd ? !entry.data.draft : true;
+});
 ---
 
 <BaseLayout title={`Home - ${lang.toUpperCase()}`} lang={lang}>
