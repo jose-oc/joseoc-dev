@@ -68,4 +68,18 @@
   .prose :where(code):not(:where(pre code))::after {
     content: none !important;
   }
+
+  /* Mermaid diagram styling */
+  .prose svg[id^="mermaid-"] {
+    @apply max-w-full h-auto mx-auto my-8 bg-white dark:bg-white/95 rounded-xl p-6 shadow-md border border-surface-200 dark:border-surface-700 transition-all cursor-zoom-in hover:shadow-lg hover:scale-[1.01];
+  }
+
+  /* Mermaid Lightbox Modal */
+  .mermaid-modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-surface-950/80 backdrop-blur-md p-4 sm:p-12 cursor-zoom-out;
+  }
+  
+  .mermaid-modal svg {
+    @apply max-w-full max-h-full h-auto w-auto bg-white rounded-2xl p-6 sm:p-10 shadow-2xl animate-fade-in;
+  }
 }
