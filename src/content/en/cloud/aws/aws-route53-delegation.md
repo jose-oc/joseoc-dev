@@ -217,6 +217,44 @@ Create a temporary checklist like this:
 
 Be careful not to miss the apex record at `abc.xyz.com` itself.
 
+Example AWS CLI command:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id ZPARENT123456 \
+  --profile myprofile \
+  --output json |
+jq -r '
+  .ResourceRecordSets[]
+  | select(.Name == "abc.xyz.com." or (.Name | endswith(".abc.xyz.com.")))
+'
+```
+
+If you want a more zone-file-like review format for standard records, you can use the output with the `import zone file` button in the AWS web console in the child zone details:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id ZPARENT123456 \
+  --profile myprofile \
+  --output json |
+jq -r '
+  .ResourceRecordSets[]
+  | select(.Name == "abc.xyz.com." or (.Name | endswith(".abc.xyz.com.")))
+  | select(has("ResourceRecords"))
+  | select(.Type != "SOA")
+  | . as $r
+  | $r.ResourceRecords[]
+  | "\($r.Name) \($r.TTL // 300) IN \($r.Type) \(.Value)"
+'
+```
+
+What to look for:
+
+- all records at `abc.xyz.com.` itself
+- all child records under `.abc.xyz.com.`
+- no unrelated siblings such as `abc2.xyz.com.`
+- any `NS`, `SOA`, alias, weighted, or health-check-linked records that may need extra care
+
 ### Step 2: Lower TTLs Before the Migration Window
 
 If the records currently have high TTLs, consider lowering them ahead of time.
@@ -230,6 +268,52 @@ Do this early enough that caches have time to expire before the cutover window.
 
 This step is optional, but it makes migrations easier to observe and easier to roll back.
 
+Example change batch to reduce TTL on selected records:
+
+```json
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "abc.xyz.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "192.0.2.10" }
+        ]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "a.abc.xyz.com.",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "internal-lb-1.example.net." }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Apply it with:
+
+```bash
+aws route53 change-resource-record-sets \
+  --hosted-zone-id ZPARENT123456 \
+  --change-batch file://reduce-ttl-abc.json \
+  --profile myprofile
+```
+
+What to look for:
+
+- the records are unchanged except for `TTL`
+- you only include records you really want to lower
+- you preserve the full original record shape when doing the `UPSERT`
+
 ### Step 3: Create the Child Hosted Zone
 
 Create a new public hosted zone in Route 53 for:
@@ -239,6 +323,22 @@ Create a new public hosted zone in Route 53 for:
 Route 53 will automatically assign four authoritative name servers to this new hosted zone.
 
 At this stage, the zone exists, but it is not yet delegated from the parent zone.
+
+Create it with:
+
+```bash
+aws route53 create-hosted-zone \
+  --name abc.xyz.com \
+  --caller-reference abc-xyz-com-20260504T120000Z \
+  --hosted-zone-config Comment="Child zone for abc.xyz.com",PrivateZone=false \
+  --profile myprofile
+```
+
+What to look for in the output:
+
+- `HostedZone.Id`: the new child hosted zone ID
+- `DelegationSet.NameServers`: the four authoritative Route 53 name servers
+- `Config.PrivateZone`: it must be `false` for a public delegation
 
 ### Step 4: Recreate the Child Records in the New Hosted Zone
 
@@ -258,6 +358,74 @@ At the end of this step, the same functional records exist in both places:
 
 That temporary duplication is expected before delegation.
 
+Example change batch for the child zone:
+
+```json
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "abc.xyz.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "192.0.2.10" }
+        ]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "a.abc.xyz.com.",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "internal-lb-1.example.net." }
+        ]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "b.abc.xyz.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "192.0.2.11" }
+        ]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "c.abc.xyz.com.",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "\"managed-by-team-abc\"" }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Apply it with:
+
+```bash
+aws route53 change-resource-record-sets \
+  --hosted-zone-id ZCHILD123456 \
+  --change-batch file://child-zone-records-abc.json \
+  --profile myprofile
+```
+
+What to look for:
+
+- every intended record is present in the child zone
+- apex records at `abc.xyz.com.` are included
+- record values match the parent zone exactly before delegation
+
 ### Step 5: Capture the Child Zone Name Servers
 
 In the new `abc.xyz.com` hosted zone, find the `NS` record that Route 53 created automatically.
@@ -270,6 +438,20 @@ It will contain four name servers, something like:
 - `ns-789.awsdns-12.co.uk`
 
 These are the authoritative name servers for the child hosted zone.
+
+Retrieve them with:
+
+```bash
+aws route53 get-hosted-zone \
+  --id ZCHILD123456 \
+  --profile myprofile
+```
+
+What to look for in the output:
+
+- `DelegationSet.NameServers`
+- the four Route 53 names you will copy into the parent `NS` record
+- the hosted zone name is exactly `abc.xyz.com.`
 
 ### Step 6: Delegate the Child Zone from the Parent Zone
 
@@ -293,6 +475,44 @@ graph LR
     C --> A["a.abc.xyz.com"]
 ```
 
+Example change batch for the parent zone:
+
+```json
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "abc.xyz.com.",
+        "Type": "NS",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "ns-123.awsdns-45.com." },
+          { "Value": "ns-678.awsdns-90.net." },
+          { "Value": "ns-234.awsdns-56.org." },
+          { "Value": "ns-789.awsdns-12.co.uk." }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Apply it with:
+
+```bash
+aws route53 change-resource-record-sets \
+  --hosted-zone-id ZPARENT123456 \
+  --change-batch file://delegate-abc-ns.json \
+  --profile myprofile
+```
+
+What to look for:
+
+- the `Name` is exactly `abc.xyz.com.`
+- all four child-zone name servers are present
+- you are changing the parent zone, not the child zone
+
 ### Step 7: Remove the Old Child Records from the Parent Zone
 
 After the `NS` delegation record exists in `xyz.com`, delete the records that belong to the delegated child namespace from the parent zone.
@@ -313,6 +533,74 @@ After cleanup, the parent zone should keep only:
 
 And the child zone should now be the only place that contains records for the `abc.xyz.com` subtree.
 
+Example change batch to delete the moved records from the parent zone:
+
+```json
+{
+  "Changes": [
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "abc.xyz.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "192.0.2.10" }
+        ]
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "a.abc.xyz.com.",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "internal-lb-1.example.net." }
+        ]
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "b.abc.xyz.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "192.0.2.11" }
+        ]
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "c.abc.xyz.com.",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "\"managed-by-team-abc\"" }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Apply it with:
+
+```bash
+aws route53 change-resource-record-sets \
+  --hosted-zone-id ZPARENT123456 \
+  --change-batch file://delete-parent-abc-records.json \
+  --profile myprofile
+```
+
+What to look for:
+
+- you do not delete the new `NS` delegation record
+- the deleted record definitions exactly match the current parent-zone records
+- after deletion, only the delegation remains in the parent for `abc.xyz.com.`
+
 ### Step 8: Validate Resolution
 
 Check that DNS now resolves through the child hosted zone.
@@ -329,6 +617,123 @@ You can verify both:
 - functional answers, such as correct `A`, `CNAME`, or `TXT` responses
 - delegation, by confirming that `abc.xyz.com` returns the expected `NS` answers
 
+Use these commands.
+
+Check the delegated name servers published by normal recursive resolution:
+
+```bash
+dig NS abc.xyz.com
+```
+
+Example output:
+
+```text
+; <<>> DiG 9.10.6 <<>> NS abc.xyz.com
+;; QUESTION SECTION:
+;abc.xyz.com.                 IN      NS
+
+;; ANSWER SECTION:
+abc.xyz.com.          300     IN      NS      ns-123.awsdns-45.com.
+abc.xyz.com.          300     IN      NS      ns-678.awsdns-90.net.
+abc.xyz.com.          300     IN      NS      ns-234.awsdns-56.org.
+abc.xyz.com.          300     IN      NS      ns-789.awsdns-12.co.uk.
+```
+
+What to look for:
+
+- the `ANSWER SECTION` contains the four new child-zone Route 53 name servers
+- the name is exactly `abc.xyz.com.`
+- the TTL is in the expected range for your delegation record
+
+Query one of those authoritative child-zone name servers directly for the apex record:
+
+```bash
+dig @ns-123.awsdns-45.com abc.xyz.com
+```
+
+Example output:
+
+```text
+; <<>> DiG 9.10.6 <<>> @ns-123.awsdns-45.com abc.xyz.com
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1
+
+;; ANSWER SECTION:
+abc.xyz.com.          300     IN      A       192.0.2.10
+```
+
+What to look for:
+
+- the `aa` flag means the responding server is authoritative
+- the `ANSWER SECTION` contains the expected apex record from the child zone
+- the TTL matches what you configured in the child hosted zone
+
+Query one of those authoritative child-zone name servers directly for a child record:
+
+```bash
+dig @ns-123.awsdns-45.com a.abc.xyz.com
+```
+
+Example output:
+
+```text
+; <<>> DiG 9.10.6 <<>> @ns-123.awsdns-45.com a.abc.xyz.com
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1
+
+;; ANSWER SECTION:
+a.abc.xyz.com.        300     IN      CNAME   internal-lb-1.example.net.
+```
+
+What to look for:
+
+- again, the `aa` flag shows an authoritative answer
+- the record value is the one you copied into the child zone
+- this proves the child hosted zone itself is correct, regardless of resolver cache
+
+Trace the full delegation path:
+
+```bash
+dig +trace a.abc.xyz.com
+```
+
+Example output:
+
+```text
+com.                   172800  IN      NS      a.gtld-servers.net.
+xyz.com.               172800  IN      NS      ns-111.awsdns-11.org.
+abc.xyz.com.           300     IN      NS      ns-123.awsdns-45.com.
+abc.xyz.com.           300     IN      NS      ns-678.awsdns-90.net.
+a.abc.xyz.com.         300     IN      CNAME   internal-lb-1.example.net.
+```
+
+What to look for:
+
+- the trace reaches the parent `xyz.com` zone
+- the parent refers the resolver to the new `abc.xyz.com` child-zone name servers
+- the final answer comes after that referral, not from the old parent-zone records
+
+If you want to check all four Route 53 child-zone name servers directly:
+
+```bash
+for ns in \
+  ns-123.awsdns-45.com \
+  ns-678.awsdns-90.net \
+  ns-234.awsdns-56.org \
+  ns-789.awsdns-12.co.uk
+do
+  dig @"$ns" a.abc.xyz.com +short
+done
+```
+
+What to look for:
+
+- all four authoritative servers return the expected answer
+- there is no `SERVFAIL` or empty response from one server while others succeed
+
+Important note:
+
+- direct `dig @<child-ns>` tests tell you whether the new hosted zone is correct
+- normal recursive queries may still show older cached answers until TTL expires
+
 ### Step 9: Observe for a Short Period
 
 Watch the migrated names during the first cache window after cutover.
@@ -340,6 +745,21 @@ Look for:
 - missing records that were not copied into the child zone
 
 If you lowered TTLs before migration, this observation window is shorter and easier to reason about.
+
+Helpful observation commands:
+
+```bash
+dig abc.xyz.com
+dig a.abc.xyz.com
+dig NS abc.xyz.com
+dig +trace a.abc.xyz.com
+```
+
+What to look for:
+
+- answers gradually converge to the new child-zone data
+- no intermittent `NXDOMAIN`
+- no mismatch between direct authoritative answers and recursive answers after cache expiry
 
 ## Visualizing the Cutover
 
