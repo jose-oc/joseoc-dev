@@ -32,15 +32,21 @@ export const sidebarConfig: Record<string, SidebarGroup[]> = {
         { label: 'Environment with direnv', slug: 'python-environment-direnv' },
       ],
     },
+    // {
+    //   label: 'Drafts',
+    //   items: [
+    //     { label: 'Configure DNS', slug: 'configure-dns-servers' },
+    //     { label: 'Configure Wifi (LLM Notes)', slug: 'drafts/configure-wifi-llm-notes-draft' },
+    //     { label: 'Neovim', slug: 'neovim-value-in-daily-work' },
+    //     { label: 'Personal Performance', slug: 'energy-vs-performance' },
+    //     { label: 'Tmux', slug: 'tmux' },
+    //     { label: 'Virtualization', slug: 'virtualization' },
+    //   ]
+    // },
     {
-      label: 'Drafts',
+      label: 'How-To',
       items: [
-        { label: 'Configure DNS', slug: 'configure-dns-servers' },
-        { label: 'Configure Wifi (LLM Notes)', slug: 'drafts/configure-wifi-llm-notes-draft' },
-        { label: 'Neovim', slug: 'neovim-value-in-daily-work' },
-        { label: 'Personal Performance', slug: 'energy-vs-performance' },
-        { label: 'Tmux', slug: 'tmux' },
-        { label: 'Virtualization', slug: 'virtualization' },
+        { label: 'Split Route 53 Hosted Zone into Delegated Subdomains', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
       ]
     }
   ],
