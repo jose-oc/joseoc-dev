@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["macos", "homebrew", "setup", "devops", "automation"]
 category: "engineering"
 language: "en"
-slug: "base-system-setup-macos"
+slug: "macos-setup-guide/base-system-setup-macos"
 ---
 
 ## Why This Matters
@@ -99,10 +99,10 @@ The Brewfile's dependencies are satisfied.
 ---
 
 ## Best Practices
-1. **Version Control Your Brewfile**: Keep it in your [dotfiles](/en/docs/dotfiles-and-reproducibility) repository.
+1. **Version Control Your Brewfile**: Keep it in your [dotfiles](/en/docs/macos-setup-guide/dotfiles-and-reproducibility) repository.
 2. **Audit Regularly**: Run `brew bundle cleanup` to remove tools you no longer use.
 3. **Use Casks for Everything**: Even apps like Slack, VS Code, and Discord can be managed via Homebrew Cask.
 
 ## Summary
-By mastering Homebrew and Brewfile, you've moved from "manual configuration" to "infrastructure as code" for your personal laptop. You are now ready to [configure your terminal](/en/docs/terminal-setup-macos).
+By mastering Homebrew and Brewfile, you've moved from "manual configuration" to "infrastructure as code" for your personal laptop. You are now ready to [configure your terminal](/en/docs/macos-setup-guide/terminal-setup-macos).
 

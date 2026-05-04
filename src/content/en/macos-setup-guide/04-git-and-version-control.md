@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["git", "version-control", "github", "devops", "productivity"]
 category: "engineering"
 language: "en"
-slug: "git-and-version-control"
+slug: "macos-setup-guide/git-and-version-control"
 ---
 
 ## Why This Matters
@@ -126,7 +126,7 @@ git config --global core.excludesfile ~/.config/git/ignore
 
 In a DevOps environment, verifying that a commit actually came from you is critical.
 
-If you followed the [SSH & Authentication guide](/en/docs/ssh-and-authentication), you can use your SSH key to sign commits—no GPG required!
+If you followed the [SSH & Authentication guide](/en/docs/macos-setup-guide/ssh-and-authentication), you can use your SSH key to sign commits—no GPG required!
 
 ```bash
 git config --global gpg.format ssh
@@ -137,4 +137,4 @@ git config --global commit.gpgsign true
 ---
 
 ## Summary
-Your Git workflow is now faster, cleaner, and more secure. You have better visibility into your changes and fewer manual steps. Now that your version control is solid, let's [install the essential shell tools](/en/docs/shell-cli-tooling) that will make your daily navigation effortless.
+Your Git workflow is now faster, cleaner, and more secure. You have better visibility into your changes and fewer manual steps. Now that your version control is solid, let's [install the essential shell tools](/en/docs/macos-setup-guide/shell-cli-tooling) that will make your daily navigation effortless.

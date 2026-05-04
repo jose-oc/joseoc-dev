@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["secrets", "1password", "direnv", "security", "devops"]
 category: "engineering"
 language: "en"
-slug: "secrets-and-environment-management"
+slug: "macos-setup-guide/secrets-and-environment-management"
 ---
 
 ## Why This Matters
@@ -107,5 +107,5 @@ alias deploy="op run --env-file=.env -- terraform apply"
 ---
 
 ## Summary
-You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](/en/docs/python-and-automation-tooling) using these new security foundations.
+You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](/en/docs/macos-setup-guide/python-and-automation-tooling) using these new security foundations.
 

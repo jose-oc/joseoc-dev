@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["shell", "starship", "ux", "prompt", "macos"]
 category: "engineering"
 language: "en"
-slug: "prompt-and-ux"
+slug: "macos-setup-guide/prompt-and-ux"
 ---
 
 ## Why This Matters
@@ -79,10 +79,10 @@ While Starship is fast, checking things like "Cloud provider status" or "Large G
 ### Optimization Tips
 1. **Disable Unused Modules**: If you don't use Go or Ruby, disable them explicitly in the config to save milliseconds.
 2. **Scan Timeout**: Set a scan timeout for large Git repositories.
-3. **Use Nerd Fonts**: Ensure your terminal is using a [Nerd Font](/en/docs/terminal-setup-macos) to render the icons correctly.
+3. **Use Nerd Fonts**: Ensure your terminal is using a [Nerd Font](/en/docs/macos-setup-guide/terminal-setup-macos) to render the icons correctly.
 
 ---
 
 ## Summary
-Your terminal now looks professional and provides the critical context needed for modern DevOps work. You are no longer "flying blind." Now that your environment is visually ready, let's [manage your secrets and project environments](/en/docs/secrets-and-environment-management).
+Your terminal now looks professional and provides the critical context needed for modern DevOps work. You are no longer "flying blind." Now that your environment is visually ready, let's [manage your secrets and project environments](/en/docs/macos-setup-guide/secrets-and-environment-management).
 

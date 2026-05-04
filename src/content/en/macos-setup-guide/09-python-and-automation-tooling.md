@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["python", "uv", "ansible", "devops", "automation"]
 category: "engineering"
 language: "en"
-slug: "python-and-automation-tooling"
+slug: "macos-setup-guide/python-and-automation-tooling"
 ---
 
 ## Why This Matters
@@ -87,7 +87,7 @@ uv sync
 ```
 
 ### Automatic Activation with Direnv
-If you followed the [Secrets and Environment guide](/en/docs/secrets-and-environment-management), you can automate this even further. You don't need to manually `source .venv/bin/activate` if you use `direnv`.
+If you followed the [Secrets and Environment guide](/en/docs/macos-setup-guide/secrets-and-environment-management), you can automate this even further. You don't need to manually `source .venv/bin/activate` if you use `direnv`.
 
 Simply add this to your project's `.envrc`:
 
@@ -123,5 +123,5 @@ Now, whenever you `cd` into the project, `direnv` will automatically create the 
 ---
 
 ## Summary
-You now have a blazingly fast, modern Python setup that keeps your macOS system pristine. Your automation tools are isolated, and your projects are reproducible. Now that we can automate, let's look at the [Cloud and Kubernetes toolkit](/en/docs/kubernetes-and-devops-tooling).
+You now have a blazingly fast, modern Python setup that keeps your macOS system pristine. Your automation tools are isolated, and your projects are reproducible. Now that we can automate, let's look at the [Cloud and Kubernetes toolkit](/en/docs/macos-setup-guide/kubernetes-and-devops-tooling).
 
