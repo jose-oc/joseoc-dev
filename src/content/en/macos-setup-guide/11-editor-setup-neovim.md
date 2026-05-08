@@ -78,7 +78,11 @@ This is the "brain." It provides the autocomplete and error checking. For DevOps
 ### C. FZF-Lua (Fuzzy Search)
 Integrated with the [FZF](/en/docs/macos-setup-guide/shell-usability-improvements) we set up earlier, this allows you to find any file or function in a split second.
 
-![SCREENSHOT: Neovim showing a YAML file with LSP diagnostics and FZF search open]
+
+![Neovim showing a YAML file with LSP diagnostics and FZF search open](../../../assets/neovim-lsp-fzf.png)
+
+**Note**: In the screenshot above you can see that lsp is telling me there is an error on line 19, that's LSP in action.
+Also, you can see FZF in action, searching for files that start with 'yaml' in their name, just by typing the file name. You can open the fzf search by pressing <Leader>ff (by default, the leader key is the space bar). 
 
 ---
 
@@ -91,7 +95,6 @@ The goal is to move as fast as you think.
 * **`<leader>ff`**: Find File.
 * **`<leader>fg`**: Find Grep (search for text globally).
 
-[RECORDING: asciinema - Demonstrating rapid navigation from a Terraform resource to its variable definition and back]
 
 ---
 
