@@ -1,4 +1,4 @@
 - Translate content to Spanish
 - Cookies?
 - sitemap?
-- WRite the real content for "About me"
+
