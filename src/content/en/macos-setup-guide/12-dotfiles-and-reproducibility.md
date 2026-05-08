@@ -39,9 +39,14 @@ chezmoi init
 chezmoi add ~/.zshrc
 chezmoi add ~/.config/nvim
 chezmoi add ~/.config/starship.toml
+
+chezmoi status
 ```
 
-![SCREENSHOT: Terminal showing 'chezmoi status' and the source directory in ~/.local/share/chezmoi]
+The files you add to chezmoi will be stored in `~/.local/share/chezmoi`. This is a real Git repository.
+
+![chezmoi git dir](../../../assets/chezmoi-git-dir.png)
+
 
 ---
 
