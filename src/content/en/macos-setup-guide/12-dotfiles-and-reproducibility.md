@@ -59,7 +59,6 @@ Once a file is managed by Chezmoi, you should no longer edit it directly in your
 2. **Preview**: `chezmoi diff` (See what's about to change).
 3. **Apply**: `chezmoi apply` (Make the changes live).
 
-[RECORDING: asciinema - Demonstrating the edit-diff-apply workflow with chezmoi]
 
 ---
 

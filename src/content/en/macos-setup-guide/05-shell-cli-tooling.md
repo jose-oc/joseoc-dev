@@ -87,8 +87,7 @@ Replace cd
 alias cd="z"
 ```
 
-
-[RECORDING: asciinema - Demonstrating fast navigation between deep directories using zoxide]
+![Terminal showing fast navigation between deep directories using zoxide](../../../assets/terminal-using-zoxide.svg)
 
 ---
 

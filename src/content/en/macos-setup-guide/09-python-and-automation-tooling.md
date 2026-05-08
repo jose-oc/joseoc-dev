@@ -71,7 +71,17 @@ uv tool install --with-executables-from ansible-core,ansible-lint ansible
 * It has its own private Python environment.
 * You can upgrade it with `uv tool upgrade ansible` without affecting anything else.
 
-![SCREENSHOT: Terminal output showing 'uv tool list' and isolated environments]
+```shell
+❯ uv tool list
+ansible v8.7.0
+- ansible-community
+basedpyright v1.39.3
+- basedpyright
+- basedpyright-langserver
+ruff v0.15.11
+- ruff
+```
+
 
 ---
 
@@ -110,7 +120,6 @@ layout uv
 
 Now, whenever you `cd` into the project, `direnv` will automatically create the virtual environment (if it doesn't exist) and activate it for you. This is the cleanest way to work across multiple Python projects.
 
-[RECORDING: asciinema - Demonstrating the speed of 'uv venv' and 'uv sync' in a medium-sized project]
 
 ---
 

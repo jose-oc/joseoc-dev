@@ -68,7 +68,10 @@ The prompt changes dynamically based on the directory you are in.
 * **In a Python project**: Shows the Python version (requires a `.python-version` or `pyproject.toml` file).
 * **In a K8s folder**: Shows your current cluster context and namespace.
 
-[RECORDING: asciinema - Demonstrating the prompt changing as we switch between a Python project and a Terraform directory]
+
+In the screenshot below you can see the prompt changing as I switch between a Python project and a Terraform directory.
+
+![Terminal showing starship prompt in a python project and a terraform directory](../../../assets/terminal-starship-prompt.png)
 
 ---
 

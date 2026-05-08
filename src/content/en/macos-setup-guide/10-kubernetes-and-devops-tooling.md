@@ -47,7 +47,6 @@ Instead of running five different `kubectl get` commands to find why a pod is cr
 2. Navigate to the crashing pod.
 3. Press `l` to see logs or `d` to describe it.
 
-![SCREENSHOT: K9s interface showing a cluster overview with various resources]
 
 ---
 
@@ -70,7 +69,6 @@ alias tfp="terraform plan"
 alias tfa="terraform apply"
 ```
 
-[RECORDING: asciinema - Demonstrating a 'terraform plan' and 'kubectx' cluster switching]
 
 ---
 

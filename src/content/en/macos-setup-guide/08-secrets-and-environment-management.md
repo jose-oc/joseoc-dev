@@ -47,8 +47,8 @@ When you `cd` into this folder, direnv will ask you to authorize the file:
 ```bash
 direnv allow
 ```
+![Terminal showing variables loading automatically when entering a folder and unloading when leaving](../../../assets/terminal-direnv-load-variables.png)
 
-[RECORDING: asciinema - Demonstrating variables loading automatically when entering a folder and unloading when leaving]
 
 ---
 
