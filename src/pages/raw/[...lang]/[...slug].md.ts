@@ -16,8 +16,8 @@ export async function getStaticPaths() {
     const slug = doc.data.slug || fallbackSlug;
     
     return {
-      params: { lang, slug },
-      props: { doc },
+      params: { lang: lang === 'en' ? undefined : lang, slug },
+      props: { doc, lang: lang || 'en' },
     };
   });
 }

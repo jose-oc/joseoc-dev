@@ -65,27 +65,30 @@ if (slug) {
         }
       });
     </script>
-    {slug ? (
-      <>
-        {availableLangs.includes(lang) && (
-          <link rel="alternate" type="text/markdown" href={`/raw/${lang}/${slug}.md`} />
-        )}
-        {/* SEO hreflang tags for translated versions */}
-        {availableLangs.includes('en') && (
-          <link rel="alternate" hreflang="en" href={`/en/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
-        )}
-        {availableLangs.includes('es') && (
-          <link rel="alternate" hreflang="es" href={`/es/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
-        )}
-        <link rel="alternate" hreflang="x-default" href={`/en/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
-      </>
-    ) : (
-      <>
-        <link rel="alternate" hreflang="en" href={`/en/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
-        <link rel="alternate" hreflang="es" href={`/es/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
-        <link rel="alternate" hreflang="x-default" href={`/en/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
-      </>
-    )}
+    {(() => {
+      const segments = Astro.url.pathname.split('/').filter(Boolean);
+      const hasLangPrefix = segments[0] === 'es';
+      const pathSegments = hasLangPrefix ? segments.slice(1) : segments;
+      const pathWithoutLang = pathSegments.join('/');
+      
+      const enUrl = `/${pathWithoutLang}`;
+      const esUrl = `/es/${pathWithoutLang}`;
+      
+      return (
+        <>
+          {slug && availableLangs.includes(lang) && (
+            <link rel="alternate" type="text/markdown" href={`/raw${lang === 'es' ? '/es' : ''}/${slug}.md`} />
+          )}
+          {availableLangs.includes('en') && (
+            <link rel="alternate" hreflang="en" href={enUrl} />
+          )}
+          {availableLangs.includes('es') && (
+            <link rel="alternate" hreflang="es" href={esUrl} />
+          )}
+          <link rel="alternate" hreflang="x-default" href={enUrl} />
+        </>
+      );
+    })()}
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col bg-surface-50 dark:bg-surface-950">
@@ -119,7 +122,7 @@ if (slug) {
       </div>
       <div class="flex flex-col items-center gap-2">
         <div>Jose Ortiz &copy; {new Date().getFullYear()}</div>
-        <a href={`/${lang}/privacy`} class="text-xs text-surface-400 hover:text-primary-600 dark:hover:text-primary-500 transition-colors underline-offset-4 hover:underline">
+        <a href={lang === 'es' ? '/es/privacy' : '/privacy'} class="text-xs text-surface-400 hover:text-primary-600 dark:hover:text-primary-500 transition-colors underline-offset-4 hover:underline">
           {lang === 'es' ? 'Política de Privacidad' : 'Privacy Policy'}
         </a>
       </div>
@@ -172,7 +175,7 @@ if (slug) {
             const modal = document.createElement('div');
             modal.className = 'mermaid-modal'; // We reuse the same class for styling
             
-            let content: HTMLElement;
+            let content: HTMLElement | SVGElement;
             if (isImage) {
               const img = document.createElement('img');
               img.src = (target as HTMLImageElement).src;
@@ -181,9 +184,11 @@ if (slug) {
               content = img;
             } else {
               const svg = target.closest('svg')!;
-              const clone = svg.cloneNode(true) as HTMLElement;
+              const clone = svg.cloneNode(true) as SVGElement;
               clone.removeAttribute('style');
-              clone.className = 'max-w-full max-h-full h-auto w-auto bg-white rounded-2xl p-6 sm:p-10 shadow-2xl animate-fade-in';
+              clone.removeAttribute('width');
+              clone.removeAttribute('height');
+              clone.setAttribute('class', 'max-w-full max-h-full h-auto w-auto bg-white rounded-2xl p-6 sm:p-10 shadow-2xl animate-fade-in');
               content = clone;
             }
             

@@ -31,7 +31,7 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
       <article class="flex-grow min-w-0 py-8 animate-fade-in transition-all duration-500 ease-in-out">
         <header class="mb-12 border-b border-surface-200 dark:border-surface-800 pb-12">
           {category && (
-            <a href={`/${lang}/category/${category}`} class="text-xs font-bold tracking-widest uppercase text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors mb-4 block">
+            <a href={lang === 'es' ? `/es/category/${category}` : `/category/${category}`} class="text-xs font-bold tracking-widest uppercase text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors mb-4 block">
               {category}
             </a>
           )}
@@ -47,7 +47,7 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
           {tags.length > 0 && (
             <div class="flex flex-wrap gap-2 mt-8">
               {tags.map(tag => (
-                <a href={`/${lang}/tag/${tag}`} class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-surface-100 hover:bg-surface-200 text-surface-700 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-300 border border-surface-200 dark:border-surface-700 transition-all hover:scale-105">
+                <a href={lang === 'es' ? `/es/tag/${tag}` : `/tag/${tag}`} class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-surface-100 hover:bg-surface-200 text-surface-700 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-300 border border-surface-200 dark:border-surface-700 transition-all hover:scale-105">
                   #{tag}
                 </a>
               ))}
