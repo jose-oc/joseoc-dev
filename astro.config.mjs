@@ -6,6 +6,20 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeMermaid from 'rehype-mermaid';
 import remarkGithubAlerts from 'remark-github-alerts';
+import { visit } from 'unist-util-visit';
+
+function remarkHiddenText() {
+  return (tree) => {
+    visit(tree, (node, index, parent) => {
+      if (node.type === 'text' || node.type === 'code' || node.type === 'inlineCode') {
+        const regex = /%%[\s\S]*?%%/g;
+        if (regex.test(node.value)) {
+          node.value = node.value.replace(regex, '');
+        }
+      }
+    });
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,9 +32,9 @@ export default defineConfig({
       type: 'shiki',
       excludeLangs: ['mermaid'],
     },
-    remarkPlugins: [remarkGithubAlerts],
+    remarkPlugins: [remarkGithubAlerts, remarkHiddenText],
     rehypePlugins: [
-      [rehypeMermaid, { 
+      [rehypeMermaid, {
         strategy: 'inline-svg',
         mermaidConfig: {
           theme: 'neutral'
@@ -30,7 +44,7 @@ export default defineConfig({
   },
 
   integrations: [mdx(), sitemap()],
-  site: 'https://example.com', // Replace with actual domain
+  site: 'https://joseoc.dev',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],

@@ -1,0 +1,91 @@
+---
+---
+<div class="reading-controls flex items-center gap-3">
+  <button 
+    id="focus-mode-toggle" 
+    class="p-1.5 rounded-md hover:bg-surface-200 dark:hover:bg-surface-800 text-surface-600 dark:text-surface-400 transition-all flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
+    title="Toggle Focus Mode"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>
+    </svg>
+    <span class="hidden xl:inline">Focus</span>
+  </button>
+
+  <div class="h-4 w-px bg-surface-300 dark:bg-surface-700 mx-1"></div>
+
+  <div class="flex items-center gap-2">
+    <span class="text-[10px] font-black text-surface-400 dark:text-surface-600">A</span>
+    <input 
+      type="range" 
+      id="font-size-slider" 
+      min="14" 
+      max="24" 
+      step="1" 
+      value="16"
+      class="w-16 sm:w-20 h-1 bg-surface-300 dark:bg-surface-700 rounded-lg appearance-none cursor-pointer accent-primary-600 dark:accent-primary-500"
+      aria-label="Adjust font size"
+    />
+    <span class="text-[14px] font-black text-surface-500 dark:text-surface-400">A</span>
+  </div>
+</div>
+
+<script>
+  function initReadingControls() {
+    const focusToggle = document.getElementById('focus-mode-toggle');
+    const fontSizeSlider = document.getElementById('font-size-slider') as HTMLInputElement;
+    const container = document.querySelector('.reading-controls');
+    
+    if (!focusToggle || !fontSizeSlider || !container) return;
+
+    const docLayoutContainer = document.querySelector('.doc-layout-grid') || document.querySelector('.doc-layout-container');
+    const prose = document.querySelector('.prose') as HTMLElement;
+
+    // Only show controls if we are on a documentation/article page
+    if (!prose) {
+      container.classList.add('hidden');
+      return;
+    } else {
+      container.classList.remove('hidden');
+    }
+
+    // --- Focus Mode ---
+    const savedFocusMode = localStorage.getItem('focus-mode') === 'true';
+    if (savedFocusMode) {
+      document.documentElement.classList.add('focus-mode');
+    }
+
+    // Remove existing listeners to avoid duplicates on re-init
+    const newFocusToggle = focusToggle.cloneNode(true);
+    focusToggle.parentNode?.replaceChild(newFocusToggle, focusToggle);
+    
+    newFocusToggle.addEventListener('click', () => {
+      const isActive = document.documentElement.classList.toggle('focus-mode');
+      localStorage.setItem('focus-mode', isActive.toString());
+    });
+
+    // --- Font Size ---
+    const savedFontSize = localStorage.getItem('doc-font-size') || '18';
+    fontSizeSlider.value = savedFontSize;
+    prose.style.fontSize = `${savedFontSize}px`;
+
+    fontSizeSlider.addEventListener('input', (e) => {
+      const size = (e.target as HTMLInputElement).value;
+      prose.style.fontSize = `${size}px`;
+      localStorage.setItem('doc-font-size', size);
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', initReadingControls);
+  // Re-initialize after view transitions if applicable (Astro)
+  document.addEventListener('astro:after-swap', initReadingControls);
+</script>
+
+<style>
+  @reference "../styles/global.css";
+  
+  #font-size-slider::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 rounded-full bg-primary-600 dark:bg-primary-500 cursor-pointer border-2 border-white dark:border-surface-900 shadow-sm;
+  }
+</style>

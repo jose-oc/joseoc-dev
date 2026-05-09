@@ -62,7 +62,7 @@ const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.pro
   </head>
   <body class="min-h-screen flex flex-col bg-surface-50 dark:bg-surface-950">
     <Header lang={lang} />
-    <main class="flex-grow w-full max-w-7xl mx-auto px-4" data-pagefind-body>
+    <main class="flex-grow w-full mx-auto transition-all duration-500 ease-in-out [.focus-mode_&]:px-8" data-pagefind-body>
       <slot />
     </main>
     <footer class="py-8 text-center text-sm text-surface-500 border-t border-surface-200 dark:border-surface-800 mt-12 flex flex-col items-center gap-4">
@@ -89,7 +89,12 @@ const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.pro
           </a>
         )}
       </div>
-      <div>Jose Ortiz &copy; {new Date().getFullYear()}</div>
+      <div class="flex flex-col items-center gap-2">
+        <div>Jose Ortiz &copy; {new Date().getFullYear()}</div>
+        <a href={`/${lang}/privacy`} class="text-xs text-surface-400 hover:text-primary-600 dark:hover:text-primary-500 transition-colors underline-offset-4 hover:underline">
+          {lang === 'es' ? 'Política de Privacidad' : 'Privacy Policy'}
+        </a>
+      </div>
     </footer>
     
     <script>
@@ -129,29 +134,40 @@ const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.pro
           wrapper.appendChild(copyButton);
         });
 
-        // --- Mermaid Zoom/Lightbox ---
+        // --- Image/Mermaid Zoom Lightbox ---
         document.addEventListener('click', (e) => {
           const target = e.target as HTMLElement;
-          const svg = target.closest('svg[id^="mermaid-"]');
+          const isImage = target.tagName === 'IMG' && target.closest('.prose');
+          const isMermaid = target.closest('svg[id^="mermaid-"]');
           
-          if (svg && !target.closest('.mermaid-modal')) {
+          if ((isImage || isMermaid) && !target.closest('.mermaid-modal')) {
             const modal = document.createElement('div');
-            modal.className = 'mermaid-modal';
+            modal.className = 'mermaid-modal'; // We reuse the same class for styling
             
-            const clone = svg.cloneNode(true) as HTMLElement;
-            clone.removeAttribute('style'); // Remove hardcoded width/height/max-width
+            let content: HTMLElement;
+            if (isImage) {
+              const img = document.createElement('img');
+              img.src = (target as HTMLImageElement).src;
+              img.alt = (target as HTMLImageElement).alt;
+              img.className = 'max-w-full max-h-full h-auto w-auto bg-white rounded-2xl shadow-2xl animate-fade-in';
+              content = img;
+            } else {
+              const svg = target.closest('svg')!;
+              const clone = svg.cloneNode(true) as HTMLElement;
+              clone.removeAttribute('style');
+              clone.className = 'max-w-full max-h-full h-auto w-auto bg-white rounded-2xl p-6 sm:p-10 shadow-2xl animate-fade-in';
+              content = clone;
+            }
             
-            modal.appendChild(clone);
+            modal.appendChild(content);
             document.body.appendChild(modal);
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.body.style.overflow = 'hidden';
             
-            // Close modal on click
             modal.onclick = () => {
               modal.remove();
               document.body.style.overflow = '';
             };
 
-            // Close on Escape key
             const handleEsc = (e: KeyboardEvent) => {
               if (e.key === 'Escape') {
                 modal.remove();

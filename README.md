@@ -7,6 +7,17 @@ This is a custom-built, modern, static documentation website built with [Astro](
 - **Multilingual Content Collections**: Content is authored in Markdown and stored in `src/content/en/` and `src/content/es/`.
 - **Aesthetic UI**: Uses Tailwind CSS v4 and the Typography plugin for a premium, developer-centric layout. Features a sticky sidebar, dynamic Table of Contents, and custom tags/categories.
 - **LLM Optimization**: Every documentation page automatically serves its raw Markdown counterpart via an API endpoint (`/raw/[lang]/[...slug].md`) and links to it in the HTML `<head>` for easy consumption by AI agents.
+- **Privacy First**: Zero cookies, zero tracking, and no external analytics. User preferences are stored locally in the browser.
+
+## 🔒 Privacy & Cookies
+
+This site is designed to be **privacy-respecting by default**:
+- **No Cookies**: We do not use any cookies.
+- **No Tracking**: No Google Analytics, no pixels, and no third-party tracking scripts.
+- **Functional Local Storage**: We use `localStorage` exclusively to remember your UI preferences (Theme, Focus Mode, and Font Size). This data never leaves your device.
+- **Hosting**: Hosted on Vercel, which may collect standard server logs for security purposes.
+
+*(Full details can be found on the [Privacy Policy](https://joseoc.dev/en/privacy) page).*
 
 ## 📝 Content Management Best Practices
 
@@ -25,6 +36,21 @@ This site supports GitHub-Flavored Markdown alerts for highlighting important in
 > [!TIP]
 > If you are on macOS and already use [Homebrew](/en/docs/macos-setup-guide/base-system-setup-macos), the `brew` method is the fastest way to get started and manage updates automatically.
 ```
+
+### Hidden Text (Internal Notes)
+You can write text that is visible in the raw Markdown source (for your own reference or for LLMs) but is **completely removed** from the generated HTML version.
+
+**Syntax:**
+Wrap your text in double percentage signs `%%`.
+
+**Example:**
+```markdown
+This text is public.
+%% This is a hidden note for myself that won't appear on the website. %%
+This text is also public.
+```
+
+*(This is powered by the custom `remarkHiddenText` plugin in `astro.config.mjs`).*
 
 ### Links and Anchors
 To create cross-language links that work with the router, use the `{[lang]}` syntax in your Markdown.
