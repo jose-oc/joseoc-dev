@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeMermaid from 'rehype-mermaid';
+import remarkGithubAlerts from 'remark-github-alerts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,6 +18,7 @@ export default defineConfig({
       type: 'shiki',
       excludeLangs: ['mermaid'],
     },
+    remarkPlugins: [remarkGithubAlerts],
     rehypePlugins: [
       [rehypeMermaid, { 
         strategy: 'inline-svg',

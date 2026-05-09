@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.2.1",
     "rehype-mermaid": "^3.0.0",
+    "remark-github-alerts": "^0.1.1",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {

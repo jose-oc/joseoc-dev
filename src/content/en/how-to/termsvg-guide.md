@@ -69,4 +69,4 @@ That generates a file named `terminal-recording-20260509_110827.svg` in the curr
 
 ## Conclusion
 
-[termsvg](https://github.com/mrmarble/termsvg) is an essential tool for any DevOps engineer or technical writer who wants to create clear, interactive, and high-performance terminal demonstrations. Give it a try for your next blog post or project README!
+<a href="https://github.com/mrmarble/termsvg" target="_blank" rel="noopener noreferrer">termsvg</a> is an essential tool for any DevOps engineer or technical writer who wants to create clear, interactive, and high-performance terminal demonstrations. Give it a try for your next blog post or project README!

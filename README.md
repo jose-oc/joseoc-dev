@@ -8,6 +8,36 @@ This is a custom-built, modern, static documentation website built with [Astro](
 - **Aesthetic UI**: Uses Tailwind CSS v4 and the Typography plugin for a premium, developer-centric layout. Features a sticky sidebar, dynamic Table of Contents, and custom tags/categories.
 - **LLM Optimization**: Every documentation page automatically serves its raw Markdown counterpart via an API endpoint (`/raw/[lang]/[...slug].md`) and links to it in the HTML `<head>` for easy consumption by AI agents.
 
+## 📝 Content Management Best Practices
+
+### Markdown Alerts (Callouts)
+This site supports GitHub-Flavored Markdown alerts for highlighting important information. You can use these to structure your content with visual cues.
+
+**Available Types:**
+- `> [!TIP]` - For helpful tips and suggestions
+- `> [!NOTE]` - For general information
+- `> [!IMPORTANT]` - For critical information
+- `> [!WARNING]` - For warnings and cautions
+- `> [!CAUTION]` - For potential risks or errors
+
+**Example:**
+```markdown
+> [!TIP]
+> If you are on macOS and already use [Homebrew](/en/docs/macos-setup-guide/base-system-setup-macos), the `brew` method is the fastest way to get started and manage updates automatically.
+```
+
+### Links and Anchors
+To create cross-language links that work with the router, use the `{[lang]}` syntax in your Markdown.
+
+**Working Example:**
+```markdown
+[Homebrew](/en/docs/macos-setup-guide/base-system-setup-macos)
+```
+
+**Why this works:**
+The Astro i18n router will automatically translate the URL based on the current language context. For instance, when viewing the Spanish version, it will convert `{[lang]}` to `es`, resulting in the correct URL `/es/docs/macos-setup-guide/base-system-setup-macos`.
+
+
 ## 🧭 Routing and Navigation
 
 ### How Routing Works

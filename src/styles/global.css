@@ -82,4 +82,47 @@
   .mermaid-modal svg {
     @apply max-w-full max-h-full h-auto w-auto bg-white rounded-2xl p-6 sm:p-10 shadow-2xl animate-fade-in;
   }
+
+  /* Markdown Alerts (Callouts) */
+  .markdown-alert {
+    @apply my-6 p-4 border-l-4 rounded-r-lg;
+  }
+  .markdown-alert .markdown-alert-title {
+    @apply flex items-center gap-2 mb-2 font-bold text-sm uppercase tracking-wide;
+  }
+  .markdown-alert p {
+    @apply m-0 text-sm! leading-relaxed;
+  }
+
+  /* NOTE (Info) */
+  .markdown-alert-note {
+    @apply bg-blue-50/50 dark:bg-blue-900/10 border-blue-500 text-blue-900 dark:text-blue-200;
+  }
+  .markdown-alert-note .markdown-alert-title {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+
+  /* TIP */
+  .markdown-alert-tip {
+    @apply bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-900 dark:text-emerald-200;
+  }
+  .markdown-alert-tip .markdown-alert-title {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+
+  /* WARNING */
+  .markdown-alert-warning {
+    @apply bg-amber-50/50 dark:bg-amber-900/10 border-amber-500 text-amber-900 dark:text-amber-200;
+  }
+  .markdown-alert-warning .markdown-alert-title {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+
+  /* CAUTION (Error) */
+  .markdown-alert-caution {
+    @apply bg-rose-50/50 dark:bg-rose-900/10 border-rose-500 text-rose-900 dark:text-rose-200;
+  }
+  .markdown-alert-caution .markdown-alert-title {
+    @apply text-rose-600 dark:text-rose-400;
+  }
 }
