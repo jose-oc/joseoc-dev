@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
+  ];
+}
+
+const { lang } = Astro.params;
+
+const content = {
+  en: {
+    title: "Privacy Policy",
+    lastUpdated: "May 9, 2026",
+    sections: [
+      {
+        title: "Overview",
+        content: "This website is a personal documentation project. I value your privacy and aim to be as transparent as possible about how this site operates."
+      },
+      {
+        title: "Information Collection",
+        content: "This website **does not collect any personal data**. There are no contact forms, no user accounts, and no tracking cookies."
+      },
+      {
+        title: "Local Storage",
+        content: "We use browser 'Local Storage' to save your UI preferences. This data stays entirely on your device and is not sent to any server. We store:",
+        items: [
+          "Theme preference (Light/Dark mode)",
+          "Focus mode preference (Sidebars visibility)",
+          "Document font size"
+        ]
+      },
+      {
+        title: "Third-Party Services",
+        content: "The site is hosted on **Vercel**. Like most hosting providers, they may collect server logs (such as IP addresses) for security and maintenance purposes. You can consult Vercel's privacy policy for more details."
+      }
+    ]
+  },
+  es: {
+    title: "Política de Privacidad",
+    lastUpdated: "9 de mayo de 2026",
+    sections: [
+      {
+        title: "Resumen",
+        content: "Este sitio web es un proyecto personal de documentación. Valoro tu privacidad y mi objetivo es ser lo más transparente posible sobre cómo funciona este sitio."
+      },
+      {
+        title: "Recopilación de Información",
+        content: "Este sitio web **no recopila ningún dato personal**. No hay formularios de contacto, ni cuentas de usuario, ni cookies de seguimiento."
+      },
+      {
+        title: "Almacenamiento Local",
+        content: "Utilizamos el 'Almacenamiento Local' del navegador para guardar tus preferencias de interfaz. Estos datos permanecen exclusivamente en tu dispositivo y no se envían a ningún servidor. Guardamos:",
+        items: [
+          "Preferencia de tema (Modo claro/oscuro)",
+          "Preferencia de modo enfoque (visibilidad de las barras laterales)",
+          "Tamaño de fuente del documento"
+        ]
+      },
+      {
+        title: "Servicios de Terceros",
+        content: "El sitio está alojado en **Vercel**. Como la mayoría de los proveedores de hosting, pueden recopilar registros del servidor (como direcciones IP) por motivos de seguridad y mantenimiento. Puedes consultar la política de privacidad de Vercel para más detalles."
+      }
+    ]
+  }
+};
+
+const t = content[lang as keyof typeof content];
+---
+
+<BaseLayout title={t.title} lang={lang}>
+  <div class="max-w-3xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+    <header class="mb-12 border-b border-surface-200 dark:border-surface-800 pb-8">
+      <h1 class="text-4xl font-black text-surface-900 dark:text-surface-50 mb-4 tracking-tight">
+        {t.title}
+      </h1>
+      <p class="text-sm text-surface-500 dark:text-surface-400 font-mono">
+        Last Updated: {t.lastUpdated}
+      </p>
+    </header>
+
+    <div class="space-y-10">
+      {t.sections.map((section) => (
+        <section>
+          <h2 class="text-xl font-bold text-surface-900 dark:text-surface-100 mb-3">
+            {section.title}
+          </h2>
+          <p class="text-surface-600 dark:text-surface-400 leading-relaxed">
+            {section.content}
+          </p>
+          {section.items && (
+            <ul class="mt-4 space-y-2 list-disc list-inside text-surface-600 dark:text-surface-400 ml-4">
+              {section.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+    
+    <div class="mt-16 pt-8 border-t border-surface-200 dark:border-surface-800 text-center">
+      <a href={`/${lang}/`} class="text-primary-600 dark:text-primary-500 font-bold hover:underline transition-all">
+        &larr; Back to Home
+      </a>
+    </div>
+  </div>
+</BaseLayout>

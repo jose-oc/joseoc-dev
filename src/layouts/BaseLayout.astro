@@ -89,7 +89,12 @@ const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.pro
           </a>
         )}
       </div>
-      <div>Jose Ortiz &copy; {new Date().getFullYear()}</div>
+      <div class="flex flex-col items-center gap-2">
+        <div>Jose Ortiz &copy; {new Date().getFullYear()}</div>
+        <a href={`/${lang}/privacy`} class="text-xs text-surface-400 hover:text-primary-600 dark:hover:text-primary-500 transition-colors underline-offset-4 hover:underline">
+          {lang === 'es' ? 'Política de Privacidad' : 'Privacy Policy'}
+        </a>
+      </div>
     </footer>
     
     <script>

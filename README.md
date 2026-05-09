@@ -7,6 +7,17 @@ This is a custom-built, modern, static documentation website built with [Astro](
 - **Multilingual Content Collections**: Content is authored in Markdown and stored in `src/content/en/` and `src/content/es/`.
 - **Aesthetic UI**: Uses Tailwind CSS v4 and the Typography plugin for a premium, developer-centric layout. Features a sticky sidebar, dynamic Table of Contents, and custom tags/categories.
 - **LLM Optimization**: Every documentation page automatically serves its raw Markdown counterpart via an API endpoint (`/raw/[lang]/[...slug].md`) and links to it in the HTML `<head>` for easy consumption by AI agents.
+- **Privacy First**: Zero cookies, zero tracking, and no external analytics. User preferences are stored locally in the browser.
+
+## 🔒 Privacy & Cookies
+
+This site is designed to be **privacy-respecting by default**:
+- **No Cookies**: We do not use any cookies.
+- **No Tracking**: No Google Analytics, no pixels, and no third-party tracking scripts.
+- **Functional Local Storage**: We use `localStorage` exclusively to remember your UI preferences (Theme, Focus Mode, and Font Size). This data never leaves your device.
+- **Hosting**: Hosted on Vercel, which may collect standard server logs for security purposes.
+
+*(Full details can be found on the [Privacy Policy](https://joseoc.dev/en/privacy) page).*
 
 ## 📝 Content Management Best Practices
 
