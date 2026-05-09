@@ -47,6 +47,7 @@ export const sidebarConfig: Record<string, SidebarGroup[]> = {
       label: 'How-To',
       items: [
         { label: 'Split Route 53 Hosted Zone into Delegated Subdomains', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
+        { label: 'Record Terminal Sessions as SVG with termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
       ]
     }
   ],
