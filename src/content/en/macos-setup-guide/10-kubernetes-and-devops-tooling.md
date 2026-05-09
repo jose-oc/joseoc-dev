@@ -93,7 +93,7 @@ lima uname -a
 
 ## 5. Safety First: The "Golden Rule"
 
-Before running any destructive command (like `helm uninstall` or `kubectl delete`), always verify your context using your [Starship prompt](/en/docs/macos-setup-guide/prompt-and-ux) or by running:
+Before running any destructive command (like `helm uninstall` or `kubectl delete`), always verify your context using your [Starship prompt](/docs/macos-setup-guide/prompt-and-ux) or by running:
 
 ```bash
 kubectx -c # Shows current cluster
@@ -103,5 +103,5 @@ kubens -c  # Shows current namespace
 ---
 
 ## Summary
-You now have a production-grade DevOps environment. You can switch clusters safely, monitor resources in real-time, and test infrastructure locally. Now that your cloud tools are ready, let's [configure your ultimate editor: Neovim](/en/docs/macos-setup-guide/editor-setup-neovim).
+You now have a production-grade DevOps environment. You can switch clusters safely, monitor resources in real-time, and test infrastructure locally. Now that your cloud tools are ready, let's [configure your ultimate editor: Neovim](/docs/macos-setup-guide/editor-setup-neovim).
 workflows.

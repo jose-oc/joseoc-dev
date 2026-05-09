@@ -11,13 +11,14 @@ export async function getStaticPaths() {
   const supportedLanguages = ['en', 'es'];
   const allLanguages = [...new Set([...languages, ...supportedLanguages])];
 
-  return allLanguages.map((lang) => ({ params: { lang } }));
+  return allLanguages.map((l) => ({ params: { lang: l === 'en' ? undefined : l } }));
 }
 
-const { lang } = Astro.params;
+const { lang = 'en' } = Astro.params;
 const isProd = import.meta.env.PROD;
 const blogs = await getCollection('blog', (entry) => {
-  if (!entry.id.startsWith(`${lang}/`)) return false;
+  const searchLang = lang || 'en';
+  if (!entry.id.startsWith(`${searchLang}/`)) return false;
   return isProd ? !entry.data.draft : true;
 });
 
@@ -40,10 +41,11 @@ blogs.sort((a, b) => {
         blogs.map((post) => {
           const fallbackSlug = post.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
           const slug = post.data.slug || fallbackSlug;
+          const langPrefix = lang === 'es' ? '/es' : '';
           return (
             <article class="bg-surface-50 dark:bg-surface-800 p-6 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm hover:shadow-md transition-shadow">
               <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-2">
-                <a href={`/${lang}/blog/${slug}`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <a href={`${langPrefix}/blog/${slug}`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                   {post.data.title || fallbackSlug}
                 </a>
               </h2>

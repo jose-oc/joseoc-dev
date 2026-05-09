@@ -5,15 +5,24 @@ const { pathname } = Astro.url;
 
 // Extract current language and the rest of the path
 const segments = pathname.split('/').filter(Boolean);
-const currentLang = segments[0] === 'es' ? 'es' : 'en';
+const hasLangPrefix = segments[0] === 'es';
+const currentLang = hasLangPrefix ? 'es' : 'en';
 const toggleLang = currentLang === 'en' ? 'es' : 'en';
 
-// Determine if we are on a doc, blog, or other page
-const isDoc = segments[1] === 'docs';
-const isBlog = segments[1] === 'blog';
-const slug = (isDoc || isBlog) ? segments.slice(2).join('/') : null;
+// Path without language prefix
+const pathSegments = hasLangPrefix ? segments.slice(1) : segments;
 
-let toggleUrl = `/${toggleLang}/`;
+const isDoc = pathSegments[0] === 'docs';
+const isBlog = pathSegments[0] === 'blog';
+const slug = (isDoc || isBlog) ? pathSegments.slice(1).join('/') : null;
+
+let toggleUrl = toggleLang === 'es' ? '/es/' : '/';
+
+const buildUrl = (l: string, pSegments: string[]) => {
+  const prefix = l === 'es' ? '/es' : '';
+  const path = pSegments.join('/');
+  return `${prefix}/${path}`;
+};
 
 if (slug) {
   const collection = isDoc ? 'docs' : 'blog';
@@ -25,16 +34,14 @@ if (slug) {
   });
   
   if (translationExists) {
-    toggleUrl = `/${toggleLang}/${segments[1]}/${slug}`;
+    toggleUrl = buildUrl(toggleLang, pathSegments);
   } else {
     // If no translation exists, fallback to the section index (e.g. /es/docs)
-    toggleUrl = `/${toggleLang}/${segments[1]}/`;
+    toggleUrl = buildUrl(toggleLang, [pathSegments[0]]);
   }
-} else {
-  // For other pages (home, about, privacy, categories, tags)
-  // Assume they exist or fallback to language home
-  const restOfPath = segments[0] === currentLang ? segments.slice(1).join('/') : segments.join('/');
-  toggleUrl = `/${toggleLang}/${restOfPath}`;
+} else if (pathSegments.length > 0) {
+  // For other pages (about, privacy, categories, tags)
+  toggleUrl = buildUrl(toggleLang, pathSegments);
 }
 ---
 

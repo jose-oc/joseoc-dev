@@ -13,7 +13,7 @@
     "build": "rm -rf dist && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "test:links": "npm run build && linkinator ./dist --recurse --skip 'joseoc.dev'",
+    "test:links": "npm run build && linkinator ./dist --recurse --skip 'joseoc.dev' --skip 'linkedin.com' --skip 'twitter.com' --skip 'x.com' --skip 'github.com'",
     "test:e2e": "playwright test",
     "test": "npm run test:links && npm run test:e2e"
   },

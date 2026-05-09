@@ -3,12 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export function getStaticPaths() {
   return [
-    { params: { lang: 'en' } },
+    { params: { lang: undefined } },
     { params: { lang: 'es' } },
   ];
 }
 
-const { lang } = Astro.params;
+const { lang = 'en' } = Astro.params;
 
 const content = {
   en: {
@@ -102,9 +102,14 @@ const t = content[lang as keyof typeof content];
     </div>
     
     <div class="mt-16 pt-8 border-t border-surface-200 dark:border-surface-800 text-center">
-      <a href={`/${lang}/`} class="text-primary-600 dark:text-primary-500 font-bold hover:underline transition-all">
-        &larr; Back to Home
-      </a>
+      {(() => {
+        const langPrefix = lang === 'es' ? '/es' : '';
+        return (
+          <a href={`${langPrefix}/`} class="text-primary-600 dark:text-primary-500 font-bold hover:underline transition-all">
+            &larr; Back to Home
+          </a>
+        );
+      })()}
     </div>
   </div>
 </BaseLayout>

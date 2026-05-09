@@ -25,7 +25,7 @@ export async function getStaticPaths() {
   allLanguages.forEach((lang) => {
     tags.forEach((tag) => {
       paths.push({
-        params: { lang, tag },
+        params: { lang: lang === 'en' ? undefined : lang, tag },
       });
     });
   });
@@ -37,11 +37,13 @@ const { lang, tag } = Astro.params;
 const isProd = import.meta.env.PROD;
 
 const docs = await getCollection('docs', (entry) => {
-  if (!entry.id.startsWith(`${lang}/`) || !entry.data.tags?.includes(tag)) return false;
+  const searchLang = lang || 'en';
+  if (!entry.id.startsWith(`${searchLang}/`) || !entry.data.tags?.includes(tag)) return false;
   return isProd ? !entry.data.draft : true;
 });
 const blogs = await getCollection('blog', (entry) => {
-  if (!entry.id.startsWith(`${lang}/`) || !entry.data.tags?.includes(tag)) return false;
+  const searchLang = lang || 'en';
+  if (!entry.id.startsWith(`${searchLang}/`) || !entry.data.tags?.includes(tag)) return false;
   return isProd ? !entry.data.draft : true;
 });
 
@@ -55,9 +57,14 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
 <BaseLayout title={`Posts tagged with #${tag}`} description={`Explore all articles tagged with ${tag}`} lang={lang}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
-      <a href={`/${lang}/`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors mb-4">
-        &larr; Back to Home
-      </a>
+      {(() => {
+        const langPrefix = lang === 'es' ? '/es' : '';
+        return (
+          <a href={`${langPrefix}/`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors mb-4">
+            &larr; Back to Home
+          </a>
+        );
+      })()}
       <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50">
         Tag: <span class="text-primary-600 dark:text-primary-500">#{tag}</span>
       </h1>
@@ -66,10 +73,10 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
     
     <div class="space-y-6">
       {allContent.map((post) => {
-        const fallbackSlug = post.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
         const slug = post.data.slug || fallbackSlug;
         const isBlog = post.collection === 'blog';
-        const url = isBlog ? `/${lang}/blog/${slug}` : `/${lang}/docs/${slug}`;
+        const langPrefix = lang === 'es' ? '/es' : '';
+        const url = isBlog ? `${langPrefix}/blog/${slug}` : `${langPrefix}/docs/${slug}`;
         
         return (
           <article class="bg-surface-50 dark:bg-surface-800/50 p-6 rounded-xl border border-surface-200 dark:border-surface-700/50 hover:border-primary-300 dark:hover:border-primary-700 transition-colors">
@@ -90,11 +97,14 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
             )}
             {post.data.tags && post.data.tags.length > 0 && (
               <div class="mt-4 flex flex-wrap gap-2">
-                {post.data.tags.map((t) => (
-                  <a href={`/${lang}/tag/${t}`} class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-200 hover:bg-surface-300 text-surface-800 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-200 transition-colors">
-                    #{t}
-                  </a>
-                ))}
+                {post.data.tags.map((t) => {
+                  const langPrefix = lang === 'es' ? '/es' : '';
+                  return (
+                    <a href={`${langPrefix}/tag/${t}`} class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-200 hover:bg-surface-300 text-surface-800 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-200 transition-colors">
+                      #{t}
+                    </a>
+                  );
+                })}
               </div>
             )}
           </article>

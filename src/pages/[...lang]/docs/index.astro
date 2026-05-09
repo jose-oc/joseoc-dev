@@ -4,12 +4,12 @@ import { sidebarConfig } from '../../../config/sidebar';
 
 export function getStaticPaths() {
   return [
-    { params: { lang: 'en' } },
+    { params: { lang: undefined } },
     { params: { lang: 'es' } },
   ];
 }
 
-const { lang } = Astro.params;
+const { lang = 'en' } = Astro.params;
 
 // Find all available docs for this language
 const docs = await getCollection('docs');
@@ -32,9 +32,10 @@ for (const group of sidebarConfig.docs) {
 }
 
 if (firstAvailableSlug) {
-  return Astro.redirect(`/${lang}/docs/${firstAvailableSlug}`);
+  const langPrefix = lang === 'es' ? '/es' : '';
+  return Astro.redirect(`${langPrefix}/docs/${firstAvailableSlug}`);
 }
 
 // Fallback to home if no docs exist for this language
-return Astro.redirect(`/${lang}/`);
+return Astro.redirect(lang === 'es' ? '/es/' : '/');
 ---
