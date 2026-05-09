@@ -26,6 +26,21 @@ This site supports GitHub-Flavored Markdown alerts for highlighting important in
 > If you are on macOS and already use [Homebrew](/en/docs/macos-setup-guide/base-system-setup-macos), the `brew` method is the fastest way to get started and manage updates automatically.
 ```
 
+### Hidden Text (Internal Notes)
+You can write text that is visible in the raw Markdown source (for your own reference or for LLMs) but is **completely removed** from the generated HTML version.
+
+**Syntax:**
+Wrap your text in double percentage signs `%%`.
+
+**Example:**
+```markdown
+This text is public.
+%% This is a hidden note for myself that won't appear on the website. %%
+This text is also public.
+```
+
+*(This is powered by the custom `remarkHiddenText` plugin in `astro.config.mjs`).*
+
 ### Links and Anchors
 To create cross-language links that work with the router, use the `{[lang]}` syntax in your Markdown.
 

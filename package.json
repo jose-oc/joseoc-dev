@@ -2,6 +2,9 @@
   "name": "temp-astro",
   "type": "module",
   "version": "0.0.1",
+  "overrides": {
+    "vite": "^7"
+  },
   "engines": {
     "node": ">=22.12.0"
   },
@@ -10,7 +13,7 @@
     "build": "rm -rf dist && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "test:links": "npm run build && linkinator ./dist --recurse --skip 'example.com'",
+    "test:links": "npm run build && linkinator ./dist --recurse --skip 'joseoc.dev'",
     "test:e2e": "playwright test",
     "test": "npm run test:links && npm run test:e2e"
   },
@@ -21,7 +24,8 @@
     "astro": "^6.2.1",
     "rehype-mermaid": "^3.0.0",
     "remark-github-alerts": "^0.1.1",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

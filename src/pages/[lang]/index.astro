@@ -1,6 +1,8 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import heroImage from '../../assets/hero-bw.png';
 
 export function getStaticPaths() {
   return [
@@ -15,22 +17,106 @@ const docs = await getCollection('docs', (entry) => {
   if (!entry.id.startsWith(`${lang}/`)) return false;
   return isProd ? !entry.data.draft : true;
 });
+
+const content = {
+  en: {
+    name: "Jose Ortiz",
+    bio: "DevOps engineer focused on automation, infrastructure and building reliable systems.",
+    subBio: "I write occasionally about technology, learning and the things I’m curious about.",
+    interestsTitle: "Currently interested in:",
+    interests: [
+      "AI",
+      "Infrastructure automation",
+      "Observability",
+      "Learning and knowledge management",
+      "Health and human performance"
+    ],
+    browseTitle: "Documentation"
+  },
+  es: {
+    name: "Jose Ortiz",
+    bio: "Ingeniero DevOps enfocado en automatización, infraestructura y construcción de sistemas fiables.",
+    subBio: "Escribo ocasionalmente sobre tecnología, aprendizaje y las cosas que me despiertan curiosidad.",
+    interestsTitle: "Actualmente interesado en:",
+    interests: [
+      "IA",
+      "Automatización de infraestructura",
+      "Observabilidad",
+      "Aprendizaje y gestión del conocimiento",
+      "Salud y rendimiento humano"
+    ],
+    browseTitle: "Documentación"
+  }
+};
+
+const t = content[lang as keyof typeof content];
 ---
 
-<BaseLayout title={`Home - ${lang.toUpperCase()}`} lang={lang}>
-  <div class="prose dark:prose-invert">
-    <h1>Welcome to Jose's Documentation Site</h1>
-    <p>Browse the available documentation below:</p>
-    <ul>
-      {docs.map((doc) => {
-        const fallbackSlug = doc.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
-        const slug = doc.data.slug || fallbackSlug;
-        return (
-          <li>
-            <a href={`/${lang}/docs/${slug}`}>{doc.data.title || fallbackSlug}</a>
+<BaseLayout title={t.name} lang={lang}>
+  <div class="max-w-3xl mx-auto py-12 px-4">
+    <header class="mb-12 animate-fade-in">
+      <div class="mb-8 overflow-hidden rounded-2xl shadow-2xl border border-surface-200 dark:border-surface-800">
+        <Image 
+          src={heroImage} 
+          alt="Minimalist workspace" 
+          class="w-full h-64 object-cover grayscale hover:grayscale-0 transition-all duration-700"
+        />
+      </div>
+      
+      <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50 mb-6 tracking-tight">
+        {t.name}
+      </h1>
+      
+      <p class="text-xl text-surface-700 dark:text-surface-300 mb-4 leading-relaxed font-medium">
+        {t.bio}
+      </p>
+      
+      <p class="text-lg text-surface-600 dark:text-surface-400 italic">
+        {t.subBio}
+      </p>
+    </header>
+
+    <section class="mb-16 animate-fade-in" style="animation-delay: 100ms;">
+      <h2 class="text-sm uppercase tracking-widest text-primary-600 dark:text-primary-500 font-bold mb-6">
+        {t.interestsTitle}
+      </h2>
+      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-surface-700 dark:text-surface-300">
+        {t.interests.map((interest) => (
+          <li class="flex items-center gap-3 group">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary-500/50 group-hover:bg-primary-500 transition-colors"></span>
+            {interest}
           </li>
-        );
-      })}
-    </ul>
+        ))}
+      </ul>
+    </section>
+
+    <section class="animate-fade-in" style="animation-delay: 200ms;">
+      <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-8 tracking-tight border-b border-surface-200 dark:border-surface-800 pb-4">
+        {t.browseTitle}
+      </h2>
+      <ul class="space-y-4">
+        {docs.map((doc) => {
+          const fallbackSlug = doc.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
+          const slug = doc.data.slug || fallbackSlug;
+          return (
+            <li>
+              <a 
+                href={`/${lang}/docs/${slug}`}
+                class="group block p-4 rounded-xl border border-surface-200 dark:border-surface-800 hover:border-primary-500/50 hover:bg-primary-500/5 transition-all"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-surface-900 dark:text-surface-50 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                    {doc.data.title || fallbackSlug}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-surface-400 group-hover:text-primary-500 transition-colors">
+                    <path d="M5 12h14m-7-7 7 7-7 7"/>
+                  </svg>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   </div>
 </BaseLayout>

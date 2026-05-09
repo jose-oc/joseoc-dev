@@ -69,6 +69,11 @@
     content: none !important;
   }
 
+  /* Prose Image styling and zoom */
+  .prose img {
+    @apply cursor-zoom-in transition-all hover:scale-[1.01] hover:shadow-lg;
+  }
+
   /* Mermaid diagram styling */
   .prose svg[id^="mermaid-"] {
     @apply max-w-full h-auto mx-auto my-8 bg-white dark:bg-white/95 rounded-xl p-6 shadow-md border border-surface-200 dark:border-surface-700 transition-all cursor-zoom-in hover:shadow-lg hover:scale-[1.01];
