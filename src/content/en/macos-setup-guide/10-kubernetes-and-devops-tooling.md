@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["kubernetes", "devops", "terraform", "helm", "k9s"]
 category: "engineering"
 language: "en"
-slug: "kubernetes-and-devops-tooling"
+slug: "macos-setup-guide/kubernetes-and-devops-tooling"
 ---
 
 ## Why This Matters
@@ -47,7 +47,6 @@ Instead of running five different `kubectl get` commands to find why a pod is cr
 2. Navigate to the crashing pod.
 3. Press `l` to see logs or `d` to describe it.
 
-![SCREENSHOT: K9s interface showing a cluster overview with various resources]
 
 ---
 
@@ -70,7 +69,6 @@ alias tfp="terraform plan"
 alias tfa="terraform apply"
 ```
 
-[RECORDING: asciinema - Demonstrating a 'terraform plan' and 'kubectx' cluster switching]
 
 ---
 
@@ -95,7 +93,7 @@ lima uname -a
 
 ## 5. Safety First: The "Golden Rule"
 
-Before running any destructive command (like `helm uninstall` or `kubectl delete`), always verify your context using your [Starship prompt](prompt-and-ux) or by running:
+Before running any destructive command (like `helm uninstall` or `kubectl delete`), always verify your context using your [Starship prompt](/en/docs/macos-setup-guide/prompt-and-ux) or by running:
 
 ```bash
 kubectx -c # Shows current cluster
@@ -105,5 +103,5 @@ kubens -c  # Shows current namespace
 ---
 
 ## Summary
-You now have a production-grade DevOps environment. You can switch clusters safely, monitor resources in real-time, and test infrastructure locally. Now that your cloud tools are ready, let's [configure your ultimate editor: Neovim](editor-setup-neovim).
+You now have a production-grade DevOps environment. You can switch clusters safely, monitor resources in real-time, and test infrastructure locally. Now that your cloud tools are ready, let's [configure your ultimate editor: Neovim](/en/docs/macos-setup-guide/editor-setup-neovim).
 workflows.

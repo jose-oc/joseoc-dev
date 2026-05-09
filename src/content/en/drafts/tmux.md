@@ -6,6 +6,7 @@ tags: [tmux, productivity]
 category: engineering
 language: en
 slug: tmux
+draft: true
 ---
 
 # How I Use tmux for Daily Work

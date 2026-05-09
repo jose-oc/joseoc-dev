@@ -1,0 +1,20 @@
+---
+const { pathname } = Astro.url;
+
+// Extract current language and the rest of the path
+const segments = pathname.split('/').filter(Boolean);
+const currentLang = segments[0] === 'es' ? 'es' : 'en';
+const restOfPath = segments[0] === currentLang ? segments.slice(1).join('/') : segments.join('/');
+
+const toggleLang = currentLang === 'en' ? 'es' : 'en';
+const toggleUrl = `/${toggleLang}/${restOfPath}`;
+---
+
+<a 
+  href={toggleUrl}
+  class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-surface-200 dark:border-surface-800 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+  aria-label={`Switch to ${toggleLang === 'en' ? 'English' : 'Spanish'}`}
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-surface-500"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+  <span class="uppercase">{currentLang}</span>
+</a>

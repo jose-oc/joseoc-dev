@@ -1,5 +1,5 @@
 {
-  "name": "growing-filament",
+  "name": "temp-astro",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -7,18 +7,26 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build": "rm -rf dist && astro build && pagefind --site dist",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test:links": "npm run build && linkinator ./dist --recurse --skip 'example.com'",
+    "test:e2e": "playwright test",
+    "test": "npm run test:links && npm run test:e2e"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.3",
+    "@astrojs/mdx": "^5.0.4",
     "@astrojs/sitemap": "^3.7.2",
-    "@pagefind/default-ui": "^1.5.2",
+    "@tailwindcss/vite": "^4.2.4",
+    "astro": "^6.2.1",
+    "rehype-mermaid": "^3.0.0",
+    "remark-github-alerts": "^0.1.1",
+    "tailwindcss": "^4.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.2.2",
-    "astro": "^6.1.8",
-    "pagefind": "^1.5.2",
-    "tailwindcss": "^4.2.2"
+    "linkinator": "^7.6.1",
+    "pagefind": "^1.5.2"
   }
 }

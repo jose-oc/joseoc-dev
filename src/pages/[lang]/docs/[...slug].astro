@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocLayout from '../../../layouts/DocLayout.astro';
+
+export async function getStaticPaths() {
+  const isProd = import.meta.env.PROD;
+  const docs = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+  return docs.map((doc) => {
+    // doc.id is like "en/macos-setup-guide/01-base-system-setup-macos.md"
+    const parts = doc.id.split('/');
+    const lang = parts[0];
+    
+    // Fallback to filename if no frontmatter slug is defined
+    const fallbackSlug = parts.slice(1).join('/').replace(/\.mdx?$/, '');
+    const slug = doc.data.slug || fallbackSlug;
+    
+    return {
+      params: { lang, slug },
+      props: { doc, lang, slug },
+    };
+  });
+}
+
+const { doc, lang, slug } = Astro.props;
+const { Content, headings } = await render(doc);
+---
+
+<DocLayout 
+  title={doc.data.title || "Docs"} 
+  description={doc.data.description}
+  lang={lang} 
+  slug={slug}
+  headings={headings}
+  tags={doc.data.tags}
+  category={doc.data.category}
+>
+  <Content />
+</DocLayout>

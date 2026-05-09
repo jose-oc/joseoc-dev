@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["zsh", "fzf", "productivity", "cli", "macos"]
 category: "engineering"
 language: "en"
-slug: "shell-usability-improvements"
+slug: "macos-setup-guide/shell-usability-improvements"
 ---
 
 ## Why This Matters
@@ -38,7 +38,6 @@ source <(fzf --zsh)
 * **`Ctrl + T`**: Find a file and paste it into your command line.
 * **`Alt + C`**: Fuzzy search for a directory and `cd` into it.
 
-[RECORDING: asciinema - Demonstrating 'Ctrl+R' history search and 'Ctrl+T' file selection with fzf]
 
 ---
 
@@ -93,8 +92,11 @@ autoload -U select-word-style
 select-word-style bash
 ```
 
-![SCREENSHOT: Terminal showing the difference in 'Alt + Backspace' behavior on a long path]
-=== Didn't I add this already on a previous page? ===
+In the image below,  you can see the how I first used `Ctrl+R` so fzf find the nvim command I was looking for and then I used `Ctrl+T` to find the file `dot_zshrc`.
+Finally, I pressed `Alt + Backspace` to jump and delete words.
+
+![Terminal showing the difference in 'Alt + Backspace' behavior on a long path](../../../assets/terminal-fzf-example.svg)
+
 
 ---
 
@@ -121,5 +123,5 @@ done
 ---
 
 ## Summary
-Your shell is no longer just a prompt; it's a productivity partner. It remembers your history, suggests your next moves, and navigates paths intelligently. Now that it *works* well, let's make it *look* professional with the [Starship Prompt](prompt-and-ux).
+Your shell is no longer just a prompt; it's a productivity partner. It remembers your history, suggests your next moves, and navigates paths intelligently. Now that it *works* well, let's make it *look* professional with the [Starship Prompt](/en/docs/macos-setup-guide/prompt-and-ux).
 

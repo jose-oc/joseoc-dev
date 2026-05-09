@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["dotfiles", "chezmoi", "reproducibility", "devops", "automation"]
 category: "engineering"
 language: "en"
-slug: "dotfiles-and-reproducibility"
+slug: "macos-setup-guide/dotfiles-and-reproducibility"
 ---
 
 ## Why This Matters
@@ -39,9 +39,14 @@ chezmoi init
 chezmoi add ~/.zshrc
 chezmoi add ~/.config/nvim
 chezmoi add ~/.config/starship.toml
+
+chezmoi status
 ```
 
-![SCREENSHOT: Terminal showing 'chezmoi status' and the source directory in ~/.local/share/chezmoi]
+The files you add to chezmoi will be stored in `~/.local/share/chezmoi`. This is a real Git repository.
+
+![chezmoi git dir](../../../assets/chezmoi-git-dir.png)
+
 
 ---
 
@@ -50,11 +55,10 @@ chezmoi add ~/.config/starship.toml
 Once a file is managed by Chezmoi, you should no longer edit it directly in your home folder. If you do, your changes will be overwritten next time you "apply" your dotfiles.
 
 ### The Workflow
-1. **Edit**: `chezmoi edit ~/.zshrc` (This opens the file in your [configured Neovim](editor-setup-neovim)).
+1. **Edit**: `chezmoi edit ~/.zshrc` (This opens the file in your [configured Neovim](/en/docs/macos-setup-guide/editor-setup-neovim)).
 2. **Preview**: `chezmoi diff` (See what's about to change).
 3. **Apply**: `chezmoi apply` (Make the changes live).
 
-[RECORDING: asciinema - Demonstrating the edit-diff-apply workflow with chezmoi]
 
 ---
 
@@ -77,7 +81,7 @@ git push -u origin main
 
 ## 4. 100% Reproducibility with Brewfile
 
-To make your machine truly reproducible, you need to manage your applications too. We do this by adding the `Brewfile` we created in the [Base System Setup](base-system-setup-macos) to Chezmoi.
+To make your machine truly reproducible, you need to manage your applications too. We do this by adding the `Brewfile` we created in the [Base System Setup](/en/docs/macos-setup-guide/base-system-setup-macos) to Chezmoi.
 
 ```bash
 # Update your Brewfile

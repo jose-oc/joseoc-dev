@@ -6,6 +6,7 @@ tags: [health, performance]
 category: performance
 language: en
 slug: energy-vs-performance
+draft: true
 ---
 
 # Why I Care About Energy, Not Just Productivity

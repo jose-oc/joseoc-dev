@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["secrets", "1password", "direnv", "security", "devops"]
 category: "engineering"
 language: "en"
-slug: "secrets-and-environment-management"
+slug: "macos-setup-guide/secrets-and-environment-management"
 ---
 
 ## Why This Matters
@@ -47,8 +47,8 @@ When you `cd` into this folder, direnv will ask you to authorize the file:
 ```bash
 direnv allow
 ```
+![Terminal showing variables loading automatically when entering a folder and unloading when leaving](../../../assets/terminal-direnv-load-variables.png)
 
-[RECORDING: asciinema - Demonstrating variables loading automatically when entering a folder and unloading when leaving]
 
 ---
 
@@ -77,7 +77,6 @@ op run --env-file=.env -- npm run dev
 > [!TIP]
 > 1Password will pop up a Touch ID prompt. Once approved, `npm run dev` gets the real key, but if you run `echo $STRIPE_API_KEY` in another terminal tab, it remains empty.
 
-![SCREENSHOT: 1Password Touch ID prompt appearing when running 'op run']
 
 ---
 
@@ -107,5 +106,5 @@ alias deploy="op run --env-file=.env -- terraform apply"
 ---
 
 ## Summary
-You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](python-and-automation-tooling) using these new security foundations.
+You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](/en/docs/macos-setup-guide/python-and-automation-tooling) using these new security foundations.
 

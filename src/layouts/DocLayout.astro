@@ -1,0 +1,62 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Toc from '../components/Toc.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang: string;
+  slug: string;
+  headings: any[];
+  tags?: string[];
+  category?: string;
+}
+
+const { title, description, lang, slug, headings, tags = [], category } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} lang={lang} slug={slug}>
+  <div class="flex items-start gap-8 w-full max-w-7xl mx-auto">
+    <Sidebar lang={lang} currentSlug={slug} />
+    
+    <article class="flex-grow min-w-0 py-8 animate-fade-in">
+      <header class="mb-8 border-b border-surface-200 dark:border-surface-800 pb-8">
+        {category && (
+          <a href={`/${lang}/category/${category}`} class="text-sm font-semibold tracking-wider uppercase text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors mb-2 block">
+            {category}
+          </a>
+        )}
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-surface-900 dark:text-surface-50 mb-4 tracking-tight">
+          {title}
+        </h1>
+        {description && (
+          <p class="text-lg text-surface-600 dark:text-surface-400 max-w-3xl">
+            {description}
+          </p>
+        )}
+        
+        {tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mt-6">
+            {tags.map(tag => (
+              <a href={`/${lang}/tag/${tag}`} class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-100 hover:bg-surface-200 text-surface-800 dark:bg-surface-800 dark:hover:bg-surface-700 dark:text-surface-200 border border-surface-200 dark:border-surface-700 transition-colors">
+                #{tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div class="prose prose-surface dark:prose-invert prose-primary max-w-none 
+                  prose-headings:scroll-mt-24 
+                  prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+                  prose-pre:border prose-pre:border-surface-200 dark:prose-pre:border-surface-800
+                  prose-img:rounded-xl prose-img:border prose-img:border-surface-200 dark:prose-img:border-surface-800 shadow-sm
+                  transition-colors">
+        <slot />
+      </div>
+    </article>
+
+    <Toc headings={headings} />
+  </div>
+</BaseLayout>

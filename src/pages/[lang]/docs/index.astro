@@ -1,0 +1,15 @@
+---
+import { sidebarConfig } from '../../../config/sidebar';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const firstDocSlug = sidebarConfig.docs[0]?.items[0]?.slug || '';
+
+return Astro.redirect(`/${lang}/docs/${firstDocSlug}`);
+---

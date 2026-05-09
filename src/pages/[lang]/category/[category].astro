@@ -1,47 +1,96 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const enPosts = await getCollection('en');
-  const esPosts = await getCollection('es');
+  const isProd = import.meta.env.PROD;
+  const docs = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+  const blogs = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
+  const allContent = [...docs, ...blogs];
 
-  const enCats = [...new Set(enPosts.map(p => p.data.category))].map(cat => ({
-    params: { lang: 'en', category: cat },
-    props: { posts: enPosts.filter(p => p.data.category === cat) }
-  }));
+  // Get all languages
+  const languages = [...new Set(allContent.map((item) => item.id.split('/')[0]))];
+  const supportedLanguages = ['en', 'es'];
+  const allLanguages = [...new Set([...languages, ...supportedLanguages])];
 
-  const esCats = [...new Set(esPosts.map(p => p.data.category))].map(cat => ({
-    params: { lang: 'es', category: cat },
-    props: { posts: esPosts.filter(p => p.data.category === cat) }
-  }));
+  // Get all unique categories
+  const categories = new Set<string>();
+  allContent.forEach((item) => {
+    if (item.data.category) {
+      categories.add(item.data.category);
+    }
+  });
 
-  return [...enCats, ...esCats];
+  const paths = [];
+  allLanguages.forEach((lang) => {
+    categories.forEach((category) => {
+      paths.push({
+        params: { lang, category },
+      });
+    });
+  });
+
+  return paths;
 }
 
 const { lang, category } = Astro.params;
-const { posts } = Astro.props;
+const isProd = import.meta.env.PROD;
 
-const sortedPosts = posts
-  .filter(p => !p.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const docs = await getCollection('docs', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`) || entry.data.category !== category) return false;
+  return isProd ? !entry.data.draft : true;
+});
+const blogs = await getCollection('blog', (entry) => {
+  if (!entry.id.startsWith(`${lang}/`) || entry.data.category !== category) return false;
+  return isProd ? !entry.data.draft : true;
+});
+
+const allContent = [...docs, ...blogs].sort((a, b) => {
+  const dateA = a.data.pubDate ? new Date(a.data.pubDate).valueOf() : 0;
+  const dateB = b.data.pubDate ? new Date(b.data.pubDate).valueOf() : 0;
+  return dateB - dateA;
+});
 ---
 
-<Layout title={`Category: ${category}`} language={lang!}>
-  <div class="mb-12">
-    <a href={`/${lang}/blog`} class="text-sm text-blue-600 hover:underline">← Back to Blog</a>
-    <h1 class="text-4xl font-bold mt-4 capitalize">Category: {category}</h1>
+<BaseLayout title={`Category: ${category}`} description={`Explore all articles in the ${category} category`} lang={lang}>
+  <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <a href={`/${lang}/`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors mb-4">
+        &larr; Back to Home
+      </a>
+      <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50 capitalize">
+        Category: <span class="text-primary-600 dark:text-primary-500">{category}</span>
+      </h1>
+      <p class="mt-2 text-surface-600 dark:text-surface-400">Found {allContent.length} result(s).</p>
+    </div>
+    
+    <div class="space-y-6">
+      {allContent.map((post) => {
+        const fallbackSlug = post.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
+        const slug = post.data.slug || fallbackSlug;
+        const isBlog = post.collection === 'blog';
+        const url = isBlog ? `/${lang}/blog/${slug}` : `/${lang}/docs/${slug}`;
+        
+        return (
+          <article class="bg-surface-50 dark:bg-surface-800/50 p-6 rounded-xl border border-surface-200 dark:border-surface-700/50 hover:border-primary-300 dark:hover:border-primary-700 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-50">
+                <a href={url} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                  {post.data.title || fallbackSlug}
+                </a>
+              </h2>
+              <span class="text-xs font-mono px-2 py-1 bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 rounded uppercase tracking-wider">
+                {isBlog ? 'Blog' : 'Docs'}
+              </span>
+            </div>
+            {post.data.description && (
+              <p class="text-surface-700 dark:text-surface-300">
+                {post.data.description}
+              </p>
+            )}
+          </article>
+        )
+      })}
+    </div>
   </div>
-
-  <div class="space-y-12">
-    {sortedPosts.map(post => (
-      <article>
-        <time class="text-sm text-gray-500">{post.data.date.toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES')}</time>
-        <h3 class="text-2xl font-bold hover:text-blue-600 mt-1">
-          <a href={`/${lang}/${post.data.slug}`}>{post.data.title}</a>
-        </h3>
-        <p class="text-gray-600 dark:text-gray-400 mt-3">{post.data.description}</p>
-      </article>
-    ))}
-  </div>
-</Layout>
+</BaseLayout>

@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["macos", "terminal", "ghostty", "iterm2", "productivity"]
 category: "engineering"
 language: "en"
-slug: "terminal-setup-macos"
+slug: "macos-setup-guide/terminal-setup-macos"
 ---
 
 ## Why This Matters
@@ -60,7 +60,7 @@ brew install --cask font-hack-nerd-font
 
 ## 3. Ghostty Configuration for Power Users
 
-Ghostty is configured via a plain text file, making it perfect for [dotfiles management](dotfiles-and-reproducibility).
+Ghostty is configured via a plain text file, making it perfect for [dotfiles management](/en/docs/macos-setup-guide/dotfiles-and-reproducibility).
 
 You can find the available settings in the [Ghostty documentation](https://ghostty.org/docs/config/reference).
 
@@ -145,5 +145,5 @@ Both Ghostty and iTerm2 use GPU acceleration (Metal) on macOS. This offloads tex
 ---
 
 ## Summary
-You now have a high-performance window into your system. With **Ghostty** and **Nerd Fonts**, your environment is fast, readable, and ready for icons. Next, we'll secure your identity by [setting up SSH and Authentication](ssh-and-authentication).
+You now have a high-performance window into your system. With **Ghostty** and **Nerd Fonts**, your environment is fast, readable, and ready for icons. Next, we'll secure your identity by [setting up SSH and Authentication](/en/docs/macos-setup-guide/ssh-and-authentication).
 

@@ -1,0 +1,40 @@
+---
+import { sidebarConfig } from '../config/sidebar';
+
+interface Props {
+  lang: string;
+  currentSlug?: string;
+}
+
+const { lang, currentSlug } = Astro.props;
+---
+
+<aside class="w-64 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 border-r border-surface-200 dark:border-surface-800 py-6 pr-6">
+  <nav class="space-y-8">
+    {sidebarConfig.docs.map(group => (
+      <div>
+        <h3 class="font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm">{group.label}</h3>
+        <ul class="space-y-2">
+          {group.items.map(item => {
+            const isActive = currentSlug === item.slug;
+            return (
+              <li>
+                <a 
+                  href={`/${lang}/docs/${item.slug}`} 
+                  class:list={[
+                    "block text-sm transition-colors",
+                    isActive 
+                      ? "text-primary-600 dark:text-primary-500 font-medium" 
+                      : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-50"
+                  ]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>

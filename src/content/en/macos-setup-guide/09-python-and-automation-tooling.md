@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["python", "uv", "ansible", "devops", "automation"]
 category: "engineering"
 language: "en"
-slug: "python-and-automation-tooling"
+slug: "macos-setup-guide/python-and-automation-tooling"
 ---
 
 ## Why This Matters
@@ -71,7 +71,17 @@ uv tool install --with-executables-from ansible-core,ansible-lint ansible
 * It has its own private Python environment.
 * You can upgrade it with `uv tool upgrade ansible` without affecting anything else.
 
-![SCREENSHOT: Terminal output showing 'uv tool list' and isolated environments]
+```shell
+❯ uv tool list
+ansible v8.7.0
+- ansible-community
+basedpyright v1.39.3
+- basedpyright
+- basedpyright-langserver
+ruff v0.15.11
+- ruff
+```
+
 
 ---
 
@@ -87,7 +97,7 @@ uv sync
 ```
 
 ### Automatic Activation with Direnv
-If you followed the [Secrets and Environment guide](secrets-and-environment-management), you can automate this even further. You don't need to manually `source .venv/bin/activate` if you use `direnv`.
+If you followed the [Secrets and Environment guide](/en/docs/macos-setup-guide/secrets-and-environment-management), you can automate this even further. You don't need to manually `source .venv/bin/activate` if you use `direnv`.
 
 Simply add this to your project's `.envrc`:
 
@@ -110,7 +120,6 @@ layout uv
 
 Now, whenever you `cd` into the project, `direnv` will automatically create the virtual environment (if it doesn't exist) and activate it for you. This is the cleanest way to work across multiple Python projects.
 
-[RECORDING: asciinema - Demonstrating the speed of 'uv venv' and 'uv sync' in a medium-sized project]
 
 ---
 
@@ -123,5 +132,5 @@ Now, whenever you `cd` into the project, `direnv` will automatically create the 
 ---
 
 ## Summary
-You now have a blazingly fast, modern Python setup that keeps your macOS system pristine. Your automation tools are isolated, and your projects are reproducible. Now that we can automate, let's look at the [Cloud and Kubernetes toolkit](kubernetes-and-devops-tooling).
+You now have a blazingly fast, modern Python setup that keeps your macOS system pristine. Your automation tools are isolated, and your projects are reproducible. Now that we can automate, let's look at the [Cloud and Kubernetes toolkit](/en/docs/macos-setup-guide/kubernetes-and-devops-tooling).
 

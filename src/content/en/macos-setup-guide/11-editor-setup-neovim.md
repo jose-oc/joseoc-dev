@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["neovim", "editor", "lsp", "devops", "productivity"]
 category: "engineering"
 language: "en"
-slug: "editor-setup-neovim"
+slug: "macos-setup-guide/editor-setup-neovim"
 ---
 
 ## Why This Matters
@@ -73,12 +73,17 @@ Standard syntax highlighting is based on regex. Treesitter builds a real syntax 
 This is the "brain." It provides the autocomplete and error checking. For DevOps, we focus on:
 * **Yamlls**: For Kubernetes and Ansible.
 * **Terraform-ls**: For HCL.
-* **Basedpyright**: For Python (managed via [UV](python-and-automation-tooling)).
+* **Basedpyright**: For Python (managed via [UV](/en/docs/macos-setup-guide/python-and-automation-tooling)).
 
 ### C. FZF-Lua (Fuzzy Search)
-Integrated with the [FZF](shell-usability-improvements) we set up earlier, this allows you to find any file or function in a split second.
+Integrated with the [FZF](/en/docs/macos-setup-guide/shell-usability-improvements) we set up earlier, this allows you to find any file or function in a split second.
 
-![SCREENSHOT: Neovim showing a YAML file with LSP diagnostics and FZF search open]
+
+![Neovim showing a YAML file with LSP diagnostics and FZF search open](../../../assets/neovim-lsp-fzf.png)
+
+> [!NOTE]
+> In the screenshot above you can see that lsp is telling me there is an error on line 19, that's LSP in action.
+> Also, you can see FZF in action, searching for files that start with 'yaml' in their name, just by typing the file name. You can open the fzf search by pressing <Leader>ff (by default, the leader key is the space bar). 
 
 ---
 
@@ -91,7 +96,6 @@ The goal is to move as fast as you think.
 * **`<leader>ff`**: Find File.
 * **`<leader>fg`**: Find Grep (search for text globally).
 
-[RECORDING: asciinema - Demonstrating rapid navigation from a Terraform resource to its variable definition and back]
 
 ---
 
@@ -102,5 +106,5 @@ For DevOps work, you often need to move or rename files in bulk. **Oil.nvim** le
 ---
 
 ## Summary
-You now have a high-performance, keyboard-driven forge for your code and infrastructure. Your editor is integrated with your shell, your search tools, and your language servers. Now that your environment is complete, let's [ensure it's all reproducible and managed with Dotfiles](dotfiles-and-reproducibility).
+You now have a high-performance, keyboard-driven forge for your code and infrastructure. Your editor is integrated with your shell, your search tools, and your language servers. Now that your environment is complete, let's [ensure it's all reproducible and managed with Dotfiles](/en/docs/macos-setup-guide/dotfiles-and-reproducibility).
 

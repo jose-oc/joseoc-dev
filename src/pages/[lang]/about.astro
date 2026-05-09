@@ -1,7 +1,7 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
-export async function getStaticPaths() {
+export function getStaticPaths() {
   return [
     { params: { lang: 'en' } },
     { params: { lang: 'es' } },
@@ -10,35 +10,56 @@ export async function getStaticPaths() {
 
 const { lang } = Astro.params;
 
-const t = {
+const content = {
   en: {
-    title: "About Me",
-    content: `
-      <h2>Who I am</h2>
-      <p>I am a senior engineer focused on DevOps, AI, and Linux. I love building systems that are efficient, secure, and easy to maintain.</p>
-      <h2>Philosophy</h2>
-      <p>I believe in simplicity and clarity. This site is a reflection of that: minimalist, fast, and focused on content.</p>
-      <h2>What this site is about</h2>
-      <p>This is my personal knowledge base and documentation hub. I share what works for me and why.</p>
-    `
+    title: "About me",
+    description: "I’ve always been interested in systems and understanding how things work.",
+    subtitle: "DevOps engineer, automation enthusiast, and lifelong learner.",
+    paragraphs: [
+      "I’ve always been interested in systems and understanding how things work.",
+      "I grew up surrounded by cables, amplifiers, and computers. My father worked in the music industry and later opened a computer academy and a computer store at a time when very few people had a computer at home. Between records, hardware components, and CRT monitors, I learned early on how to install operating systems, assemble PCs, deal with viruses, or spend hours copying code from magazines to make games work.",
+      "Over time, I studied computer science and started working in software development. I’ve gone through different stages and technologies: desktop applications, backend development, automation, distributed systems, cloud infrastructure, and on-premise environments. For many years I worked mainly as a developer, but gradually I moved closer to the world of DevOps and platform engineering, drawn to the less visible side of systems and to understanding how all the different pieces connect together.",
+      "Today, I especially enjoy automating processes, simplifying operations, and building tools that make life a little easier for other teams. I usually work with infrastructure, CI/CD, observability, and automation using technologies such as Python, Terraform, Ansible, and Kubernetes, although I’ve become less interested in chasing every new technology simply because it’s new.",
+      "Over the years, I’ve also come to appreciate less technical aspects of the job: clear documentation, autonomy, continuous learning, and the importance of building things sustainably over the long term — both for the systems themselves and for the people maintaining them.",
+      "Outside of work, I’m interested in topics related to learning, health, and human performance. Probably because, after many years in technology, I’ve become increasingly interested not only in how systems work, but also in how we work as people."
+    ]
   },
   es: {
     title: "Sobre mí",
-    content: `
-      <h2>Quién soy</h2>
-      <p>Soy un ingeniero senior enfocado en DevOps, IA y Linux. Me encanta construir sistemas que sean eficientes, seguros y fáciles de mantener.</p>
-      <h2>Filosofía</h2>
-      <p>Creo en la simplicidad y la claridad. Este sitio es un reflejo de eso: minimalista, rápido y enfocado en el contenido.</p>
-      <h2>De qué trata este sitio</h2>
-      <p>Esta es mi base de conocimientos personal y centro de documentación. Comparto lo que me funciona y por qué.</p>
-    `
+    description: "Siempre me ha interesado entender cómo funcionan las cosas.",
+    subtitle: "Ingeniero DevOps, entusiasta de la automatización y aprendiz constante.",
+    paragraphs: [
+      "Siempre me ha interesado entender cómo funcionan las cosas.",
+      "Crecí rodeado de cables, amplificadores y ordenadores. Mi padre trabajaba en el mundo de la música y más tarde abrió una academia y una tienda de informática en una época en la que muy poca gente tenía un ordenador en casa. Entre componentes, pantallas CRT y conexiones a internet que ocupaban la línea del teléfono, aprendí bastante pronto a instalar sistemas operativos, desmontar PCs o copiar código desde revistas para hacer funcionar juegos y pequeños programas.",
+      "Con el tiempo estudié informática y empecé a trabajar desarrollando software. He pasado por distintas etapas y tecnologías: aplicaciones de escritorio, backend, automatización, sistemas distribuidos, infraestructura cloud y entornos on-premise. Durante años trabajé principalmente como desarrollador, hasta que poco a poco fui acercándome al mundo DevOps y platform engineering, atraído por entender cómo todas las piezas de un sistema terminan relacionándose entre sí.",
+      "Hoy disfruto especialmente automatizando procesos, simplificando operaciones y construyendo herramientas que hagan la vida más fácil a otros equipos. Suelo trabajar con infraestructura, CI/CD, observabilidad y automatización usando tecnologías como Python, Terraform, Ansible o Kubernetes, aunque cada vez me interesa menos perseguir la última novedad simplemente por ser nueva.",
+      "Al principio de mi carrera quería construir sistemas perfectos: robustos, flexibles y preparados para durar diez años desde el primer día. Con el tiempo he aprendido a valorar más la simplicidad, la iteración y las soluciones que evolucionan de forma gradual. Me interesa más construir algo útil y mantenible que algo espectacular sobre el papel.",
+      "También he aprendido a apreciar aspectos menos técnicos: la documentación clara, la autonomía, la capacidad de aprendizaje y la importancia de trabajar de forma sostenible a largo plazo, tanto para los sistemas como para las personas que los mantienen.",
+      "Fuera del trabajo me interesan temas relacionados con aprendizaje, salud y rendimiento humano. Probablemente porque, después de muchos años en tecnología, cada vez me interesa más entender no sólo cómo funcionan los sistemas, sino también cómo funcionamos nosotros."
+    ]
   }
-}[lang as 'en' | 'es'];
+};
+
+const t = content[lang as keyof typeof content];
 ---
 
-<Layout title={t.title} language={lang!}>
-  <article class="prose dark:prose-invert max-w-none">
-    <h1>{t.title}</h1>
-    <Fragment set:html={t.content} />
-  </article>
-</Layout>
+<BaseLayout title={t.title} description={t.description} lang={lang}>
+  <div class="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h1 class="text-5xl font-extrabold text-surface-900 dark:text-surface-50 tracking-tight mb-4">
+        {t.title}
+      </h1>
+      <p class="text-xl text-surface-600 dark:text-surface-400 max-w-2xl mx-auto">
+        {t.subtitle}
+      </p>
+    </div>
+
+    <div class="bg-surface-50 dark:bg-surface-800/50 p-8 sm:p-10 rounded-2xl border border-surface-200 dark:border-surface-700/50 shadow-sm">
+      <article class="prose prose-surface dark:prose-invert prose-primary max-w-none prose-lg">
+        {t.paragraphs.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </article>
+    </div>
+  </div>
+</BaseLayout>

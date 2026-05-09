@@ -5,7 +5,7 @@ date: "2026-04-18"
 tags: ["ssh", "git", "authentication", "security", "1password"]
 category: "engineering"
 language: "en"
-slug: "ssh-and-authentication"
+slug: "macos-setup-guide/ssh-and-authentication"
 ---
 
 ## Why This Matters
@@ -145,5 +145,5 @@ ssh-add -l
 ---
 
 ## Summary
-You've now secured the "front door" of your development environment. Your keys are managed, your identities are separated, and your authentication is biometric. Now that we have identity, let's [configure Git](git-and-version-control) to use it properly.
+You've now secured the "front door" of your development environment. Your keys are managed, your identities are separated, and your authentication is biometric. Now that we have identity, let's [configure Git](/en/docs/macos-setup-guide/git-and-version-control) to use it properly.
 
