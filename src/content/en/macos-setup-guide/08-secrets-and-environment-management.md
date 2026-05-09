@@ -77,7 +77,6 @@ op run --env-file=.env -- npm run dev
 > [!TIP]
 > 1Password will pop up a Touch ID prompt. Once approved, `npm run dev` gets the real key, but if you run `echo $STRIPE_API_KEY` in another terminal tab, it remains empty.
 
-![SCREENSHOT: 1Password Touch ID prompt appearing when running 'op run']
 
 ---
 

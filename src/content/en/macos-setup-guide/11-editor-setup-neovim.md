@@ -81,8 +81,9 @@ Integrated with the [FZF](/en/docs/macos-setup-guide/shell-usability-improvement
 
 ![Neovim showing a YAML file with LSP diagnostics and FZF search open](../../../assets/neovim-lsp-fzf.png)
 
-**Note**: In the screenshot above you can see that lsp is telling me there is an error on line 19, that's LSP in action.
-Also, you can see FZF in action, searching for files that start with 'yaml' in their name, just by typing the file name. You can open the fzf search by pressing <Leader>ff (by default, the leader key is the space bar). 
+> [!NOTE]
+> In the screenshot above you can see that lsp is telling me there is an error on line 19, that's LSP in action.
+> Also, you can see FZF in action, searching for files that start with 'yaml' in their name, just by typing the file name. You can open the fzf search by pressing <Leader>ff (by default, the leader key is the space bar). 
 
 ---
 
