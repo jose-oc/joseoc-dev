@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import { siteConfig } from '../config/site';
@@ -11,6 +12,21 @@ interface Props {
 }
 
 const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.props;
+
+// Check which languages are available for this slug
+let availableLangs = ['en', 'es'];
+if (slug) {
+  const docs = await getCollection('docs');
+  const blogs = await getCollection('blog');
+  const allContent = [...docs, ...blogs];
+  
+  availableLangs = allContent
+    .filter(d => {
+      const dSlug = d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
+      return dSlug === slug;
+    })
+    .map(d => d.id.split('/')[0]);
+}
 ---
 
 <!doctype html>
@@ -49,13 +65,25 @@ const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.pro
         }
       });
     </script>
-    {slug && (
+    {slug ? (
       <>
-        <link rel="alternate" type="text/markdown" href={`/raw/${lang}/${slug}.md`} />
+        {availableLangs.includes(lang) && (
+          <link rel="alternate" type="text/markdown" href={`/raw/${lang}/${slug}.md`} />
+        )}
         {/* SEO hreflang tags for translated versions */}
-        <link rel="alternate" hreflang="en" href={`/en/docs/${slug}`} />
-        <link rel="alternate" hreflang="es" href={`/es/docs/${slug}`} />
-        <link rel="alternate" hreflang="x-default" href={`/en/docs/${slug}`} />
+        {availableLangs.includes('en') && (
+          <link rel="alternate" hreflang="en" href={`/en/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
+        )}
+        {availableLangs.includes('es') && (
+          <link rel="alternate" hreflang="es" href={`/es/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
+        )}
+        <link rel="alternate" hreflang="x-default" href={`/en/${Astro.url.pathname.includes('/blog/') ? 'blog' : 'docs'}/${slug}`} />
+      </>
+    ) : (
+      <>
+        <link rel="alternate" hreflang="en" href={`/en/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
+        <link rel="alternate" hreflang="es" href={`/es/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
+        <link rel="alternate" hreflang="x-default" href={`/en/${Astro.url.pathname.split('/').filter(Boolean).slice(1).join('/')}`} />
       </>
     )}
     <title>{title}</title>

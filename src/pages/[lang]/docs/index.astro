@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import { sidebarConfig } from '../../../config/sidebar';
 
 export function getStaticPaths() {
@@ -9,7 +10,31 @@ export function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
-const firstDocSlug = sidebarConfig.docs[0]?.items[0]?.slug || '';
 
-return Astro.redirect(`/${lang}/docs/${firstDocSlug}`);
+// Find all available docs for this language
+const docs = await getCollection('docs');
+const availableSlugs = new Set(
+  docs
+    .filter(d => d.id.startsWith(`${lang}/`))
+    .map(d => d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, ''))
+);
+
+// Find the first doc in the sidebar that actually exists for this language
+let firstAvailableSlug = '';
+for (const group of sidebarConfig.docs) {
+  for (const item of group.items) {
+    if (availableSlugs.has(item.slug)) {
+      firstAvailableSlug = item.slug;
+      break;
+    }
+  }
+  if (firstAvailableSlug) break;
+}
+
+if (firstAvailableSlug) {
+  return Astro.redirect(`/${lang}/docs/${firstAvailableSlug}`);
+}
+
+// Fallback to home if no docs exist for this language
+return Astro.redirect(`/${lang}/`);
 ---
