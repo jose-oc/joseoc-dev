@@ -1,10 +1,34 @@
 ---
+import { getCollection } from 'astro:content';
+import { sidebarConfig } from '../config/sidebar';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import Search from './Search.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import ReadingControls from './ReadingControls.astro';
 
 const { lang = 'en' } = Astro.props;
+
+// Find all available docs for this language to link directly to the first one
+const docs = await getCollection('docs');
+const availableSlugs = new Set(
+  docs
+    .filter(d => d.id.startsWith(`${lang}/`))
+    .map(d => d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, ''))
+);
+
+// Find the first doc in the sidebar that actually exists for this language
+let firstAvailableSlug = '';
+for (const group of sidebarConfig.docs) {
+  for (const item of group.items) {
+    if (availableSlugs.has(item.slug)) {
+      firstAvailableSlug = item.slug;
+      break;
+    }
+  }
+  if (firstAvailableSlug) break;
+}
+
+const docsUrl = firstAvailableSlug ? `/${lang}/docs/${firstAvailableSlug}` : `/${lang}/docs`;
 ---
 
 <header class="sticky top-0 z-40 w-full border-b border-surface-200 dark:border-surface-800 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-md">
@@ -14,7 +38,7 @@ const { lang = 'en' } = Astro.props;
         jose<span class="text-surface-900 dark:text-surface-50">oc</span>
       </a>
       <nav class="hidden md:flex gap-6 text-sm font-medium text-surface-600 dark:text-surface-400">
-        <a href={`/${lang}/docs`} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors">Docs</a>
+        <a href={docsUrl} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors">Docs</a>
         <a href={`/${lang}/blog`} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors">Blog</a>
         <a href={`/${lang}/about`} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors">About</a>
       </nav>
