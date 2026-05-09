@@ -98,7 +98,7 @@ alias deploy="op run --env-file=.env -- terraform apply"
 
 ## 4. Best Practices for Secret Safety
 
-1. **Global Gitignore**: Ensure `.env` and `.envrc` are in your [global gitignore](git-and-version-control#4-handling-global-ignores).
+1. **Global Gitignore**: Ensure `.env` and `.envrc` are in your [global gitignore](/en/docs/macos-setup-guide/git-and-version-control#4-handling-global-ignores).
 2. **Biometrics**: Always enable Touch ID for the 1Password CLI to avoid typing passwords.
 3. **Use Profiles**: Use `AWS_PROFILE` or `GOOGLE_CLOUD_PROJECT` instead of hardcoding access keys.
 4. **Short-Lived Tokens**: Prefer `op signin` sessions that expire over long-lived environment variables.

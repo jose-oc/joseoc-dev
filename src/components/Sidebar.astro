@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import { sidebarConfig } from '../config/sidebar';
 
 interface Props {
@@ -7,11 +8,24 @@ interface Props {
 }
 
 const { lang, currentSlug } = Astro.props;
+
+// Get all docs for the current language to filter the sidebar
+const docs = await getCollection('docs');
+const availableSlugs = new Set(
+  docs
+    .filter(d => d.id.startsWith(`${lang}/`))
+    .map(d => d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, ''))
+);
+
+const filteredSidebar = sidebarConfig.docs.map(group => ({
+  ...group,
+  items: group.items.filter(item => availableSlugs.has(item.slug))
+})).filter(group => group.items.length > 0);
 ---
 
 <aside class="w-64 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 border-r border-surface-200 dark:border-surface-800 py-6 pr-6">
   <nav class="space-y-8">
-    {sidebarConfig.docs.map(group => (
+    {filteredSidebar.map(group => (
       <div>
         <h3 class="font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm">{group.label}</h3>
         <ul class="space-y-2">

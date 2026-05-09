@@ -64,8 +64,6 @@ test.describe('Language Switcher & SEO', () => {
     const esTag = page.locator('link[hreflang="es"]');
     await expect(esTag).toHaveAttribute('href', '/es/docs/python-environment-direnv');
   });
-  });
-
 });
 
 test.describe('Taxonomy Routing', () => {
