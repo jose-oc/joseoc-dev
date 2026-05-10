@@ -1,8 +1,6 @@
-- Is the sitemap generated correctly? Is it good for SEO?
 - Translate content to Spanish
 - add images to some pages
 - change image in home page
-- Shall we add `robots.txt` and `meta robots` tags to the site to improve SEO?
 
 
 
