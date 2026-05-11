@@ -1,12 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { sidebarConfig } from '../config/sidebar';
+import { getSidebarConfig } from '../config/sidebar';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import Search from './Search.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import ReadingControls from './ReadingControls.astro';
 
 const { lang = 'en' } = Astro.props;
+const sidebarConfig = getSidebarConfig(lang);
 
 // Find all available docs for this language to link directly to the first one
 const docs = await getCollection('docs');

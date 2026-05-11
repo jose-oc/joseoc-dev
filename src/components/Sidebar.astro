@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { sidebarConfig } from '../config/sidebar';
+import { getSidebarConfig } from '../config/sidebar';
 
 interface Props {
   lang: string;
@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { lang, currentSlug } = Astro.props;
+const sidebarConfig = getSidebarConfig(lang);
 
 // Get all docs for the current language to filter the sidebar
 const docs = await getCollection('docs');

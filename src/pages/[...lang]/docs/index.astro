@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { sidebarConfig } from '../../../config/sidebar';
+import { getSidebarConfig } from '../../../config/sidebar';
 
 export function getStaticPaths() {
   return [
@@ -10,6 +10,7 @@ export function getStaticPaths() {
 }
 
 const { lang = 'en' } = Astro.params;
+const sidebarConfig = getSidebarConfig(lang);
 
 // Find all available docs for this language
 const docs = await getCollection('docs');
