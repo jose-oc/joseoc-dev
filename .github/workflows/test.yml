@@ -31,9 +31,9 @@ jobs:
       uses: treosh/lighthouse-ci-action@v12
       with:
         urls: |
-          http://localhost:4325/
-          http://localhost:4325/es
-        startServerCommand: npm run dev -- --port 4325
+          http://127.0.0.1:4325/
+          http://127.0.0.1:4325/es
+        startServerCommand: npm run preview -- --port 4325 --host 127.0.0.1
         uploadArtifacts: true
         temporaryPublicStorage: true
       
