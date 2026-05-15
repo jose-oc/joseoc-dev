@@ -78,8 +78,8 @@ if (slug) {
       const pathSegments = hasLangPrefix ? segments.slice(1) : segments;
       const pathWithoutLang = pathSegments.join('/');
       
-      const enUrl = `${siteUrl}/${pathWithoutLang}`;
-      const esUrl = `${siteUrl}/es/${pathWithoutLang}`;
+      const enUrl = pathWithoutLang ? `${siteUrl}/${pathWithoutLang}` : siteUrl;
+      const esUrl = pathWithoutLang ? `${siteUrl}/es/${pathWithoutLang}` : `${siteUrl}/es`;
       
       return (
         <>
