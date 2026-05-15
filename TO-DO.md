@@ -1,4 +1,3 @@
-- Translate content to Spanish
 - add images to some pages
 - change image in home page
 
