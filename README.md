@@ -116,9 +116,8 @@ This suite ensures that your site remains search-engine friendly and optimized f
 We use Google Lighthouse to ensure high performance and perfect SEO scores.
 - **Local Audit**: 
   1. Build the site: `npm run build`
-  2. Start the preview: `npm run preview`
-  3. In a new terminal, run: `npx lighthouse http://127.0.0.1:4321 --only-categories=seo --view`
-- **CI/CD**: This runs automatically on every Pull Request via GitHub Actions.
+  2. Run the audit using the shared config: `npx @lhci/cli collect --config=./.lighthouserc.json`
+- **CI/CD**: This runs automatically on every Pull Request via GitHub Actions using the same `.lighthouserc.json`.
 
 ### Run All Tests
 ```bash
