@@ -29,3 +29,8 @@ playwright/.cache/
 # IDE Settings
 .vscode/
 .idea/
+
+# Lighthouse
+.lighthouseci/
+*.report.html
+
