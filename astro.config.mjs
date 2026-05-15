@@ -43,8 +43,14 @@ export default defineConfig({
     ]
   },
 
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => !page.endsWith('/docs') && !page.endsWith('/es/docs')
+    })
+  ],
   site: 'https://joseoc.dev',
+  trailingSlash: 'never',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],

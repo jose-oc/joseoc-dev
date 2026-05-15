@@ -103,9 +103,26 @@ Playwright spins up a headless Chromium browser, runs the dev server, and intera
   - Triggers a deliberate 404 to ensure our custom `src/pages/404.astro` page loads correctly.
   - Validates that SEO `<link rel="alternate" hreflang="X">` tags are correctly generated in the HTML `<head>`.
 
+### 3. SEO Metadata Audits
+This suite ensures that your site remains search-engine friendly and optimized for AI agents.
+- **Command**: `npx playwright test tests/seo.spec.ts`
+- **What it does**:
+  - Verifies every page has a valid `<title>` and `<meta name="description">`.
+  - Ensures `<link rel="canonical">` tags point to the production domain.
+  - Checks that `hreflang` tags are correctly generated for multilingual cross-linking.
+  - Confirms the presence of the hidden Markdown link for AI agents.
+
+### 4. Lighthouse Audits
+We use Google Lighthouse to ensure high performance and perfect SEO scores.
+- **Local Audit**: 
+  1. Build the site: `npm run build`
+  2. Start the preview: `npm run preview`
+  3. In a new terminal, run: `npx lighthouse http://127.0.0.1:4321 --only-categories=seo --view`
+- **CI/CD**: This runs automatically on every Pull Request via GitHub Actions.
+
 ### Run All Tests
 ```bash
-# Run both the link crawler and the E2E browser tests sequentially
+# Run link crawler, E2E browser tests, and SEO audits
 npm run test
 ```
 

@@ -73,6 +73,8 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
     
     <div class="space-y-6">
       {allContent.map((post) => {
+        const parts = post.id.split('/');
+        const fallbackSlug = parts.slice(1).join('/').replace(/\.mdx?$/, '');
         const slug = post.data.slug || fallbackSlug;
         const isBlog = post.collection === 'blog';
         const langPrefix = lang === 'es' ? '/es' : '';

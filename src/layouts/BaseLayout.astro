@@ -9,9 +9,13 @@ interface Props {
   description?: string;
   lang?: string;
   slug?: string;
+  noindex?: boolean;
 }
 
-const { title, description = 'IT Documentation', lang = 'en', slug } = Astro.props;
+const { title, description = 'IT Documentation', lang = 'en', slug, noindex = false } = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 
 // Check which languages are available for this slug
 let availableLangs = ['en', 'es'];
@@ -37,6 +41,9 @@ if (slug) {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    
+    <link rel="canonical" href={canonicalURL} />
     
     <script is:inline>
       const theme = (() => {
@@ -71,13 +78,13 @@ if (slug) {
       const pathSegments = hasLangPrefix ? segments.slice(1) : segments;
       const pathWithoutLang = pathSegments.join('/');
       
-      const enUrl = `/${pathWithoutLang}`;
-      const esUrl = `/es/${pathWithoutLang}`;
+      const enUrl = pathWithoutLang ? `${siteUrl}/${pathWithoutLang}` : siteUrl;
+      const esUrl = pathWithoutLang ? `${siteUrl}/es/${pathWithoutLang}` : `${siteUrl}/es`;
       
       return (
         <>
           {slug && availableLangs.includes(lang) && (
-            <link rel="alternate" type="text/markdown" href={`/raw${lang === 'es' ? '/es' : ''}/${slug}.md`} />
+            <link rel="alternate" type="text/markdown" href={`${siteUrl}/raw${lang === 'es' ? '/es' : ''}/${slug}.md`} />
           )}
           {availableLangs.includes('en') && (
             <link rel="alternate" hreflang="en" href={enUrl} />

@@ -59,10 +59,10 @@ test.describe('Language Switcher & SEO', () => {
     
     // Check that hreflang tags exist in the <head>
     const enTag = page.locator('link[hreflang="en"]');
-    await expect(enTag).toHaveAttribute('href', '/docs/python-environment-direnv');
+    await expect(enTag).toHaveAttribute('href', 'https://joseoc.dev/docs/python-environment-direnv');
 
     const esTag = page.locator('link[hreflang="es"]');
-    await expect(esTag).toHaveAttribute('href', '/es/docs/python-environment-direnv');
+    await expect(esTag).toHaveAttribute('href', 'https://joseoc.dev/es/docs/python-environment-direnv');
   });
 });
 
