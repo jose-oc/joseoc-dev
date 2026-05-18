@@ -72,7 +72,7 @@ This is an example of `~/.config/ghostty/config`. I personally, leave this file 
 font-family = Hack Nerd Font
 font-size = 13
 theme = Deep
-scrollback-limit = 100000
+scrollback-limit = 50000000
 copy-on-select = true
 window-padding-x = 8
 window-padding-y = 8
@@ -90,6 +90,32 @@ ghostty +list-themes
 
 ![ghostty list themes](../../../assets/ghostty-list-themes.png)
 
+
+
+### Understanding `scrollback-limit`: Ghostty vs iTerm2
+
+One important difference between **Ghostty** and **iTerm2** is how they manage scrollback history.
+
+In **Ghostty**, `scrollback-limit` is measured in **bytes**, not lines. It covers both the **visible screen** and the **scrollback buffer**, and once that limit is reached, the oldest content is discarded. The current default is **10,000,000 bytes per terminal surface**. A "surface" is effectively one tab, split, or window pane.
+
+This matters because Ghostty keeps scrollback **in memory**. A larger value gives you more history, but it also increases the terminal's potential RAM usage, especially if you keep many tabs or splits open. The good news is that Ghostty allocates this lazily, so setting a higher limit does **not** immediately reserve all that memory up front.
+
+```ini
+# Example: keep more history than the default
+scrollback-limit = 50000000
+```
+
+By contrast, **iTerm2** thinks about scrollback in **lines**, and it also offers an **unlimited scrollback** option. That sounds convenient, but it can keep growing indefinitely and may eventually consume a large amount of memory during long log tails, verbose test runs, or chatty Kubernetes sessions.
+
+In practice, the tradeoff is simple:
+
+* **Ghostty**: more predictable memory usage, but no truly unlimited scrollback yet.
+* **iTerm2**: more flexible history retention, including unlimited mode, but with less control over worst-case memory growth.
+
+If you spend most of your day watching large logs, `scrollback-limit` is one of the few Ghostty settings worth tuning explicitly. If you mostly use short-lived shells and editors, the default is usually fine.
+
+
+Sources: [Ghostty config reference](https://ghostty.org/docs/config/reference), [iTerm2 terminal profile preferences](https://iterm2.com/documentation-preferences-profiles-terminal.html)
 
 
 ---
