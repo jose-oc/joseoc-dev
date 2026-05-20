@@ -22,17 +22,81 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 
 // Check which languages are available for this slug
 let availableLangs = ['en', 'es'];
+let currentItem: any = null;
 if (slug) {
   const docs = await getCollection('docs');
   const blogs = await getCollection('blog');
   const allContent = [...docs, ...blogs];
   
-  availableLangs = allContent
-    .filter(d => {
-      const dSlug = d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
-      return dSlug === slug;
-    })
-    .map(d => d.id.split('/')[0]);
+  const matched = allContent.filter(d => {
+    const dSlug = d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
+    return dSlug === slug;
+  });
+  
+  availableLangs = matched.map(d => d.id.split('/')[0]);
+  currentItem = matched.find(d => d.id.startsWith(`${lang}/`));
+}
+
+// JSON-LD Structured Data
+let jsonLd: any = null;
+if (currentItem) {
+  const isBlog = currentItem.collection === 'blog';
+  const type = isBlog ? 'BlogPosting' : 'TechArticle';
+  
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": type,
+    "headline": title || currentItem.data.title,
+    "description": description || currentItem.data.description,
+    "url": canonicalURL.toString(),
+    "inLanguage": lang,
+  };
+  
+  if (currentItem.data.pubDate) {
+    jsonLd.datePublished = currentItem.data.pubDate instanceof Date 
+      ? currentItem.data.pubDate.toISOString() 
+      : new Date(currentItem.data.pubDate).toISOString();
+  }
+  
+  // Author
+  const authorName = isBlog ? (currentItem.data.author || 'Jose Ortiz') : 'Jose Ortiz';
+  jsonLd.author = {
+    "@type": "Person",
+    "name": authorName,
+    "url": siteUrl,
+    "sameAs": [
+      siteConfig.social.linkedin,
+      siteConfig.social.twitter,
+      siteConfig.social.github
+    ].filter(Boolean)
+  };
+
+  // Publisher
+  jsonLd.publisher = {
+    "@type": "Organization",
+    "name": "Jose Ortiz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": new URL('/favicon.svg', siteUrl).toString()
+    }
+  };
+} else if (Astro.url.pathname === '/' || Astro.url.pathname === '/es' || Astro.url.pathname === '/es/') {
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Jose Ortiz",
+    "url": siteUrl,
+    "description": description,
+    "author": {
+      "@type": "Person",
+      "name": "Jose Ortiz",
+      "sameAs": [
+        siteConfig.social.linkedin,
+        siteConfig.social.twitter,
+        siteConfig.social.github
+      ].filter(Boolean)
+    }
+  };
 }
 ---
 
@@ -115,6 +179,9 @@ if (slug) {
         </>
       );
     })()}
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col bg-surface-50 dark:bg-surface-950">
