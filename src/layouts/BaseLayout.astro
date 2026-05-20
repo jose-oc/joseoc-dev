@@ -13,12 +13,19 @@ interface Props {
   image?: string;
 }
 
-const { title, description = 'IT Documentation', lang = 'en', slug, noindex = false, image } = Astro.props;
-
-const ogImage = image ? new URL(image, siteUrl) : new URL('/favicon.svg', siteUrl);
-
 const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+
+const { title, description, lang = 'en', slug, noindex = false, image } = Astro.props;
+
+const defaultDescriptions: Record<string, string> = {
+  en: 'IT Documentation, DevOps guides, and technical articles by Jose Ortiz.',
+  es: 'Documentación técnica de TI, guías de DevOps y artículos técnicos de Jose Ortiz.'
+};
+
+const metaDescription = description || defaultDescriptions[lang] || defaultDescriptions.en;
+
+const ogImage = image ? new URL(image, siteUrl) : new URL('/favicon.svg', siteUrl);
 
 // Check which languages are available for this slug
 let availableLangs = ['en', 'es'];
@@ -47,7 +54,7 @@ if (currentItem) {
     "@context": "https://schema.org",
     "@type": type,
     "headline": title || currentItem.data.title,
-    "description": description || currentItem.data.description,
+    "description": metaDescription || currentItem.data.description,
     "url": canonicalURL.toString(),
     "inLanguage": lang,
   };
@@ -86,7 +93,7 @@ if (currentItem) {
     "@type": "WebSite",
     "name": "Jose Ortiz",
     "url": siteUrl,
-    "description": description,
+    "description": metaDescription,
     "author": {
       "@type": "Person",
       "name": "Jose Ortiz",
@@ -107,7 +114,7 @@ if (currentItem) {
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     {noindex && <meta name="robots" content="noindex" />}
     
     <link rel="canonical" href={canonicalURL} />
@@ -116,7 +123,7 @@ if (currentItem) {
     <meta property="og:type" content={slug ? "article" : "website"} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:site_name" content="Jose Ortiz" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
@@ -125,7 +132,7 @@ if (currentItem) {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
     
     <script is:inline>
