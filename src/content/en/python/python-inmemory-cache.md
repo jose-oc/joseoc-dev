@@ -1,4 +1,12 @@
-# Building A Small In-Process Cache In Python Without Overengineering It
+---
+title: "Building a Small In-Process Cache in Python Without Overengineering It"
+description: "How to implement a lightweight, in-memory cache in Python using a dictionary, Lock, and TTL/max-item eviction, without needing Redis."
+date: "2026-05-20"
+tags: ["python", "caching", "in-memory", "concurrency", "performance"]
+category: "engineering"
+language: "en"
+slug: "python-inmemory-cache"
+---
 
 Not every cache needs Redis.
 

@@ -37,6 +37,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         label: 'Python',
         items: [
           { label: '· Environment with direnv', slug: 'python-environment-direnv' },
+          { label: '· Threading & Blocking I/O', slug: 'python-threads-blocking-io' },
+          { label: '· In-Process Cache', slug: 'python-inmemory-cache' },
         ],
       },
       {
@@ -73,6 +75,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         label: 'Python',
         items: [
           { label: '· Entorno con direnv', slug: 'python-environment-direnv' },
+          { label: '· Hilos y E/S bloqueante', slug: 'python-threads-blocking-io' },
+          { label: '· Caché en memoria', slug: 'python-inmemory-cache' },
         ],
       },
       {

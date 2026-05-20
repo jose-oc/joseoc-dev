@@ -1,4 +1,12 @@
-# Using Threads In Python Web Apps Without Tripping Over Blocking I/O
+---
+title: "Using Threads in Python Web Apps Without Tripping Over Blocking I/O"
+description: "Learn how to safely run blocking I/O operations inside async Python web applications using run_in_threadpool without blocking the event loop."
+date: "2026-05-20"
+tags: ["python", "asyncio", "threads", "fastapi", "performance"]
+category: "engineering"
+language: "en"
+slug: "python-threads-blocking-io"
+---
 
 If you build Python APIs for real systems, sooner or later you hit this situation:
 
