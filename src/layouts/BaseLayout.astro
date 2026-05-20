@@ -10,9 +10,12 @@ interface Props {
   lang?: string;
   slug?: string;
   noindex?: boolean;
+  image?: string;
 }
 
-const { title, description = 'IT Documentation', lang = 'en', slug, noindex = false } = Astro.props;
+const { title, description = 'IT Documentation', lang = 'en', slug, noindex = false, image } = Astro.props;
+
+const ogImage = image ? new URL(image, siteUrl) : new URL('/favicon.svg', siteUrl);
 
 const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
@@ -44,6 +47,22 @@ if (slug) {
     {noindex && <meta name="robots" content="noindex" />}
     
     <link rel="canonical" href={canonicalURL} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={slug ? "article" : "website"} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Jose Ortiz" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     
     <script is:inline>
       const theme = (() => {
