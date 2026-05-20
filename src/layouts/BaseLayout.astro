@@ -15,6 +15,7 @@ interface Props {
 
 const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const canonicalURLString = canonicalURL.toString().replace(/\/$/, '');
 
 const { title, description, lang = 'en', slug, noindex = false, image } = Astro.props;
 
@@ -55,7 +56,7 @@ if (currentItem) {
     "@type": type,
     "headline": title || currentItem.data.title,
     "description": metaDescription || currentItem.data.description,
-    "url": canonicalURL.toString(),
+    "url": canonicalURLString,
     "inLanguage": lang,
   };
   
@@ -117,11 +118,11 @@ if (currentItem) {
     <meta name="description" content={metaDescription} />
     {noindex && <meta name="robots" content="noindex" />}
     
-    <link rel="canonical" href={canonicalURL} />
+    <link rel="canonical" href={canonicalURLString} />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={slug ? "article" : "website"} />
-    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:url" content={canonicalURLString} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:site_name" content="Jose Ortiz" />
@@ -130,7 +131,7 @@ if (currentItem) {
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:url" content={canonicalURLString} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
