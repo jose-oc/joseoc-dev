@@ -14,7 +14,7 @@ Si desarrollas APIs de Python para sistemas reales, tarde o temprano te encontra
 - parte de tu trabajo no es asíncrono en absoluto
 - aun así, necesitas llamarlo de forma segura bajo carga
 
-Este era exactamente nuestro caso. La API está construida con FastAPI/Starlette, pero la autenticación requería:
+Éste era exactamente nuestro caso. La API está construida con FastAPI/Starlette, pero la autenticación requería:
 
 - leer un token de revisión desde el disco
 - llamar a `TokenReview` de Kubernetes usando `requests`
@@ -28,7 +28,7 @@ Ahí es donde los hilos ayudan.
 El Python asíncrono es fantástico cuando el código que estás llamando también es asíncrono. Pero si una función utiliza E/S (I/O) bloqueante, una opción práctica es:
 
 - mantener tu ruta o dependencia asíncrona
-- mover solo la parte bloqueante a un pool de hilos (threadpool)
+- mover sólo la parte bloqueante a un pool de hilos (threadpool)
 
 En Starlette/FastAPI, la herramienta habitual es:
 
@@ -76,7 +76,7 @@ async def authenticate_websocket_access(websocket):
 
 ### Para qué sirve `run_in_threadpool`
 
-Brilla cuando tienes código que es:
+Es estupendo cuando tienes código que es:
 
 - bloqueante
 - que ya funciona correctamente
@@ -120,11 +120,14 @@ class Client:
 
 Esto puede estar bien en un programa síncrono sencillo. Pero tan pronto como empiezas a llamar a ese cliente de forma concurrida desde varios hilos, el estado compartido de la sesión se convierte en un problema.
 
-Nosotros chocamos directamente con esto.
+Nosotros chocamos directamente con ésto.
 
 Primero movimos las comprobaciones de autenticación al pool de hilos. Eso resolvió el problema del bucle de eventos. Pero entonces, múltiples peticiones podían llamar al mismo autenticador simultáneamente, y dicho autenticador mantenía una única `requests.Session` compartida.
 
-Esto es arriesgado.
+Ésto es arriesgado.
+
+> [!TIP]
+> Crear un nuevo `requests.Session()` vs único reutilizado
 
 Un patrón más seguro es crear una sesión nueva para cada llamada bloqueante y cerrarla explícitamente:
 
