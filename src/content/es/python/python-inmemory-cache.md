@@ -17,7 +17,7 @@ A veces solo quieres algo pequeño, local y aburrido:
 - local al proceso
 - fácil de entender
 
-Ese es exactamente el tipo de caché que añadimos para las comprobaciones de autenticación JWT exitosas.
+Ése es exactamente el tipo de caché que añadimos para las comprobaciones de autenticación JWT exitosas.
 
 El objetivo era sencillo:
 
@@ -25,11 +25,11 @@ El objetivo era sencillo:
 - especialmente cuando un cliente realiza peticiones periódicas (polling) sobre el estado de un trabajo o se reconecta a un websocket
 - sin modificar la API externa
 
-### Qué tipo de caché es esta
+### Qué tipo de caché es ésta
 
 Se trata de una caché en memoria dentro de un único proceso de Python.
 
-Esto significa que es:
+Ésto significa que es:
 
 - rápida
 - simple
@@ -104,7 +104,7 @@ utilizamos:
 cache[sha256(token)] = ...
 ```
 
-Esto no es un cifrado fuerte, pero sigue siendo mucho más limpio que conservar tokens portadores (bearer tokens) en bruto como claves.
+Esto no es un cifrado fuerte, pero sigue siendo mucho más limpio que conservar bearer tokens en bruto como claves.
 
 ### Escribir en la caché
 
@@ -124,7 +124,7 @@ Pero si te detienes ahí, pronto surgirán algunos problemas.
 
 ### Primera advertencia: las entradas expiradas pueden acumularse
 
-Si solo eliminas las entradas expiradas cuando se vuelve a consultar ese mismo token, las entradas obsoletas pueden acumularse indefinidamente.
+Si sólo eliminas las entradas expiradas cuando se vuelve a consultar ese mismo token, las entradas obsoletas pueden acumularse indefinidamente.
 
 Por eso añadimos una limpieza (pruning) durante la escritura:
 
@@ -147,7 +147,7 @@ def store_cached_identity(cache: dict, token: str, identity, ttl_seconds: float)
     )
 ```
 
-Esto evita que la caché crezca indefinidamente con entradas muertas.
+Así se evita que la caché crezca indefinidamente con entradas muertas.
 
 ### Segunda advertencia: incluso una caché con TTL puede crecer demasiado
 
@@ -178,7 +178,7 @@ def store_cached_identity(cache: dict, token: str, identity, ttl_seconds: float,
         del cache[oldest_key]
 ```
 
-Esta no es una caché LRU (Least Recently Used) sofisticada. Es simplemente una caché acotada que respeta el orden de inserción con limpieza de TTL.
+Ésta no es una caché LRU (Least Recently Used) sofisticada. Es simplemente una caché acotada que respeta el orden de inserción con limpieza de TTL.
 
 Y para una pequeña caché operativa, suele ser más que suficiente.
 
@@ -244,11 +244,11 @@ En esos casos, utiliza una caché compartida real o replantea si el almacenamien
 - Las cachés con TTL pueden aceptar brevemente algo que dejó de ser válido inmediatamente después de almacenarse en caché.
 - Las cachés locales del proceso no hacen nada por otros procesos en otros servidores o contenedores.
 - Una caché acotada con desalojo de la entrada más antigua es simple, pero no equivale a una LRU.
-- Aunque uses hashes para las claves, estas se derivan de secretos; evalúa con realismo el riesgo de un volcado de memoria.
+- Aunque uses hashes para las claves, éstas se derivan de secretos; evalúa con realismo el riesgo de un volcado de memoria.
 
 ### Un modelo mental práctico
 
-Si te estás preguntando si esto es lo que necesitas, hazte estas preguntas:
+Si te estás preguntando si ésto es lo que necesitas, hazte estas preguntas:
 
 - ¿Estoy repitiendo la misma comprobación costosa con mucha frecuencia?
 - ¿Es aceptable una caché local de corta duración?
