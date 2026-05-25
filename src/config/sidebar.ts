@@ -55,6 +55,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Basics and First Steps', slug: 'observability/observability-basics' },
           { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
         ]
+      },
+      {
+        label: 'Networking',
+        items: [
+          { label: '· Troubleshooting Commands by Problem', slug: 'networking/troubleshooting-commands-by-problem' },
+          { label: '· Why Linux Interface Names Look Weird', slug: 'networking/linux-interface-names' },
+        ]
       }
     ],
   },
@@ -99,6 +106,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         items: [
           { label: '· Conceptos basicos y primeros pasos', slug: 'observability/observability-basics' },
           { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
+        ]
+      },
+      {
+        label: 'Redes',
+        items: [
+          { label: '· Comandos de troubleshooting por problema', slug: 'networking/troubleshooting-commands-by-problem' },
+          { label: '· Por que los nombres de interfaz se ven raros', slug: 'networking/linux-interface-names' },
         ]
       }
     ],
