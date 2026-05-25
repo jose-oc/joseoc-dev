@@ -48,6 +48,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Split Route 53 Hosted Zone into Delegated Subdomains', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
           { label: '· Record Terminal Sessions as SVG with termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
         ]
+      },
+      {
+        label: 'Observability',
+        items: [
+          { label: '· Basics and First Steps', slug: 'observability/observability-basics' },
+          { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
+        ]
       }
     ],
   },
@@ -85,6 +92,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Crear y delegar una zona hospedada de Route 53 para un subdominio', slug: 'create-delegated-subdomain-aws-route53-hosted-zone' },
           { label: '· Dividir una Hosted Zone de Route 53 en subdominios delegados', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
           { label: '· Grabar sesiones de terminal en SVG con termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
+        ]
+      },
+      {
+        label: 'Observabilidad',
+        items: [
+          { label: '· Conceptos basicos y primeros pasos', slug: 'observability/observability-basics' },
+          { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
         ]
       }
     ],
