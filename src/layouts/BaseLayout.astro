@@ -10,26 +10,101 @@ interface Props {
   lang?: string;
   slug?: string;
   noindex?: boolean;
+  image?: string;
 }
-
-const { title, description = 'IT Documentation', lang = 'en', slug, noindex = false } = Astro.props;
 
 const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const canonicalURLString = canonicalURL.toString().replace(/\/$/, '');
+
+const { title, description, lang = 'en', slug, noindex = false, image } = Astro.props;
+
+const defaultDescriptions: Record<string, string> = {
+  en: 'IT Documentation, DevOps guides, and technical articles by Jose Ortiz.',
+  es: 'Documentación técnica de TI, guías de DevOps y artículos técnicos de Jose Ortiz.'
+};
+
+const metaDescription = description || defaultDescriptions[lang] || defaultDescriptions.en;
+
+const ogImage = image ? new URL(image, siteUrl) : new URL('/favicon.svg', siteUrl);
 
 // Check which languages are available for this slug
 let availableLangs = ['en', 'es'];
+let currentItem: any = null;
 if (slug) {
   const docs = await getCollection('docs');
   const blogs = await getCollection('blog');
   const allContent = [...docs, ...blogs];
   
-  availableLangs = allContent
-    .filter(d => {
-      const dSlug = d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
-      return dSlug === slug;
-    })
-    .map(d => d.id.split('/')[0]);
+  const matched = allContent.filter(d => {
+    const dSlug = d.data.slug || d.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');
+    return dSlug === slug;
+  });
+  
+  availableLangs = matched.map(d => d.id.split('/')[0]);
+  currentItem = matched.find(d => d.id.startsWith(`${lang}/`));
+}
+
+// JSON-LD Structured Data
+let jsonLd: any = null;
+if (currentItem) {
+  const isBlog = currentItem.collection === 'blog';
+  const type = isBlog ? 'BlogPosting' : 'TechArticle';
+  
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": type,
+    "headline": title || currentItem.data.title,
+    "description": metaDescription || currentItem.data.description,
+    "url": canonicalURLString,
+    "inLanguage": lang,
+  };
+  
+  if (currentItem.data.pubDate) {
+    jsonLd.datePublished = currentItem.data.pubDate instanceof Date 
+      ? currentItem.data.pubDate.toISOString() 
+      : new Date(currentItem.data.pubDate).toISOString();
+  }
+  
+  // Author
+  const authorName = isBlog ? (currentItem.data.author || 'Jose Ortiz') : 'Jose Ortiz';
+  jsonLd.author = {
+    "@type": "Person",
+    "name": authorName,
+    "url": siteUrl,
+    "sameAs": [
+      siteConfig.social.linkedin,
+      siteConfig.social.twitter,
+      siteConfig.social.github
+    ].filter(Boolean)
+  };
+
+  // Publisher
+  jsonLd.publisher = {
+    "@type": "Organization",
+    "name": "Jose Ortiz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": new URL('/favicon.svg', siteUrl).toString()
+    }
+  };
+} else if (Astro.url.pathname === '/' || Astro.url.pathname === '/es' || Astro.url.pathname === '/es/') {
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Jose Ortiz",
+    "url": siteUrl,
+    "description": metaDescription,
+    "author": {
+      "@type": "Person",
+      "name": "Jose Ortiz",
+      "sameAs": [
+        siteConfig.social.linkedin,
+        siteConfig.social.twitter,
+        siteConfig.social.github
+      ].filter(Boolean)
+    }
+  };
 }
 ---
 
@@ -40,10 +115,26 @@ if (slug) {
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     {noindex && <meta name="robots" content="noindex" />}
     
-    <link rel="canonical" href={canonicalURL} />
+    <link rel="canonical" href={canonicalURLString} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={slug ? "article" : "website"} />
+    <meta property="og:url" content={canonicalURLString} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:site_name" content="Jose Ortiz" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURLString} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImage} />
     
     <script is:inline>
       const theme = (() => {
@@ -96,6 +187,9 @@ if (slug) {
         </>
       );
     })()}
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col bg-surface-50 dark:bg-surface-950">

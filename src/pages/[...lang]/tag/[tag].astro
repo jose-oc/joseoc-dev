@@ -24,9 +24,16 @@ export async function getStaticPaths() {
   const paths = [];
   allLanguages.forEach((lang) => {
     tags.forEach((tag) => {
-      paths.push({
-        params: { lang: lang === 'en' ? undefined : lang, tag },
+      // Only generate paths for language + tag combinations that actually have content
+      const hasContent = allContent.some((item) => {
+        const itemLang = item.id.split('/')[0];
+        return itemLang === lang && item.data.tags?.includes(tag);
       });
+      if (hasContent) {
+        paths.push({
+          params: { lang: lang === 'en' ? undefined : lang, tag },
+        });
+      }
     });
   });
 
