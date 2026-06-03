@@ -51,7 +51,7 @@ source_env_if_exists .envrc.private
 * `uv pip sync requirements-controller.txt`: Sincroniza el entorno virtual con el archivo `requirements-controller.txt`. Ésto instala las dependencias del proyecto en el entorno virtual.
 * `export ANSIBLE_CONFIG=$PWD/ansible.cfg`: Exporta la variable de entorno `ANSIBLE_CONFIG` a `ansible.cfg`.
 * `export ANSIBLE_PYTHON_INTERPRETER=$VIRTUAL_ENV/bin/python`: Exporta la variable de entorno `ANSIBLE_PYTHON_INTERPRETER` al entorno virtual de python.
-* `source_env_if_exists .envrc.private`: Carga las variables de entorno del archivo `.envrc.private` si existe. Esto es util para no subir las variables de entorno privadas al repositorio. Recuerda añadir el archivo `.envrc.private` a `.gitignore`.
+* `source_env_if_exists .envrc.private`: Carga las variables de entorno del archivo `.envrc.private` si existe. Esto es útil para no subir las variables de entorno privadas al repositorio. Recuerda añadir el archivo `.envrc.private` a `.gitignore`.
 
 La línea `python3 -m pip install --requirement requirements-controller.txt` reemplazaría a `uv pip sync requirements-controller.txt` y serías tú quien editaría el archivo `requirements-controller.txt` para añadir o quitar dependencias, sin necesidad de especificar las dependencias transitivas.
 
