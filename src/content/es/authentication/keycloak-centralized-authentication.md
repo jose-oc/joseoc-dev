@@ -1,6 +1,6 @@
 ---
 title: "Keycloak explicado: autenticación centralizada para web, SSH, Kubernetes y Talos"
-description: "Introduccion en lenguaje claro a Keycloak, su terminologia principal y ejemplos practicos de autenticación centralizada para aplicaciones web, SSH, Kubernetes y Talos."
+description: "Introducción en lenguaje claro a Keycloak, su terminología principal y ejemplos prácticos de autenticación centralizada para aplicaciones web, SSH, Kubernetes y Talos."
 date: "2026-06-03"
 tags: ["keycloak", "authentication", "sso", "identity", "security"]
 category: "authentication"
@@ -13,9 +13,9 @@ Keycloak es una plataforma de gestión de identidad y acceso. Dicho en lenguaje 
 
 En lugar de que cada aplicación gestione la autenticación por su cuenta, las aplicaciones pueden confiar en Keycloak para responder unas preguntas importantes:
 
-- quien es este usuario
+- quién es este usuario
 - ha iniciado sesión correctamente
-- deberia tener acceso a este sistema
+- debería tener acceso a este sistema
 
 Eso simplifica la vida tanto para usuarios como para operadores. Los usuarios tienen un único lugar donde iniciar sesión. Los operadores tienen un único lugar donde gestionar cuentas, grupos, políticas y controles de seguridad más fuertes como MFA.
 
@@ -26,7 +26,7 @@ Sin autenticación centralizada, los equipos suelen acabar con:
 - cuentas locales separadas en cada aplicación
 - políticas de contraseña inconsistentes
 - accesos difíciles de revocar de forma limpia
-- ningun lugar único para forzar MFA
+- ningún lugar único para forzar MFA
 - poca visibilidad sobre quién entró en cada sitio
 
 Keycloak resuelve éso convirtiéndose en la capa compartida de autenticación.
@@ -39,7 +39,7 @@ Keycloak resuelve éso convirtiéndose en la capa compartida de autenticación.
 flowchart LR
   U[Usuario] --> A[Aplicación o servicio]
   A --> K[Keycloak]
-  K --> I[Verificacion de identidad]
+  K --> I[Verificación de identidad]
   I --> K
   K --> A
   A --> U
@@ -69,7 +69,7 @@ Quiere decir que el usuario inicia sesión una vez y luego puede acceder a varia
 
 Requiere más de una prueba de identidad, por ejemplo:
 
-- contraseña + codigo TOTP
+- contraseña + código TOTP
 - contraseña + llave de seguridad hardware
 
 MFA hace que una contraseña robada sea mucho menos útil para un atacante.
@@ -120,7 +120,7 @@ Son sistemas de directorio usados para almacenar usuarios y grupos.
 
 Keycloak puede conectarse a ellos, de modo que no tengas que recrear cada cuenta manualmente.
 
-## Donde encaja Keycloak
+## Dónde encaja Keycloak
 
 Un modelo mental simple se ve así:
 
@@ -166,7 +166,7 @@ sequenceDiagram
 
 - una experiencia de login común para muchas herramientas
 - un solo lugar para forzar MFA
-- desactivar cuentas es más facil cuando alguien se va
+- desactivar cuentas es más fácil cuando alguien se va
 - el control de acceso por grupos es más sencillo
 
 ### Nota práctica
@@ -177,7 +177,7 @@ Esto suele usar estándares como:
 - OAuth 2.0
 - a veces SAML
 
-No necesitas entender todos los detalles el primer dia. Lo importante es que la aplicación confía en Keycloak en vez de pedir una contraseña local.
+No necesitas entender todos los detalles el primer día. Lo importante es que la aplicación confía en Keycloak en vez de pedir una contraseña local.
 
 ## Ejemplo 2: autenticación centralizada para SSH
 
@@ -193,7 +193,7 @@ El flujo se parece más a esto:
 
 ```mermaid
 flowchart LR
-  U[Usuario] --> B[Broker de acceso o bastion]
+  U[Usuario] --> B[Broker de acceso o bastión]
   B --> K[Keycloak]
   K --> B
   B --> S[Servidor SSH]
@@ -203,7 +203,7 @@ flowchart LR
 
 Keycloak sigue siendo la fuente de identidad, pero otro componente traduce esa identidad a algo que SSH entiende.
 
-éso puede ser:
+Éso puede ser:
 
 - un certificado SSH
 - una clave temporal
@@ -223,7 +223,7 @@ Keycloak sigue siendo la fuente de identidad, pero otro componente traduce esa i
 
 Kubernetes soporta proveedores externos de identidad, así que encaja bastante bien con Keycloak.
 
-Un patron común es:
+Un patrón común es:
 
 - el usuario se autentica contra Keycloak
 - Kubernetes confía en el token emitido
@@ -309,7 +309,7 @@ No.
 
 Keycloak suele ser muy fuerte en la primera pregunta, mientras que el sistema destino sigue aplicando la segunda.
 
-### "Si instalo Keycloak, todos los protocolos funcionaran igual"
+### "Si instalo Keycloak, todos los protocolos funcionarán igual"
 
 No. HTTPS, SSH, Kubernetes y Talos no consumen identidad exactamente del mismo modo. Algunos necesitan un proxy, plugin, broker o flujo con certificados por medio.
 

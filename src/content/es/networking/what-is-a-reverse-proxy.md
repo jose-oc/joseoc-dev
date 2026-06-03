@@ -1,6 +1,6 @@
 ---
 title: "Qué es un reverse proxy y por qué seguramente ya usas uno"
-description: "Aprende qué hace un reverse proxy, como se coloca delante de las aplicaciones y por que es útil para HTTPS, routing, balanceo y control de acceso."
+description: "Aprende qué hace un reverse proxy, cómo se coloca delante de las aplicaciones y por qué es útil para HTTPS, routing, balanceo y control de acceso."
 date: "2026-06-03"
 tags: ["networking", "reverse-proxy", "http", "nginx", "traefik"]
 category: "networking"
@@ -13,44 +13,44 @@ Un reverse proxy es un servidor que se coloca delante de una o varias aplicacion
 
 En vez de que el usuario hable directamente con la app, primero habla con el reverse proxy.
 
-Luego el reverse proxy decide que hacer:
+Luego el reverse proxy decide qué hacer:
 
-- enviar la peticion al backend correcto
+- enviar la petición al backend correcto
 - terminar HTTPS
 - aplicar reglas de acceso
-- anadir cabeceras
-- repartir trafico entre varios servidores
+- añadir cabeceras
+- repartir tráfico entre varios servidores
 
-## La version corta
+## La versión corta
 
 Si esto te suena abstracto, piensa en un recepcionista delante de un edificio de oficinas.
 
-El recepcionista no hace el trabajo de todos los equipos que hay dentro del edificio. Pero si:
+El recepcionista no hace el trabajo de todos los equipos que hay dentro del edificio. Pero sí:
 
 - recibe primero a la gente
-- comprueba a donde deben ir
+- comprueba a dónde deben ir
 - puede aplicar reglas de acceso
-- puede proteger a los equipos internos de exposicion directa
+- puede proteger a los equipos internos de exposición directa
 
-Eso es mas o menos lo que hace un reverse proxy para las aplicaciones.
+Eso es más o menos lo que hace un reverse proxy para las aplicaciones.
 
-## Por que se llama "reverse"
+## Por qué se llama "reverse"
 
 Mucha gente aprende antes lo que es un proxy normal.
 
-Un forward proxy se coloca entre el cliente y internet. Representa al cliente.
+Un forward proxy se coloca entre el cliente e internet. Representa al cliente.
 
 Un reverse proxy se coloca entre el cliente y el servidor. Representa al lado servidor.
 
 Así que:
 
 - forward proxy: "estoy ayudando al cliente a llegar a servidores"
-- reverse proxy: "estoy ayudando a los servidores a recibir y gestionar trafico de clientes"
+- reverse proxy: "estoy ayudando a los servidores a recibir y gestionar tráfico de clientes"
 
-## Un flujo simple de trafico
+## Un flujo simple de tráfico
 
 ```text
-Navegador del usuario -> Reverse proxy -> Aplicacion
+Navegador del usuario -> Reverse proxy -> Aplicación
 ```
 
 Si hay varias aplicaciones, puede verse así:
@@ -61,25 +61,25 @@ Navegador del usuario -> Reverse proxy -> App A
                                      -> App C
 ```
 
-Puede que el usuario solo vea un hostname publico, mientras el reverse proxy enruta internamente las peticiones.
+Puede que el usuario solo vea un hostname público, mientras el reverse proxy enruta internamente las peticiones.
 
 ## Trabajos comunes de un reverse proxy
 
-### 1. Terminacion HTTPS
+### 1. Terminación HTTPS
 
-Uno de los trabajos mas comunes es manejar certificados TLS y conexiones HTTPS cifradas.
+Uno de los trabajos más comunes es manejar certificados TLS y conexiones HTTPS cifradas.
 
-En vez de configurar certificados por separado en cada aplicacion, el reverse proxy puede:
+En vez de configurar certificados por separado en cada aplicación, el reverse proxy puede:
 
 - guardar el certificado
 - terminar TLS
-- reenviar HTTP en claro o trafico recifrado al backend
+- reenviar HTTP en claro o tráfico recifrado al backend
 
-Eso simplifica mucho la operacion.
+Eso simplifica mucho la operación.
 
 ### 2. Routing de peticiones
 
-Un reverse proxy puede enviar trafico a distintos backends según:
+Un reverse proxy puede enviar tráfico a distintos backends según:
 
 - hostname
 - path de URL
@@ -90,32 +90,32 @@ Ejemplos:
 - `grafana.example.com` -> Grafana
 - `wiki.example.com` -> Wiki
 - `example.com/api` -> backend API
-- `example.com/app` -> aplicacion frontend
+- `example.com/app` -> aplicación frontend
 
 ### 3. Balanceo de carga
 
-Si tienes varias instancias de la misma aplicacion, el reverse proxy puede repartir peticiones entre ellas.
+Si tienes varias instancias de la misma aplicación, el reverse proxy puede repartir peticiones entre ellas.
 
 Eso ayuda con:
 
-- mas disponibilidad
+- más disponibilidad
 - mejor capacidad
-- escalado mas simple
+- escalado más simple
 
 ### 4. Control de acceso
 
-Un reverse proxy puede aplicar reglas antes de que la peticion llegue al backend.
+Un reverse proxy puede aplicar reglas antes de que la petición llegue al backend.
 
 Ejemplos:
 
-- exigir autenticacion
+- exigir autenticación
 - permitir solo ciertos rangos IP
 - bloquear peticiones sospechosas
-- limitar trafico abusivo
+- limitar tráfico abusivo
 
-### 5. Manejo de cabeceras y propagacion de identidad
+### 5. Manejo de cabeceras y propagación de identidad
 
-Los reverse proxies suelen anadir o reenviar cabeceras utiles como:
+Los reverse proxies suelen añadir o reenviar cabeceras útiles como:
 
 - `X-Forwarded-For`
 - `X-Forwarded-Proto`
@@ -124,19 +124,19 @@ Los reverse proxies suelen anadir o reenviar cabeceras utiles como:
 Estas ayudan al backend a entender:
 
 - la IP real del cliente
-- si la peticion original uso HTTPS
-- que hostname pidio el usuario
+- si la petición original usó HTTPS
+- qué hostname pidió el usuario
 
-## Por que esto es útil en entornos reales
+## Por qué ésto es útil en entornos reales
 
-Sin un reverse proxy, cada aplicacion podria tener que encargarse de:
+Sin un reverse proxy, cada aplicación podría tener que encargarse de:
 
 - sus propios certificados TLS
-- su propia exposicion publica
-- su propia logica de routing
+- su propia exposición pública
+- su propia lógica de routing
 - sus propios filtros de acceso
 
-Eso suele acabar siendo un lio.
+Eso suele acabar siendo un lío.
 
 Un reverse proxy te permite centralizar esas preocupaciones.
 
@@ -146,7 +146,7 @@ Por eso son tan comunes en:
 - configuraciones de ingress en Kubernetes
 - dashboards self-hosted
 - entornos de microservicios
-- webs publicas
+- webs públicas
 
 ## Un ejemplo práctico
 
@@ -164,38 +164,38 @@ Con un reverse proxy:
 - `login.example.com` va a Keycloak
 - `app.example.com` va a la app interna
 
-El reverse proxy se convierte en el punto de entrada publico, mientras las aplicaciones pueden quedarse en direcciones privadas detras de el.
+El reverse proxy se convierte en el punto de entrada público, mientras las aplicaciones pueden quedarse en direcciones privadas detrás de él.
 
 ## Reverse proxy vs load balancer
 
-Estos terminos se solapan bastante.
+Estos términos se solapan bastante.
 
 Un reverse proxy puede hacer balanceo de carga, y un load balancer puede comportarse como reverse proxy.
 
-La distincion útil es esta:
+La distinción útil es esta:
 
-- reverse proxy suele enfatizar manejo de peticiones, routing, cabeceras, TLS y politicas
-- load balancer suele enfatizar repartir trafico entre varios backends
+- reverse proxy suele enfatizar manejo de peticiones, routing, cabeceras, TLS y políticas
+- load balancer suele enfatizar repartir tráfico entre varios backends
 
 En productos reales, una misma herramienta muchas veces hace ambas cosas.
 
 ## Reverse proxy vs API gateway
 
-Un API gateway suele ser mas especializado.
+Un API gateway suele ser más especializado.
 
 Puede incluir:
 
-- integración con autenticacion
+- integración con autenticación
 - rate limiting
-- transformacion de peticiones
-- politicas especificas de API
+- transformación de peticiones
+- políticas específicas de API
 - funciones para desarrolladores
 
-Un reverse proxy puede ser simple y generalista. Un API gateway suele ser una capa mas opinada para APIs.
+Un reverse proxy puede ser simple y generalista. Un API gateway suele ser una capa más opinada para APIs.
 
 ## Ejemplos populares
 
-Tecnologias comunes de reverse proxy:
+Tecnologías comunes de reverse proxy:
 
 - Nginx
 - Traefik
@@ -203,26 +203,26 @@ Tecnologias comunes de reverse proxy:
 - Envoy
 - Caddy
 
-En Kubernetes, un ingress controller muchas veces actua como reverse proxy para los servicios del cluster.
+En Kubernetes, un ingress controller muchas veces actúa como reverse proxy para los servicios del cluster.
 
 ## Problemas comunes con los que la gente se encuentra
 
-Los reverse proxies son muy utiles, pero tambien pueden ser una fuente de confusion.
+Los reverse proxies son muy útiles, pero también pueden ser una fuente de confusión.
 
-Problemas tipicos:
+Problemas típicos:
 
 - la app backend no confía en las cabeceras reenviadas
-- bucles de redireccion HTTPS
+- bucles de redirección HTTPS
 - routing al hostname incorrecto
 - la IP del cliente aparece como la IP del proxy
 - los timeouts ocurren en la capa del proxy, no en la app
 
 Al hacer troubleshooting, ayuda preguntar:
 
-- llego la peticion al proxy?
-- eligio el proxy el backend correcto?
-- devolvio error el backend?
-- reescribio o bloqueo algo el proxy por el camino?
+- ¿llegó la petición al proxy?
+- ¿eligió el proxy el backend correcto?
+- ¿devolvió error el backend?
+- ¿reescribió o bloqueó algo el proxy por el camino?
 
 ## Idea final
 
@@ -234,6 +234,6 @@ Ayuda con:
 - routing
 - balanceo
 - control de acceso
-- una exposicion publica mas limpia
+- una exposición pública más limpia
 
-Si gestionas servicios internos o publicos, es muy probable que ya estes usando uno, aunque todavia no lo llames así.
+Si gestionas servicios internos o públicos, es muy probable que ya estés usando uno, aunque todavía no lo llames así.
