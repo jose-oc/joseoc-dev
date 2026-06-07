@@ -13,7 +13,7 @@ Todos tenemos esa pequeña utilidad de software que lleva años con nosotros. En
 
 Es una herramienta excelente que cumple su función: lee la información EXIF de las imágenes y las renombra estructuradamente según la fecha y hora en que fueron tomadas. Sin embargo, tiene dos grandes problemas: es código cerrado/propietario y su diseño se ha quedado congelado en la era Aqua de macOS, lo que hacía imposible modificarla o adaptarla a mis flujos de trabajo en la terminal.
 
-![Interfaz clásica de ExifRenamer](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.40.11.png)
+![Interfaz clásica de ExifRenamer](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194011.png)
 
 ## La motivación: El control total y la terminal
 
@@ -32,8 +32,8 @@ Le mostré al asistente de IA cómo utilizaba la herramienta original, le compar
 
 Aquí puedes ver parte de la configuración original que tuvimos que replicar:
 
-![Opciones de configuración de ExifRenamer](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.40.21.png)
-![Preferencias avanzadas de ExifRenamer](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.48.19.png)
+![Opciones de configuración de ExifRenamer](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194021.png)
+![Preferencias avanzadas de ExifRenamer](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194819.png)
 
 A partir de este contexto visual, mis explicaciones de comportamiento y el stack técnico que quería usar, Antigravity se encargó de estructurar y escribir todo el código de la nueva CLI.
 
