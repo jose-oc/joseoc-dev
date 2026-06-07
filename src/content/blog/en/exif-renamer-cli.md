@@ -13,7 +13,7 @@ We all have that tiny software utility that has been with us for years. In my ca
 
 It's an excellent tool that does exactly what it's supposed to: it reads the EXIF metadata of images and renames them in a structured way based on the date and time they were taken. However, it has two major drawbacks: it is proprietary/closed-source, and its design has remained frozen in the macOS Aqua era, which made it impossible to modify or adapt to my terminal workflows.
 
-![Classic ExifRenamer Interface](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.40.11.png)
+![Classic ExifRenamer Interface](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194011.png)
 
 ## The Motivation: Full Control and the Terminal
 
@@ -32,8 +32,8 @@ I showed the AI assistant how I used the original tool, shared screenshots of th
 
 Here you can see part of the original configuration we had to replicate:
 
-![ExifRenamer configuration options](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.40.21.png)
-![ExifRenamer advanced preferences](../../../assets/exifrenamer/ExifRenamer Photo renamer Screenshot 2023-08-03 at 19.48.19.png)
+![ExifRenamer configuration options](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194021.png)
+![ExifRenamer advanced preferences](../../../assets/exifrenamer/exifrenamer-screenshot-2023-08-03-194819.png)
 
 Using this visual context, my explanations of the behavior, and the technical stack I wanted to use, Antigravity took care of structuring and writing all the code for the new CLI.
 
