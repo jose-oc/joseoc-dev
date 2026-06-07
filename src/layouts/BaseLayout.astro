@@ -11,13 +11,14 @@ interface Props {
   slug?: string;
   noindex?: boolean;
   image?: string;
+  availableLangs?: string[];
 }
 
 const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const canonicalURLString = canonicalURL.toString().replace(/\/$/, '');
 
-const { title, description, lang = 'en', slug, noindex = false, image } = Astro.props;
+const { title, description, lang = 'en', slug, noindex = false, image, availableLangs: propsAvailableLangs } = Astro.props;
 
 const defaultDescriptions: Record<string, string> = {
   en: 'IT Documentation, DevOps guides, and technical articles by Jose Ortiz.',
@@ -29,7 +30,7 @@ const metaDescription = description || defaultDescriptions[lang] || defaultDescr
 const ogImage = image ? new URL(image, siteUrl) : new URL('/favicon.svg', siteUrl);
 
 // Check which languages are available for this slug
-let availableLangs = ['en', 'es'];
+let availableLangs = propsAvailableLangs || ['en', 'es'];
 let currentItem: any = null;
 if (slug) {
   const docs = await getCollection('docs');

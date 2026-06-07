@@ -24,6 +24,9 @@ const buildUrl = (l: string, pSegments: string[]) => {
   return `${prefix}/${path}`;
 };
 
+const isTag = pathSegments[0] === 'tag';
+const isCategory = pathSegments[0] === 'category';
+
 if (slug) {
   const collection = isDoc ? 'docs' : 'blog';
   const content = await getCollection(collection as any);
@@ -39,8 +42,36 @@ if (slug) {
     // If no translation exists, fallback to the section index (e.g. /es/docs)
     toggleUrl = buildUrl(toggleLang, [pathSegments[0]]);
   }
+} else if (isTag) {
+  const tag = pathSegments[1];
+  const docs = await getCollection('docs');
+  const blogs = await getCollection('blog');
+  const allContent = [...docs, ...blogs];
+  const hasContent = allContent.some(d => {
+    const dLang = d.id.split('/')[0];
+    return dLang === toggleLang && d.data.tags?.includes(tag);
+  });
+  if (hasContent) {
+    toggleUrl = buildUrl(toggleLang, pathSegments);
+  } else {
+    toggleUrl = toggleLang === 'es' ? '/es/' : '/';
+  }
+} else if (isCategory) {
+  const category = pathSegments[1];
+  const docs = await getCollection('docs');
+  const blogs = await getCollection('blog');
+  const allContent = [...docs, ...blogs];
+  const hasContent = allContent.some(d => {
+    const dLang = d.id.split('/')[0];
+    return dLang === toggleLang && d.data.category === category;
+  });
+  if (hasContent) {
+    toggleUrl = buildUrl(toggleLang, pathSegments);
+  } else {
+    toggleUrl = toggleLang === 'es' ? '/es/' : '/';
+  }
 } else if (pathSegments.length > 0) {
-  // For other pages (about, privacy, categories, tags)
+  // For other pages (about, privacy)
   toggleUrl = buildUrl(toggleLang, pathSegments);
 }
 ---

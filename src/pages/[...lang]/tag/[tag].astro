@@ -59,9 +59,14 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
   const dateB = b.data.pubDate ? new Date(b.data.pubDate).valueOf() : 0;
   return dateB - dateA; // Sort newest to oldest
 });
+
+const allDocsForTag = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+const allBlogsForTag = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
+const tagContent = [...allDocsForTag, ...allBlogsForTag].filter(item => item.data.tags?.includes(tag));
+const availableLangs = [...new Set(tagContent.map(item => item.id.split('/')[0]))];
 ---
 
-<BaseLayout title={`Posts tagged with #${tag}`} description={`Explore all articles tagged with ${tag}`} lang={lang}>
+<BaseLayout title={`Posts tagged with #${tag}`} description={`Explore all articles tagged with ${tag}`} lang={lang} availableLangs={availableLangs}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       {(() => {
