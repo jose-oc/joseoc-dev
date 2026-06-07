@@ -46,6 +46,10 @@ draft: false
 
 If the page should appear in the docs navigation, update `src/config/sidebar.ts` for both `en` and `es`. Add the new item to the right section, keep labels short, and point `slug` to the frontmatter slug. If the content should not appear in the sidebar yet, leave the file out of that config.
 
+When adding, renaming, moving, or deleting published docs, also remove or update the corresponding sidebar entries so navigation does not point to stale slugs. If you introduce a new docs section, add the section in both languages and keep the structure aligned unless there is a clear reason not to.
+
+After content or navigation changes, prefer running `npm run build` to catch broken routes, raw Markdown endpoint issues, and content rendering problems before finishing.
+
 Write for people first. Use short paragraphs, descriptive headings, working examples, and direct explanations of why a command or step matters. Prefer standard Markdown: headings, lists, fenced code blocks with language labels, tables only when they improve scanning, and links with meaningful text. Use callouts for emphasis with GitHub-style alerts such as `> [!TIP]`, `> [!NOTE]`, and `> [!WARNING]`. Use Mermaid diagrams with fenced `mermaid` blocks when a flow or architecture is easier to understand visually.
 
 Embed images with clear alt text and store assets under `src/assets/` when they belong to the article set. Use screenshots only when they add instructional value; crop them tightly and keep them readable. If you embed video-like assets or terminal recordings, make sure they support the explanation instead of replacing it. Every visual should have surrounding text that explains what the reader is looking at and why it matters.

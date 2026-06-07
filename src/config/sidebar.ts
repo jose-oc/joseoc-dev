@@ -59,8 +59,18 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
       {
         label: 'Networking',
         items: [
+          { label: '· Quick Networking Commands', slug: 'networking/networking-quick-commands' },
           { label: '· Troubleshooting Commands by Problem', slug: 'networking/troubleshooting-commands-by-problem' },
           { label: '· Why Linux Interface Names Look Weird', slug: 'networking/linux-interface-names' },
+          { label: '· OSI Layers in Plain English', slug: 'networking/osi-layers-explained' },
+          { label: '· What a Forward Proxy Is', slug: 'networking/what-is-a-forward-proxy' },
+          { label: '· What a Reverse Proxy Is', slug: 'networking/what-is-a-reverse-proxy' },
+        ]
+      },
+      {
+        label: 'Authentication',
+        items: [
+          { label: '· Keycloak and Centralized Auth', slug: 'authentication/keycloak-centralized-authentication' },
         ]
       }
     ],
@@ -111,8 +121,18 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
       {
         label: 'Redes',
         items: [
+          { label: '· Comandos rápidos de red', slug: 'networking/networking-quick-commands' },
           { label: '· Comandos de troubleshooting por problema', slug: 'networking/troubleshooting-commands-by-problem' },
           { label: '· Por que los nombres de interfaz se ven raros', slug: 'networking/linux-interface-names' },
+          { label: '· Capas OSI para tontos', slug: 'networking/osi-layers-explained' },
+          { label: '· Qué es un forward proxy', slug: 'networking/what-is-a-forward-proxy' },
+          { label: '· Qué es un reverse proxy', slug: 'networking/what-is-a-reverse-proxy' },
+        ]
+      },
+      {
+        label: 'Autenticacion',
+        items: [
+          { label: '· Keycloak y auth centralizada', slug: 'authentication/keycloak-centralized-authentication' },
         ]
       }
     ],
