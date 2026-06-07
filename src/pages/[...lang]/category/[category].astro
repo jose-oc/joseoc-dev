@@ -59,9 +59,14 @@ const allContent = [...docs, ...blogs].sort((a, b) => {
   const dateB = b.data.pubDate ? new Date(b.data.pubDate).valueOf() : 0;
   return dateB - dateA;
 });
+
+const allDocsForCat = await getCollection('docs', (entry) => isProd ? !entry.data.draft : true);
+const allBlogsForCat = await getCollection('blog', (entry) => isProd ? !entry.data.draft : true);
+const catContent = [...allDocsForCat, ...allBlogsForCat].filter(item => item.data.category === category);
+const availableLangs = [...new Set(catContent.map(item => item.id.split('/')[0]))];
 ---
 
-<BaseLayout title={`Category: ${category}`} description={`Explore all articles in the ${category} category`} lang={lang}>
+<BaseLayout title={`Category: ${category}`} description={`Explore all articles in the ${category} category`} lang={lang} availableLangs={availableLangs}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       {(() => {
