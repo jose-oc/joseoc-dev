@@ -90,12 +90,12 @@ To ensure the website functions flawlessly and has no broken links, we use two s
 
 ### 1. Linkinator (Static Link Checker)
 Linkinator crawls the statically built HTML files and checks every single `<a href="...">` tag to ensure there are no dead links or 404 errors.
-- **Command**: `npm run test:links`
-- **What it does**: Builds the production site (`npm run build`) and then aggressively scans `./dist` for broken links. Perfect for running in CI/CD before deployment.
+- **Command**: `bun run test:links`
+- **What it does**: Builds the production site (`bun run build`) and then aggressively scans `./dist` for broken links. Perfect for running in CI/CD before deployment.
 
 ### 2. Playwright (Headless Browser E2E)
 Playwright spins up a headless Chromium browser, runs the dev server, and interacts with the website exactly like a human user would. 
-- **Command**: `npm run test:e2e`
+- **Command**: `bun run test:e2e`
 - **What it does**: It runs the test suite located in `tests/e2e.spec.ts`.
 - **Coverage**:
   - Verifies the Home and Docs links redirect correctly.
@@ -105,7 +105,7 @@ Playwright spins up a headless Chromium browser, runs the dev server, and intera
 
 ### 3. SEO Metadata Audits
 This suite ensures that your site remains search-engine friendly and optimized for AI agents.
-- **Command**: `npx playwright test tests/seo.spec.ts`
+- **Command**: `bunx playwright test tests/seo.spec.ts`
 - **What it does**:
   - Verifies every page has a valid `<title>` and `<meta name="description">`.
   - Ensures `<link rel="canonical">` tags point to the production domain.
@@ -115,14 +115,14 @@ This suite ensures that your site remains search-engine friendly and optimized f
 ### 4. Lighthouse Audits
 We use Google Lighthouse to ensure high performance and perfect SEO scores.
 - **Local Audit**: 
-  1. Build the site: `npm run build`
-  2. Run the audit using the shared config: `npx @lhci/cli collect --config=./.lighthouserc.json`
+  1. Build the site: `bun run build`
+  2. Run the audit using the shared config: `bunx @lhci/cli collect --config=./.lighthouserc.json`
 - **CI/CD**: This runs automatically on every Pull Request via GitHub Actions using the same `.lighthouserc.json`.
 
 ### Run All Tests
 ```bash
 # Run link crawler, E2E browser tests, and SEO audits
-npm run test
+bun run test
 ```
 
 ## 🧞 Commands
@@ -131,8 +131,8 @@ All standard Astro commands are available from the root of the project:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run test`            | Run all tests (links + e2e)                      |
+| `bun install`             | Installs dependencies                            |
+| `bun run dev`             | Starts local dev server at `localhost:4321`      |
+| `bun run build`           | Build your production site to `./dist/`          |
+| `bun run preview`         | Preview your build locally, before deploying     |
+| `bun run test`            | Run all tests (links + e2e)                      |

@@ -231,9 +231,9 @@ if (currentItem) {
     </footer>
     
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', async () => {
         // --- Code Copy Button ---
-        const preElements = document.querySelectorAll('pre');
+        const preElements = document.querySelectorAll('pre:not(.mermaid)');
         
         preElements.forEach((pre) => {
           const wrapper = document.createElement('div');
@@ -313,6 +313,24 @@ if (currentItem) {
             document.addEventListener('keydown', handleEsc);
           }
         });
+
+        // --- Client-side Mermaid rendering ---
+        const mermaidElements = document.querySelectorAll('.mermaid');
+        if (mermaidElements.length > 0) {
+          try {
+            const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+            mermaid.initialize({
+              startOnLoad: false,
+              theme: document.documentElement.classList.contains('dark') ? 'dark' : 'neutral',
+              securityLevel: 'loose',
+            });
+            await mermaid.run({
+              nodes: Array.from(mermaidElements)
+            });
+          } catch (err) {
+            console.error('Failed to render mermaid diagrams:', err);
+          }
+        }
       });
     </script>
   </body>

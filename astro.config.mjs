@@ -35,10 +35,7 @@ export default defineConfig({
     remarkPlugins: [remarkGithubAlerts, remarkHiddenText],
     rehypePlugins: [
       [rehypeMermaid, {
-        strategy: 'inline-svg',
-        mermaidConfig: {
-          theme: 'neutral'
-        }
+        strategy: 'pre-mermaid'
       }]
     ]
   },
