@@ -42,6 +42,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         ],
       },
       {
+        label: 'Git',
+        items: [
+          { label: '· Rebase Without Fear', slug: 'git/rebase-without-fear' },
+          { label: '· Rebase Cheat Sheet', slug: 'git/rebase-cheat-sheet' },
+        ],
+      },
+      {
         label: 'How-To',
         items: [
           { label: '· Create and Delegate a Route 53 Hosted Zone for a Subdomain', slug: 'create-delegated-subdomain-aws-route53-hosted-zone' },
@@ -101,6 +108,13 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Entorno con direnv', slug: 'python-environment-direnv' },
           { label: '· Hilos y E/S bloqueante', slug: 'python-threads-blocking-io' },
           { label: '· Caché en memoria', slug: 'python-inmemory-cache' },
+        ],
+      },
+      {
+        label: 'Git',
+        items: [
+          { label: '· Rebase sin miedo', slug: 'git/rebase-without-fear' },
+          { label: '· Hoja de referencia de rebase', slug: 'git/rebase-cheat-sheet' },
         ],
       },
       {
