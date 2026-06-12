@@ -1,6 +1,6 @@
 ---
-title: "Cuándo merece la pena pasar a `pyproject.toml`"
-description: "Cómo decidir cuándo un repo Python debería pasar de archivos de requirements a `pyproject.toml`, y qué ganas cuando lo haces."
+title: "Cuándo merece la pena pasar a pyproject"
+description: "Cómo decidir cuándo un repo Python debería pasar de archivos de requirements a pyproject, y qué ganas cuando lo haces."
 date: "2026-06-12"
 tags: ["python", "pyproject", "uv", "mise", "tooling"]
 category: "engineering"

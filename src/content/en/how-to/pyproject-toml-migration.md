@@ -1,6 +1,6 @@
 ---
-title: "When to Move to `pyproject.toml`"
-description: "How to decide when a Python repo should move from requirements files to `pyproject.toml`, and what you gain when you do."
+title: "When to Move to pyproject"
+description: "How to decide when a Python repo should move from requirements files to pyproject, and what you gain when you do."
 date: "2026-06-12"
 tags: ["python", "pyproject", "uv", "mise", "tooling"]
 category: "engineering"
