@@ -239,17 +239,11 @@ UV_CACHE_DIR = "{{config_root}}/.uv-cache"
 _.file = ".env.local"
 _.path = ["bin"]
 
-[tasks.sync-deps]
-description = "Sincroniza el virtualenv desde requirements.txt"
-run = "uv pip sync requirements.txt"
-sources = ["requirements.txt"]
+[tasks.sync]
+description = "Sincroniza el entorno del proyecto"
+run = "uv sync"
+sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv"]
-
-[tasks.lock-deps]
-description = "Regenera requirements.txt"
-run = "uv pip compile --output-file requirements.txt requirements.in"
-sources = ["requirements.in"]
-outputs = ["requirements.txt"]
 ```
 
 Si quieres añadir una dependencia en este flujo, ejecuta `uv add httpx`. 
@@ -258,14 +252,7 @@ Y el flujo sería este:
 
 ```sh
 mise install
-mise run sync-deps
-```
-
-Cuando cambian las dependencias:
-
-```sh
-mise run lock-deps
-mise run sync-deps
+mise run sync
 ```
 
 Lo importante aquí es separar responsabilidades:
@@ -276,39 +263,11 @@ Lo importante aquí es separar responsabilidades:
 
 Yo no haría que `uv pip sync` se lance automáticamente cada vez que entras al repo con `cd`. Se puede intentar imitar ese comportamiento, pero suele ser peor idea:
 
-- hace más lento entrar en el directorio
-- añade efectos secundarios inesperados
-- convierte una acción de lectura en una acción de escritura
+  - hace más lento entrar en el directorio
+  - añade efectos secundarios inesperados
+  - convierte una acción de lectura en una acción de escritura
 
 Mejor mantenerlo explícito.
-
-### `pyproject.toml` mínimo
-
-```toml
-[project]
-name = "mi-proyecto"
-version = "0.1.0"
-requires-python = ">=3.13"
-dependencies = [
-  "httpx",
-  "pydantic",
-]
-
-[build-system]
-requires = ["uv_build>=0.11.7,<0.12.0"]
-build-backend = "uv_build"
-```
-
-El flujo cambia un poco, y en mi opinión para bien:
-
-```sh
-mise install
-mise run sync
-uv add rich
-uv run python main.py
-```
-
-Eso es lo que me gusta una vez ya estás en terreno `pyproject.toml`. Si quieres la decisión de migración en sí, lee [Cuándo merece la pena pasar a `pyproject.toml`](/es/docs/how-to/pyproject-toml-migration).
 
 ## Ejemplo de `mise.toml` para un proyecto con `requirements.txt`
 
@@ -324,6 +283,7 @@ python.uv_venv_auto = "create|source"
 
 [env]
 UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+UV_CACHE_DIR = "{{config_root}}/.uv-cache"
 _.file = ".env.local"
 _.path = ["bin"]
 

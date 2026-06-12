@@ -240,17 +240,11 @@ UV_CACHE_DIR = "{{config_root}}/.uv-cache"
 _.file = ".env.local"
 _.path = ["bin"]
 
-[tasks.sync-deps]
-description = "Sync the virtualenv from requirements.txt"
-run = "uv pip sync requirements.txt"
-sources = ["requirements.txt"]
+[tasks.sync]
+description = "Sync the project environment"
+run = "uv sync"
+sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv"]
-
-[tasks.lock-deps]
-description = "Regenerate requirements.txt"
-run = "uv pip compile --output-file requirements.txt requirements.in"
-sources = ["requirements.in"]
-outputs = ["requirements.txt"]
 ```
 
 If you want to add a dependency in this workflow, run `uv add httpx`. 
@@ -259,14 +253,7 @@ And the flow would be:
 
 ```sh
 mise install
-mise run sync-deps
-```
-
-When dependencies change:
-
-```sh
-mise run lock-deps
-mise run sync-deps
+mise run sync
 ```
 
 The important part is separating responsibilities:
@@ -283,34 +270,6 @@ I would not have `uv pip sync` run automatically every time I `cd` into the repo
 
 Keeping it explicit is better.
 
-### Minimal `pyproject.toml`
-
-```toml
-[project]
-name = "my-project"
-version = "0.1.0"
-requires-python = ">=3.13"
-dependencies = [
-  "httpx",
-  "pydantic",
-]
-
-[build-system]
-requires = ["uv_build>=0.11.7,<0.12.0"]
-build-backend = "uv_build"
-```
-
-The flow changes a bit, and in my opinion for the better:
-
-```sh
-mise install
-mise run sync
-uv add rich
-uv run python main.py
-```
-
-That is the part that works well once you are already in `pyproject.toml` territory. If you want the migration decision itself, read [When to move to `pyproject.toml`](/docs/how-to/pyproject-toml-migration).
-
 ## Example `mise.toml` for a project with `requirements.txt`
 
 If the repo still uses `requirements.in` and `requirements.txt`, this is the shape I would use instead:
@@ -325,6 +284,7 @@ python.uv_venv_auto = "create|source"
 
 [env]
 UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+UV_CACHE_DIR = "{{config_root}}/.uv-cache"
 _.file = ".env.local"
 _.path = ["bin"]
 
