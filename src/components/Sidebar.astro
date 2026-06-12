@@ -26,7 +26,7 @@ const langPrefix = lang === 'es' ? '/es' : '';
 ---
 
 <aside class="w-64 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 border-r border-surface-200 dark:border-surface-800 py-6 pr-6">
-  <nav class="space-y-8">
+  <nav class="space-y-8" aria-label={lang === 'es' ? 'Navegación de documentación' : 'Documentation navigation'}>
     {filteredSidebar.map(group => (
       <div>
         <h3 class="font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm">{group.label}</h3>
