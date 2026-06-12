@@ -14,7 +14,7 @@ interface Props {
   availableLangs?: string[];
 }
 
-const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://joseoc.dev';
+const siteUrl = Astro.site ? Astro.site.href.replace(/\/$/, '') : 'https://www.joseoc.dev';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const canonicalURLString = canonicalURL.toString().replace(/\/$/, '');
 

@@ -39,13 +39,13 @@ test.describe('SEO Metadata Audits', () => {
       // 3. Canonical tag
       const canonical = page.locator('link[rel="canonical"]');
       await expect(canonical).toBeAttached();
-      await expect(canonical).toHaveAttribute('href', /https:\/\/joseoc.dev.*/);
+      await expect(canonical).toHaveAttribute('href', /https:\/\/www\.joseoc\.dev.*/);
       
       // 4. Hreflang tags (must be absolute)
       const enTag = page.locator('link[hreflang="en"]');
       const esTag = page.locator('link[hreflang="es"]');
-      await expect(enTag).toHaveAttribute('href', /https:\/\/joseoc.dev.*/);
-      await expect(esTag).toHaveAttribute('href', /https:\/\/joseoc.dev.*/);
+      await expect(enTag).toHaveAttribute('href', /https:\/\/www\.joseoc\.dev.*/);
+      await expect(esTag).toHaveAttribute('href', /https:\/\/www\.joseoc\.dev.*/);
 
       // 5. LLM Optimization (Hidden markdown link)
       const markdownLink = page.locator('link[type="text/markdown"]');
