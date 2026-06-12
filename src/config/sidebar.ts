@@ -54,6 +54,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Create and Delegate a Route 53 Hosted Zone for a Subdomain', slug: 'create-delegated-subdomain-aws-route53-hosted-zone' },
           { label: '· Split Route 53 Hosted Zone into Delegated Subdomains', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
           { label: '· Record Terminal Sessions as SVG with termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
+          { label: '· Switching from direnv to mise', slug: 'how-to/direnv-to-mise' },
+          { label: '· When to move to pyproject.toml', slug: 'how-to/pyproject-toml-migration' },
         ]
       },
       {
@@ -123,6 +125,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Crear y delegar una zona hospedada de Route 53 para un subdominio', slug: 'create-delegated-subdomain-aws-route53-hosted-zone' },
           { label: '· Dividir una Hosted Zone de Route 53 en subdominios delegados', slug: 'splitting-aws-route53-hosted-zone-into-delegated-subdomains' },
           { label: '· Grabar sesiones de terminal en SVG con termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
+          { label: '· Pasar de direnv a mise', slug: 'how-to/direnv-to-mise' },
+          { label: '· Cuándo pasar a pyproject.toml', slug: 'how-to/pyproject-toml-migration' },
         ]
       },
       {

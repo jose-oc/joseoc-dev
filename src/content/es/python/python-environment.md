@@ -12,6 +12,9 @@ Cuando trabajo en un proyecto python o ansible quiero tener un entorno virtual c
 
 Para ello la mejor herramienta que he encontrado es `direnv`.
 
+> [!NOTE]
+> Antes montaba este flujo con `direnv`, pero ahora prefiero `mise` para gestionar versiones y preparar el entorno de cada proyecto. Si quieres comparar ambos enfoques, lee [Cómo me pasé de `direnv` a `mise`](/es/docs/how-to/direnv-to-mise).
+
 Instalamos direnv con brew:
 
 ```shell
@@ -66,4 +69,3 @@ Es todo automático. Cuando entras en el directorio, se ejecuta automaticamente 
 Recuerda que cada vez que modifiques el archivo `.envrc` tienes que ejecutar el comando `direnv allow`. Ésto es para permitir que direnv ejecute comandos en tu directorio. 
 
 Por defecto, las variables de entorno que definas en .envrc solo afectarán al directorio del proyecto y a sus subdirectorios. Si quieres que afecten a todos los directorios, puedes usar el comando `direnv export --all`. 
-

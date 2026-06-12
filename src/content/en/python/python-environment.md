@@ -12,6 +12,9 @@ When working on a Python or Ansible project, managing dependencies efficiently i
 
 The best tool I've found for this workflow is `direnv`.
 
+> [!NOTE]
+> I used to set up this workflow with `direnv`, but I now prefer `mise` for version management and per-project environment setup. If you are comparing the two approaches, read [How I switched from `direnv` to `mise`](/docs/how-to/direnv-to-mise).
+
 ## Installing direnv
 
 First, install `direnv` using Homebrew:

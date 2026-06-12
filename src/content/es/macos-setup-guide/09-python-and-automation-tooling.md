@@ -95,29 +95,24 @@ source .venv/bin/activate
 uv sync
 ```
 
-### Activación automática con Direnv
-Si has seguido la [guía de secretos y entorno](/es/docs/macos-setup-guide/secrets-and-environment-management), puedes automatizarlo todavía más. No necesitas hacer `source .venv/bin/activate` manualmente si usas `direnv`.
+### Activación automática con `mise`
+Si has seguido la [guía de secretos y entorno](/es/docs/macos-setup-guide/secrets-and-environment-management), puedes automatizarlo todavía más. En mi flujo actual uso `mise` aquí en lugar de `direnv`.
 
-Simplemente añade esto al `.envrc` del proyecto:
+Añade esto al `mise.toml` del proyecto:
 
-```bash
-# .envrc
-layout uv
+```toml
+[tools]
+python = "3.14"
+uv = "latest"
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[env]
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
 ```
 
-> [!TIP]
-> Para que `layout uv` funcione, añade este fragmento a `~/.config/direnv/direnvrc`:
-> ```bash
-> layout_uv() {
->   export VIRTUAL_ENV=${VIRTUAL_ENV:-$(pwd)/.venv}
->   if [[ ! -d $VIRTUAL_ENV ]]; then
->     uv venv
->   fi
->   PATH_add "$VIRTUAL_ENV/bin"
-> }
-> ```
-
-Ahora, cada vez que hagas `cd` dentro del proyecto, `direnv` creará automáticamente el entorno virtual si no existe y lo activará por ti. Es la forma más limpia de trabajar con varios proyectos Python.
+Ahora, cuando entres en el proyecto y ejecutes `mise install`, elegirá la versión correcta de Python y mantendrá la configuración del virtualenv consistente. Si quieres entender por qué cambié este flujo, lee [Cómo me pasé de `direnv` a `mise`](/es/docs/how-to/direnv-to-mise).
 
 ---
 

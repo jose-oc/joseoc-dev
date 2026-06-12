@@ -14,6 +14,9 @@ Como desarrollador, gestionas a diario docenas de API keys, contraseñas de base
 
 Una configuración profesional resuelve esto con dos herramientas: **1Password CLI** (para almacenamiento seguro) y **direnv** (para carga automática y específica por proyecto). Así te aseguras de que los secretos solo están disponibles cuando estás dentro del directorio adecuado y nunca se filtran a tu shell global.
 
+> [!NOTE]
+> Antes apoyaba casi todo el setup de herramientas y entorno en `direnv`, pero ahora uso `mise` para gestionar versiones y preparar el entorno de cada proyecto. Sigo dejando `direnv` en los ejemplos de abajo porque encaja bien para cargar secretos, pero si quieres comparar ambos flujos, empieza por [Cómo me pasé de `direnv` a `mise`](/es/docs/how-to/direnv-to-mise).
+
 ### Beneficios clave
 * **Aislamiento**: las variables de entorno del "Proyecto A" no interfieren con las del "Proyecto B".
 * **Seguridad**: los secretos permanecen cifrados en 1Password hasta el momento exacto en que se necesitan.

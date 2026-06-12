@@ -12,7 +12,7 @@ slug: "macos-setup-guide/python-and-automation-tooling"
 
 Python is the "duct tape" of DevOps, but its environment management is notoriously complex. macOS comes with a "System Python" that you should **never** touch, as modifying it can break core OS functions. 
 
-The traditional way to manage Python (using `pyenv`, `pip`, and `virtualenv`) is slow and often results in "dependency hell." By using **UV**, a modern Python manager written in Rust, you get a single tool that handles everything—Python versions, virtual environments, and global CLI tools—at speeds that are 10-100x faster than traditional methods.
+The traditional way to manage Python (using `pyenv`, `pip`, and `virtualenv`) is slow and often results in "dependency hell." By using **UV**, a modern Python manager written in Rust, you get a single tool that handles everything, from Python versions to virtual environments and global CLI tools, at speeds that are 10-100x faster than traditional methods.
 
 ### Key Benefits
 * **Isolation**: Keep your system clean. Every project and tool gets its own space.
@@ -96,29 +96,24 @@ source .venv/bin/activate
 uv sync
 ```
 
-### Automatic Activation with Direnv
-If you followed the [Secrets and Environment guide](/docs/macos-setup-guide/secrets-and-environment-management), you can automate this even further. You don't need to manually `source .venv/bin/activate` if you use `direnv`.
+### Automatic Activation with `mise`
+If you followed the [Secrets and Environment guide](/docs/macos-setup-guide/secrets-and-environment-management), you can automate this even further. My current setup uses `mise` here instead of `direnv`.
 
-Simply add this to your project's `.envrc`:
+Add this to your project's `mise.toml`:
 
-```bash
-# .envrc
-layout uv
+```toml
+[tools]
+python = "3.14"
+uv = "latest"
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[env]
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
 ```
 
-> [!TIP]
-> To make `layout uv` work, add this snippet to your `~/.config/direnv/direnvrc`:
-> ```bash
-> layout_uv() {
->   export VIRTUAL_ENV=${VIRTUAL_ENV:-$(pwd)/.venv}
->   if [[ ! -d $VIRTUAL_ENV ]]; then
->     uv venv
->   fi
->   PATH_add "$VIRTUAL_ENV/bin"
-> }
-> ```
-
-Now, whenever you `cd` into the project, `direnv` will automatically create the virtual environment (if it doesn't exist) and activate it for you. This is the cleanest way to work across multiple Python projects.
+Now, whenever you enter the project and run `mise install`, it will pick the right Python version and keep the virtual environment setup consistent for you. If you want the background on why I changed this workflow, read [How I switched from `direnv` to `mise`](/docs/how-to/direnv-to-mise).
 
 
 ---
@@ -133,4 +128,3 @@ Now, whenever you `cd` into the project, `direnv` will automatically create the 
 
 ## Summary
 You now have a blazingly fast, modern Python setup that keeps your macOS system pristine. Your automation tools are isolated, and your projects are reproducible. Now that we can automate, let's look at the [Cloud and Kubernetes toolkit](/docs/macos-setup-guide/kubernetes-and-devops-tooling).
-
