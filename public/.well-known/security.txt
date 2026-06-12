@@ -1,4 +1,4 @@
-Contact: mailto:security@joseoc.dev
+Contact: https://github.com/jose-oc/joseoc-dev/security/advisories/new
 Expires: 2027-06-12T23:40:00.000Z
 Preferred-Languages: en, es
 Canonical: https://www.joseoc.dev/.well-known/security.txt
