@@ -236,6 +236,7 @@ python.uv_venv_auto = "create|source"
 
 [env]
 UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+UV_CACHE_DIR = "{{config_root}}/.uv-cache"
 _.file = ".env.local"
 _.path = ["bin"]
 
@@ -251,6 +252,8 @@ run = "uv pip compile --output-file requirements.txt requirements.in"
 sources = ["requirements.in"]
 outputs = ["requirements.txt"]
 ```
+
+If you want to add a dependency in this workflow, run `uv add httpx`. 
 
 And the flow would be:
 
@@ -307,3 +310,39 @@ uv run python main.py
 ```
 
 That is the part that works well once you are already in `pyproject.toml` territory. If you want the migration decision itself, read [When to move to `pyproject.toml`](/docs/how-to/pyproject-toml-migration).
+
+## Example `mise.toml` for a project with `requirements.txt`
+
+If the repo still uses `requirements.in` and `requirements.txt`, this is the shape I would use instead:
+
+```toml
+[tools]
+python = "3.13"
+uv = "latest"
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[env]
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+_.file = ".env.local"
+_.path = ["bin"]
+
+[tasks.sync-deps]
+description = "Sync the virtualenv from requirements.txt"
+run = "uv pip sync requirements.txt"
+sources = ["requirements.txt"]
+outputs = [".venv"]
+
+[tasks.lock-deps]
+description = "Regenerate requirements.txt"
+run = "uv pip compile --output-file requirements.txt requirements.in"
+sources = ["requirements.in"]
+outputs = ["requirements.txt"]
+```
+
+That one fits the older workflow better:
+
+- keep `requirements.in` as the source of truth
+- regenerate `requirements.txt` when the inputs change
+- sync the virtualenv from the pinned file
