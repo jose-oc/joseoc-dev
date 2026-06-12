@@ -61,7 +61,7 @@ Your system is ready to brew.
 No instalamos solo herramientas; instalamos **multiplicadores de rendimiento**. Estas utilidades modernas, muchas escritas en Rust, sustituyen a herramientas Unix clásicas más lentas.
 
 ```bash
-brew install bat direnv eza fd fzf gh git-delta ripgrep rsync uv zoxide
+brew install bat eza fd fzf gh git-delta mise ripgrep rsync uv zoxide
 brew install --cask font-hack-nerd-font
 ```
 

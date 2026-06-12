@@ -14,6 +14,9 @@ As a developer, you handle dozens of API keys, database passwords, and cloud cre
 
 A professional setup solves this with two tools: **1Password CLI** (for secure storage) and **direnv** (for automatic, project-specific environment loading). This ensures that secrets are only available when you are in the relevant project directory and never leak into your global shell.
 
+> [!NOTE]
+> I used to lean on `direnv` for most of my tool and environment setup, but I now use `mise` for version management and per-directory project setup. I still keep `direnv` in the examples below because it is a good fit for secret loading, but if you are comparing the two workflows, start with [How I switched from `direnv` to `mise`](/docs/how-to/direnv-to-mise).
+
 ### Key Benefits
 * **Isolation**: Environment variables for "Project A" don't interfere with "Project B."
 * **Security**: Secrets stay encrypted in 1Password until the moment they are needed.
@@ -107,4 +110,3 @@ alias deploy="op run --env-file=.env -- terraform apply"
 
 ## Summary
 You now have a secure, automated way to handle project contexts and sensitive credentials. Your secrets are safe, and your terminal is "context-aware." Next, let's [set up your Python and automation environment](/docs/macos-setup-guide/python-and-automation-tooling) using these new security foundations.
-

@@ -62,7 +62,7 @@ Your system is ready to brew.
 We don't just install tools; we install **performance multipliers**. These modern Rust-based tools replace slow, legacy Unix utilities.
 
 ```bash
-brew install bat direnv eza fd fzf gh git-delta ripgrep rsync uv zoxide
+brew install bat eza fd fzf gh git-delta mise ripgrep rsync uv zoxide
 brew install --cask font-hack-nerd-font
 ```
 
@@ -105,4 +105,3 @@ The Brewfile's dependencies are satisfied.
 
 ## Summary
 By mastering Homebrew and Brewfile, you've moved from "manual configuration" to "infrastructure as code" for your personal laptop. You are now ready to [configure your terminal](/docs/macos-setup-guide/terminal-setup-macos).
-
