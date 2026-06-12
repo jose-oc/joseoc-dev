@@ -1,5 +1,32 @@
+# AI training bots (Opt-out)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# AI search/retrieval bots (Allow)
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# General bots
 User-agent: *
 Allow: /
 
 # Sitemap URL
-Sitemap: https://joseoc.dev/sitemap-index.xml
+Sitemap: https://www.joseoc.dev/sitemap-index.xml
