@@ -2,7 +2,7 @@
 title: "Por qué necesitas un archivo security.txt en tu web"
 description: "Una introducción práctica al estándar RFC 9116 security.txt, cómo ayuda a reportar vulnerabilidades y qué opciones de contacto puedes utilizar."
 date: "2026-06-13"
-tags: ["security", "web-standards", "github", "best-practices"]
+tags: ["security", "web-standards", "github", "web-best-practices"]
 category: "engineering"
 language: "es"
 slug: "how-to/security-txt"
@@ -13,7 +13,7 @@ Hace unos días, estaba auditando mi sitio web con las especificaciones estánda
 
 Mi primera reacción fue: *¿Qué es esto y para qué lo necesito?*
 
-Si gestionas un sitio web sencillo —especialmente uno estático como un portfolio o un proyecto de documentación—, la seguridad puede parecer algo de lo que solo debes preocuparte si tienes una base de datos o inicios de sesión de usuarios. Pero los estándares web evolucionan, y tener una forma estandarizada de recibir reportes sobre fallos de seguridad se ha convertido en una práctica muy recomendada.
+Si gestionas un sitio web sencillo —especialmente uno estático como un portfolio o un proyecto de documentación—, la seguridad puede parecer algo de lo que sólo debes preocuparte si tienes una base de datos o inicios de sesión de usuarios. Pero los estándares web evolucionan, y tener una forma estandarizada de recibir reportes sobre fallos de seguridad se ha convertido en una práctica muy recomendada.
 
 Aquí tienes una guía en lenguaje sencillo sobre qué es `security.txt`, por qué es importante y cómo configurarlo sin exponer tu correo electrónico personal a los spammers.
 
@@ -31,7 +31,7 @@ En lugar de que un investigador tenga que buscar en tu web un formulario de cont
 
 ## Por qué es importante: El flujo de \"divulgación responsable\"
 
-Cuando un investigador de seguridad encuentra una vulnerabilidad en tu sitio web, por lo general quiere informarte de ello de forma privada para que puedas solucionarlo. Esto es lo que se conoce como **divulgación responsable** (o *responsible disclosure*).
+Cuando un investigador de seguridad encuentra una vulnerabilidad en tu sitio web, por lo general quiere informarte de ello de forma privada para que puedas solucionarlo. Ésto es lo que se conoce como **divulgación responsable** (o *responsible disclosure*).
 
 Si no tienes una forma clara de recibir este contacto:
 *   El investigador podría frustrarse y publicar el fallo en internet inmediatamente para obligarte a prestar atención.
@@ -50,7 +50,7 @@ Cuando la gente lee la especificación de `security.txt`, la configuración más
 Contact: mailto:seguridad@ejemplo.com
 ```
 
-Si eres una empresa con un equipo de seguridad dedicado y una bandeja de entrada como `seguridad@empresa.com`, esto es perfecto. Pero si es un proyecto personal o un portfolio estático, lo más probable es que no tengas un correo con dominio propio.
+Si eres una empresa con un equipo de seguridad dedicado y una bandeja de entrada como `seguridad@empresa.com`, ésto es perfecto. Pero si es un proyecto personal o un portfolio estático, lo más probable es que no tengas un correo con dominio propio.
 
 Si pones tu correo electrónico personal en `security.txt`, te enfrentas a dos riesgos inmediatos:
 1.  **Spam**: Los bots automáticos rastrean constantemente la web en busca de archivos `.well-known/security.txt` para recopilar direcciones de correo. Tu bandeja de entrada personal acabará muy probablemente en bases de datos de spam.
@@ -74,12 +74,12 @@ Si ya tienes un formulario de contacto o un portal de soporte, puedes enlazar di
 Contact: https://tudominio.com/contacto
 ```
 
-Esto mantiene tu dirección de correo electrónico oculta de los rastreadores y permite que te contacten a través de tu web.
+Ésto mantiene tu dirección de correo electrónico oculta de los rastreadores y permite que te contacten a través de tu web.
 
 ### 3. Reportes de vulnerabilidades privados de GitHub (El mejor para código abierto)
 Si el código fuente de tu web está alojado en GitHub como un repositorio público, puedes activar una función integrada llamada **Private Vulnerability Reporting** (Reportes de vulnerabilidades privados) en los ajustes de seguridad de tu repositorio.
 
-Esto permite a los investigadores enviar reportes de seguridad de forma privada directamente a tu repositorio. Ellos describen el error y tú puedes colaborar con ellos en un borrador de aviso privado para solucionarlo antes de publicarlo.
+Ésto permite a los investigadores enviar reportes de seguridad de forma privada directamente a tu repositorio. Ellos describen el error y tú puedes colaborar con ellos en un borrador de aviso privado para solucionarlo antes de publicarlo.
 
 Puedes enlazar directamente a esta página de reporte en tu `security.txt`:
 
@@ -87,7 +87,7 @@ Puedes enlazar directamente a esta página de reporte en tu `security.txt`:
 Contact: https://github.com/tu-usuario/tu-repo/security/advisories/new
 ```
 
-Esta es la opción más limpia: no requiere configurar ninguna dirección de correo electrónico, mantiene tu bandeja de entrada libre de spam y gestiona los reportes de seguridad de forma estructurada y cómoda para los desarrolladores.
+Ésta es la opción más limpia: no requiere configurar ninguna dirección de correo electrónico, mantiene tu bandeja de entrada libre de spam y gestiona los reportes de seguridad de forma estructurada y cómoda para los desarrolladores.
 
 ---
 

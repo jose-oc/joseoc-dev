@@ -2,7 +2,7 @@
 title: "Why You Need a security.txt File on Your Website"
 description: "An introduction to the RFC 9116 security.txt standard, how it helps researchers report vulnerabilities, and the contact options you can use."
 date: "2026-06-13"
-tags: ["security", "web-standards", "github", "best-practices"]
+tags: ["security", "web-standards", "github", "web-best-practices"]
 category: "engineering"
 language: "en"
 slug: "how-to/security-txt"
