@@ -56,6 +56,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Record Terminal Sessions as SVG with termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
           { label: '· Switching from direnv to mise', slug: 'how-to/direnv-to-mise' },
           { label: '· When to move to pyproject', slug: 'how-to/pyproject-toml-migration' },
+          { label: '· GitHub Best Practices', slug: 'how-to/github-best-practices' },
         ]
       },
       {
@@ -127,6 +128,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Grabar sesiones de terminal en SVG con termsvg', slug: 'how-to/recording-terminal-to-svg-with-termsvg' },
           { label: '· Pasar de direnv a mise', slug: 'how-to/direnv-to-mise' },
           { label: '· Cuándo pasar a pyproject', slug: 'how-to/pyproject-toml-migration' },
+          { label: '· Buenas prácticas en GitHub', slug: 'how-to/github-best-practices' },
         ]
       },
       {
