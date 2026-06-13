@@ -1,0 +1,74 @@
+name: Update security.txt Expiration
+
+on:
+  schedule:
+    # Runs at 00:00 on the 1st of every month
+    - cron: '0 0 1 6 *'
+  workflow_dispatch:
+    # Allows manual triggering for testing
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-expiry:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Verify website health
+      run: |
+        echo "Verifying that the website is live..."
+        if ! curl -fsI https://www.joseoc.dev/ > /dev/null; then
+          echo "Error: Website is down!"
+          exit 1
+        fi
+        echo "Website is healthy."
+
+    - name: Verify security advisory link
+      run: |
+        echo "Verifying security reporting link..."
+        if ! curl -fsI https://github.com/jose-oc/joseoc-dev/security/advisories/new > /dev/null; then
+          echo "Error: Security reporting link is invalid!"
+          exit 1
+        fi
+        echo "Security link is valid."
+
+    - name: Update security.txt expiration date
+      id: update-file
+      run: |
+        # Calculate new expiry date (1 year from today in UTC ISO 8601 format)
+        NEW_EXPIRY=$(date -u -d "+1 year" +"%Y-%m-%dT%H:%M:%SZ")
+        echo "New Expiry Date: $NEW_EXPIRY"
+        
+        # Replace the Expires line in security.txt
+        sed -i "s/Expires:.*/Expires: $NEW_EXPIRY/" public/.well-known/security.txt
+        
+        # Check if there are changes
+        if git diff --quiet public/.well-known/security.txt; then
+          echo "No changes in security.txt. Exiting."
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "security.txt updated."
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Pull Request
+      if: steps.update-file.outputs.changed == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        BRANCH_NAME="cron/update-security-txt-$(date +%Y%m%d)"
+        git checkout -b "$BRANCH_NAME"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add public/.well-known/security.txt
+        git commit -m "chore(security): update security.txt expiration date"
+        git push origin "$BRANCH_NAME"
+        
+        gh pr create \
+          --title "chore(security): update security.txt expiration date" \
+          --body "Automated PR to extend the expiration date of \`security.txt\` by 1 year. This PR was created after verifying that the website at https://www.joseoc.dev/ and the GitHub vulnerability reporting link are both healthy." \
+          --head "$BRANCH_NAME" \
+          --base main
