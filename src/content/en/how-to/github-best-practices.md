@@ -116,6 +116,9 @@ gh api -X PUT /repos/OWNER/REPO/private-vulnerability-reporting
 This is the exact feature that powers the `/raw/security.txt` workflow. Once enabled, you can safely direct researchers to:
 `https://github.com/OWNER/REPO/security/advisories/new`
 
+> [!TIP]
+> For more information, read [Why You Need a security.txt File](/docs/how-to/security-txt).
+
 ---
 
 ## Summary Cheat Sheet

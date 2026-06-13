@@ -1,6 +1,6 @@
 ---
 title: "Buenas prácticas para repositorios públicos en GitHub"
-description: "Una guía sobre rulesets de ramas, limpieza de fusiones y reporte privado de vulnerabilidades con el CLI de GitHub."
+description: "Una guía sobre rulesets de ramas, limpieza y reporte privado de vulnerabilidades con el CLI de GitHub."
 date: "2026-06-13"
 tags: ["github", "git", "devops", "security", "best-practices"]
 category: "engineering"
@@ -9,7 +9,7 @@ slug: "how-to/github-best-practices"
 draft: false
 ---
 
-Cuando haces público un repositorio en GitHub, este pasa de ser un entorno de pruebas privado a un escaparate público. Mantener una buena higiene en el repositorio es fundamental: protege tu código estable de subidas accidentales, asegura un historial limpio y proporciona un canal seguro para informar de vulnerabilidades de seguridad.
+Cuando haces público un repositorio en GitHub, éste pasa de ser un entorno de pruebas privado a un escaparate público. Mantener una buena higiene en el repositorio es fundamental: protege tu código estable de subidas accidentales, asegura un historial limpio y proporciona un canal seguro para informar de vulnerabilidades de seguridad.
 
 En lugar de navegar por la interfaz de ajustes de la web de GitHub, podemos automatizar estas configuraciones utilizando la herramienta **GitHub CLI (`gh`)**.
 
@@ -17,9 +17,9 @@ Aquí tienes una guía práctica sobre los mejores ajustes que puedes activar en
 
 ---
 
-## 1. Limpieza automática de ramas al fusionar
+## 1. Limpieza automática de ramas al mezclar
 
-Cada vez que fusionas un Pull Request, la rama de origen permanece en tu repositorio como una \"rama huérfana\". Con el tiempo, esto acumula cientos de ramas muertas que dificultan la navegación y la búsqueda de trabajo activo.
+Cada vez que mezclas un Pull Request, la rama de origen permanece en tu repositorio como una \"rama huérfana\". Con el tiempo, ésto acumula cientos de ramas muertas que dificultan la navegación y la búsqueda de trabajo activo.
 
 Puedes configurar GitHub para que elimine la rama de origen automáticamente en cuanto se fusione el PR:
 
@@ -35,7 +35,7 @@ gh repo edit OWNER/REPO --delete-branch-on-merge
 
 ## 2. Actualización fluida de Pull Requests
 
-Cuando hay varios Pull Requests abiertos a la vez, una rama puede quedarse desactualizada con respecto a la rama principal (`main`). Esto a menudo obliga a los desarrolladores a descargar la rama localmente, hacer un merge o rebase y volver a subirla solo para que sea apta para su fusión.
+Cuando hay varios Pull Requests abiertos a la vez, una rama puede quedarse desactualizada con respecto a la rama principal (`main`). Ésto a menudo obliga a los desarrolladores a descargar la rama localmente, hacer un merge o rebase y volver a subirla sólo para que sea apta para su fusión.
 
 Al activar la actualización de ramas, GitHub añade un sencillo botón \"Update branch\" directamente en la interfaz del PR en la web:
 
@@ -105,7 +105,7 @@ gh api -X POST /repos/OWNER/REPO/rulesets --input ruleset.json
 
 Si un investigador de seguridad encuentra un fallo en tu web o repositorio público, publicarlo como un Issue público es peligroso porque los atacantes podrían aprovecharlo antes de que tengas listo un parche.
 
-GitHub ofrece **Private Vulnerability Reporting** (reporte privado de vulnerabilidades). Añade un botón seguro y privado en tu repositorio para que los investigadores puedan informarte de fallos directamente. Solo los propietarios del repositorio pueden ver este reporte, y permite colaborar en privado en una solución antes de hacerla pública.
+GitHub ofrece **Private Vulnerability Reporting** (reporte privado de vulnerabilidades). Añade un botón seguro y privado en tu repositorio para que los investigadores puedan informarte de fallos directamente. Sólo los propietarios del repositorio pueden ver este reporte, y permite colaborar en privado en una solución antes de hacerla pública.
 
 Para activarlo a través de la consola:
 
@@ -113,8 +113,11 @@ Para activarlo a través de la consola:
 gh api -X PUT /repos/OWNER/REPO/private-vulnerability-reporting
 ```
 
-Esta es la funcionalidad que hace posible el flujo de trabajo de `security.txt`. Una vez activado, puedes dirigir de forma segura a los investigadores a:
+Ésta es la funcionalidad que hace posible el flujo de trabajo de `security.txt`. Una vez activado, puedes dirigir de forma segura a los investigadores a:
 `https://github.com/OWNER/REPO/security/advisories/new`
+
+> [!TIP]
+> Para más información, lee [Por qué necesitas un archivo security.txt](/es/docs/how-to/security-txt).
 
 ---
 
