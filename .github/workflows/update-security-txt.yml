@@ -2,7 +2,7 @@ name: Update security.txt Expiration
 
 on:
   schedule:
-    # Runs at 00:00 on the 1st of every month
+    # Runs at 00:00 on the 1st of june
     - cron: '0 0 1 6 *'
   workflow_dispatch:
     # Allows manual triggering for testing
