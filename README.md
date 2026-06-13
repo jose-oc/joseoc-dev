@@ -17,7 +17,7 @@ This site is designed to be **privacy-respecting by default**:
 - **Functional Local Storage**: We use `localStorage` exclusively to remember your UI preferences (Theme, Focus Mode, and Font Size). This data never leaves your device.
 - **Hosting**: Hosted on Vercel, which may collect standard server logs for security purposes.
 
-*(Full details can be found on the [Privacy Policy](https://joseoc.dev/en/privacy) page).*
+*(Full details can be found on the [Privacy Policy](https://www.joseoc.dev/privacy) page).*
 
 ## 📝 Content Management Best Practices
 

@@ -46,7 +46,7 @@ export default defineConfig({
       filter: (page) => !page.endsWith('/docs') && !page.endsWith('/es/docs')
     })
   ],
-  site: 'https://joseoc.dev',
+  site: 'https://www.joseoc.dev',
   trailingSlash: 'never',
   i18n: {
     defaultLocale: 'en',

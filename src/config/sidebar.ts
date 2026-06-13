@@ -57,6 +57,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Switching from direnv to mise', slug: 'how-to/direnv-to-mise' },
           { label: '· When to move to pyproject', slug: 'how-to/pyproject-toml-migration' },
           { label: '· GitHub Best Practices', slug: 'how-to/github-best-practices' },
+          { label: '· Why You Need a security.txt File', slug: 'how-to/security-txt' },
         ]
       },
       {
@@ -129,6 +130,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Pasar de direnv a mise', slug: 'how-to/direnv-to-mise' },
           { label: '· Cuándo pasar a pyproject', slug: 'how-to/pyproject-toml-migration' },
           { label: '· Buenas prácticas en GitHub', slug: 'how-to/github-best-practices' },
+          { label: '· Por qué necesitas un archivo security.txt', slug: 'how-to/security-txt' },
         ]
       },
       {
