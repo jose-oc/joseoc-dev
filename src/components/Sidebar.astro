@@ -25,32 +25,161 @@ const filteredSidebar = sidebarConfig.docs.map(group => ({
 const langPrefix = lang === 'es' ? '/es' : '';
 ---
 
-<aside class="w-64 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 border-r border-surface-200 dark:border-surface-800 py-6 pr-6">
-  <nav class="space-y-8" aria-label={lang === 'es' ? 'Navegación de documentación' : 'Documentation navigation'}>
-    {filteredSidebar.map(group => (
-      <div>
-        <h3 class="font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm">{group.label}</h3>
-        <ul class="space-y-2">
-          {group.items.map(item => {
-            const isActive = currentSlug === item.slug;
-            return (
-              <li>
-                <a 
-                  href={`${langPrefix}/docs/${item.slug}`} 
-                  class:list={[
-                    "block text-sm transition-colors",
-                    isActive 
-                      ? "text-primary-600 dark:text-primary-500 font-medium" 
-                      : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-50"
-                  ]}
-                >
-                  {item.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    ))}
+<div class="sidebar-container w-full">
+  <div class="flex items-center justify-between mb-6 pb-4 border-b border-surface-200 dark:border-surface-800">
+    <span class="text-xs font-bold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+      {lang === 'es' ? 'Documentación' : 'Documentation'}
+    </span>
+    <button 
+      class="global-collapse-toggle p-1.5 rounded-md hover:bg-surface-200 dark:hover:bg-surface-800 text-surface-500 hover:text-surface-800 dark:text-surface-400 dark:hover:text-surface-200 transition-colors flex items-center justify-center cursor-pointer"
+      title={lang === 'es' ? 'Contraer/Expandir todo' : 'Collapse/Expand all'}
+      aria-label="Collapse or expand all sections"
+      data-state="expanded"
+    >
+      <!-- Collapse-all icon (shows when expanded) -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse">
+        <polyline points="4 14 10 14 10 20"></polyline>
+        <polyline points="20 10 14 10 14 4"></polyline>
+        <line x1="14" y1="10" x2="21" y2="3"></line>
+        <line x1="10" y1="14" x2="3" y2="21"></line>
+      </svg>
+      <!-- Expand-all icon (shows when collapsed) -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-expand hidden">
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="space-y-6" aria-label={lang === 'es' ? 'Navegación de documentación' : 'Documentation navigation'}>
+    {filteredSidebar.map(group => {
+      const hasActiveItem = group.items.some(item => currentSlug === item.slug);
+      return (
+        <div class:list={["sidebar-group", { "collapsed": !hasActiveItem }]}>
+          <button 
+            class="sidebar-group-toggle flex items-center justify-between w-full text-left font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm group/btn py-1 cursor-pointer"
+            aria-expanded={hasActiveItem ? "true" : "false"}
+          >
+            <span>{group.label}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-surface-400 group-hover/btn:text-surface-600 dark:group-hover/btn:text-surface-300 transition-transform duration-200 chevron-icon">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <ul class="space-y-2 pl-1 sidebar-group-list">
+            {group.items.map(item => {
+              const isActive = currentSlug === item.slug;
+              return (
+                <li>
+                  <a 
+                    href={`${langPrefix}/docs/${item.slug}`} 
+                    class:list={[
+                      "block text-sm transition-colors",
+                      isActive 
+                        ? "text-primary-600 dark:text-primary-500 font-medium" 
+                        : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-50"
+                    ]}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    })}
   </nav>
-</aside>
+</div>
+
+<script>
+  function initCollapsibleSidebars() {
+    const containers = document.querySelectorAll('.sidebar-container');
+    
+    containers.forEach(container => {
+      const groups = container.querySelectorAll('.sidebar-group');
+      const globalToggle = container.querySelector('.global-collapse-toggle');
+
+      // Setup individual group toggles
+      groups.forEach(group => {
+        const toggleBtn = group.querySelector('.sidebar-group-toggle');
+        if (!toggleBtn) return;
+        
+        toggleBtn.addEventListener('click', () => {
+          const isCollapsed = group.classList.toggle('collapsed');
+          toggleBtn.setAttribute('aria-expanded', (!isCollapsed).toString());
+          updateGlobalToggleState(container, globalToggle, groups);
+        });
+      });
+
+      // Setup global collapse/expand toggle
+      if (globalToggle) {
+        globalToggle.addEventListener('click', () => {
+          const currentState = globalToggle.getAttribute('data-state') || 'expanded';
+          const shouldCollapse = currentState === 'expanded';
+
+          groups.forEach(group => {
+            const toggleBtn = group.querySelector('.sidebar-group-toggle');
+            if (shouldCollapse) {
+              group.classList.add('collapsed');
+              toggleBtn?.setAttribute('aria-expanded', 'false');
+            } else {
+              group.classList.remove('collapsed');
+              toggleBtn?.setAttribute('aria-expanded', 'true');
+            }
+          });
+
+          const newState = shouldCollapse ? 'collapsed' : 'expanded';
+          globalToggle.setAttribute('data-state', newState);
+          if (shouldCollapse) {
+            globalToggle.classList.add('collapsed');
+          } else {
+            globalToggle.classList.remove('collapsed');
+          }
+        });
+      }
+
+      // Initial state evaluation on page load
+      updateGlobalToggleState(container, globalToggle, groups);
+    });
+  }
+
+  function updateGlobalToggleState(container: Element, globalToggle: Element | null, groups: NodeListOf<Element>) {
+    if (!globalToggle) return;
+    const allCollapsed = Array.from(groups).every(g => g.classList.contains('collapsed'));
+    if (allCollapsed) {
+      globalToggle.setAttribute('data-state', 'collapsed');
+      globalToggle.classList.add('collapsed');
+    } else {
+      globalToggle.setAttribute('data-state', 'expanded');
+      globalToggle.classList.remove('collapsed');
+    }
+  }
+
+  // Bind lifecycle events
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCollapsibleSidebars);
+  } else {
+    initCollapsibleSidebars();
+  }
+  document.addEventListener('astro:after-swap', initCollapsibleSidebars);
+</script>
+
+<style>
+  /* Sidebar collapsing CSS */
+  .sidebar-group.collapsed .sidebar-group-list {
+    display: none;
+  }
+  .sidebar-group.collapsed .chevron-icon {
+    transform: rotate(-90deg);
+  }
+
+  /* Global collapse toggle button styles */
+  .global-collapse-toggle.collapsed .icon-collapse {
+    display: none;
+  }
+  .global-collapse-toggle.collapsed .icon-expand {
+    display: block;
+  }
+</style>

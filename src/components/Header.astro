@@ -34,8 +34,8 @@ const docsUrl = firstAvailableSlug ? `${langPrefix}/docs/${firstAvailableSlug}` 
 ---
 
 <header class="sticky top-0 z-40 w-full border-b border-surface-200 dark:border-surface-800 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-md">
-  <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-6">
+  <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-6 shrink-0">
       <a href={`${langPrefix}/`} class="text-xl font-bold font-mono tracking-tight text-primary-600 dark:text-primary-500">
         jose<span class="text-surface-900 dark:text-surface-50">oc</span>
       </a>
@@ -46,13 +46,62 @@ const docsUrl = firstAvailableSlug ? `${langPrefix}/docs/${firstAvailableSlug}` 
       </nav>
     </div>
     
-    <div class="flex items-center gap-2 sm:gap-4">
+    <div class="flex items-center gap-2 sm:gap-4 flex-grow justify-end max-w-full">
+      <div class="flex-grow max-w-[130px] sm:max-w-none sm:flex-grow-0 min-w-0">
+        <Search />
+      </div>
+      
       <div class="hidden lg:block">
         <ReadingControls />
       </div>
-      <Search />
       <ThemeToggle />
       <LanguageSwitcher />
+      
+      <!-- Mobile Menu Toggle -->
+      <button 
+        id="menu-toggle" 
+        type="button" 
+        class="md:hidden text-surface-500 hover:text-surface-900 dark:text-surface-400 dark:hover:text-surface-50 transition-colors p-2 rounded-lg border border-transparent hover:border-surface-200 dark:hover:border-surface-700 hover:bg-surface-100 dark:hover:bg-surface-800" 
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+      >
+        <svg id="menu-icon-open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg id="menu-icon-close" class="hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Mobile Navigation Dropdown Menu -->
+  <div id="mobile-nav" class="hidden md:hidden border-t border-surface-200 dark:border-surface-800 bg-surface-50/95 dark:bg-surface-950/95 backdrop-blur-md transition-all duration-300">
+    <div class="container mx-auto px-4 py-4 flex flex-col gap-4">
+      <nav class="flex flex-col gap-3 text-base font-semibold text-surface-600 dark:text-surface-400">
+        <a href={docsUrl} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors py-2 border-b border-surface-100 dark:border-surface-900/50">Docs</a>
+        <a href={`${langPrefix}/blog`} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors py-2 border-b border-surface-100 dark:border-surface-900/50">Blog</a>
+        <a href={`${langPrefix}/about`} class="hover:text-surface-900 dark:hover:text-surface-50 transition-colors py-2">About</a>
+      </nav>
     </div>
   </div>
 </header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const menuIconClose = document.getElementById('menu-icon-close');
+
+    if (menuToggle && mobileNav && menuIconOpen && menuIconClose) {
+      menuToggle.addEventListener('click', () => {
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
+        mobileNav.classList.toggle('hidden');
+        menuIconOpen.classList.toggle('hidden');
+        menuIconClose.classList.toggle('hidden');
+      });
+    }
+  });
+</script>
