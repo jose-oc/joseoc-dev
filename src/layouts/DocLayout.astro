@@ -51,23 +51,8 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
 
   <div class="doc-layout-wrapper max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out [.focus-mode_&]:max-w-none [.focus-mode_&]:px-0">
     <div class="doc-layout-grid grid grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)_16rem] gap-8 xl:gap-12 w-full transition-all duration-500 ease-in-out">
-      <!-- Left Sidebar (Drawer on mobile, sticky sidebar on desktop) -->
-      <aside 
-        id="left-sidebar" 
-        class="sidebar-wrapper fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-surface-50 dark:bg-surface-950 p-6 border-r border-surface-200 dark:border-surface-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto lg:static lg:block lg:w-64 lg:h-[calc(100vh-6rem)] lg:p-0 lg:border-r-0 lg:shadow-none lg:transform-none lg:transition-none sticky lg:top-24 lg:self-start lg:pr-6 lg:py-6"
-      >
-        <div class="flex justify-end lg:hidden mb-4 border-b border-surface-200 dark:border-surface-800 pb-2">
-          <button 
-            id="close-left-sidebar" 
-            type="button" 
-            class="p-1 text-surface-500 hover:text-surface-900 dark:hover:text-surface-50 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg border border-transparent"
-            aria-label="Close menu"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+      <!-- Desktop Left Sidebar -->
+      <aside class="sidebar-wrapper hidden lg:block sticky top-24 self-start h-[calc(100vh-6rem)] overflow-y-auto pr-4 pb-20">
         <Sidebar lang={lang} currentSlug={slug} />
       </aside>
       
@@ -109,29 +94,56 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
         </div>
       </article>
 
-      <!-- Right TOC (Drawer on mobile, sticky sidebar on desktop) -->
+      <!-- Desktop Right TOC -->
       {headings.filter(h => h.depth > 1 && h.depth < 4).length > 0 && (
-        <aside 
-          id="right-sidebar" 
-          class="toc-wrapper fixed inset-y-0 right-0 z-50 w-72 max-w-[80vw] bg-surface-50 dark:bg-surface-950 p-6 border-l border-surface-200 dark:border-surface-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto xl:static xl:block xl:w-64 xl:h-[calc(100vh-6rem)] xl:p-0 xl:border-l-0 xl:shadow-none xl:transform-none xl:transition-none sticky xl:top-24 xl:self-start xl:pl-6 xl:py-6"
-        >
-          <div class="flex justify-start xl:hidden mb-4 border-b border-surface-200 dark:border-surface-800 pb-2">
-            <button 
-              id="close-right-sidebar" 
-              type="button" 
-              class="p-1 text-surface-500 hover:text-surface-900 dark:hover:text-surface-50 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg border border-transparent"
-              aria-label="Close table of contents"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
+        <aside class="toc-wrapper hidden xl:block sticky top-24 self-start h-[calc(100vh-6rem)] overflow-y-auto pl-4 pb-20">
           <Toc headings={headings} />
         </aside>
       )}
     </div>
   </div>
+
+  <!-- Mobile Left Sidebar Drawer -->
+  <aside 
+    id="left-sidebar" 
+    class="sidebar-wrapper lg:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-surface-50 dark:bg-surface-950 p-6 border-r border-surface-200 dark:border-surface-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto"
+  >
+    <div class="flex justify-end mb-4 border-b border-surface-200 dark:border-surface-800 pb-2">
+      <button 
+        id="close-left-sidebar" 
+        type="button" 
+        class="w-10 h-10 flex items-center justify-center text-surface-500 hover:text-surface-900 dark:hover:text-surface-50 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg border border-transparent transition-colors"
+        aria-label="Close menu"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <Sidebar lang={lang} currentSlug={slug} />
+  </aside>
+
+  <!-- Mobile Right TOC Drawer -->
+  {headings.filter(h => h.depth > 1 && h.depth < 4).length > 0 && (
+    <aside 
+      id="right-sidebar" 
+      class="toc-wrapper xl:hidden fixed inset-y-0 right-0 z-50 w-72 max-w-[80vw] bg-surface-50 dark:bg-surface-950 p-6 border-l border-surface-200 dark:border-surface-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto"
+    >
+      <div class="flex justify-start mb-4 border-b border-surface-200 dark:border-surface-800 pb-2">
+        <button 
+          id="close-right-sidebar" 
+          type="button" 
+          class="w-10 h-10 flex items-center justify-center text-surface-500 hover:text-surface-900 dark:hover:text-surface-50 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg border border-transparent transition-colors"
+          aria-label="Close table of contents"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <Toc headings={headings} />
+    </aside>
+  )}
 
   <!-- Backdrop for mobile drawers -->
   <div 
@@ -141,7 +153,7 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
 </BaseLayout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  function initSidebars() {
     const leftSidebar = document.getElementById('left-sidebar');
     const rightSidebar = document.getElementById('right-sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
@@ -213,7 +225,17 @@ const { title, description, lang, slug, headings, tags = [], category } = Astro.
     drawerLinks.forEach(link => {
       link.addEventListener('click', closeAll);
     });
-  });
+  }
+
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebars);
+  } else {
+    initSidebars();
+  }
+
+  // Re-run after view transitions if applicable (Astro)
+  document.addEventListener('astro:after-swap', initSidebars);
 </script>
 
 <style is:global>
