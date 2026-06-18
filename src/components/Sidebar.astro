@@ -25,7 +25,7 @@ const filteredSidebar = sidebarConfig.docs.map(group => ({
 const langPrefix = lang === 'es' ? '/es' : '';
 ---
 
-<aside class="w-64 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 border-r border-surface-200 dark:border-surface-800 py-6 pr-6">
+<div class="w-full">
   <nav class="space-y-8" aria-label={lang === 'es' ? 'Navegación de documentación' : 'Documentation navigation'}>
     {filteredSidebar.map(group => (
       <div>
@@ -53,4 +53,4 @@ const langPrefix = lang === 'es' ? '/es' : '';
       </div>
     ))}
   </nav>
-</aside>
+</div>

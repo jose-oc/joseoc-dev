@@ -14,7 +14,7 @@ const filteredHeadings = headings.filter(h => h.depth > 1 && h.depth < 4);
 ---
 
 {filteredHeadings.length > 0 && (
-  <aside class="w-64 flex-shrink-0 hidden xl:block overflow-y-auto h-[calc(100vh-4rem)] sticky top-16 py-6 pl-6">
+  <nav class="w-full" aria-label="Table of contents">
     <h3 class="font-semibold text-surface-900 dark:text-surface-50 mb-3 text-sm uppercase tracking-wider">On this page</h3>
     <ul class="space-y-2 border-l border-surface-200 dark:border-surface-800">
       {filteredHeadings.map(heading => (
@@ -28,5 +28,5 @@ const filteredHeadings = headings.filter(h => h.depth > 1 && h.depth < 4);
         </li>
       ))}
     </ul>
-  </aside>
+  </nav>
 )}
