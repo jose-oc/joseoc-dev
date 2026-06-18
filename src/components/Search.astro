@@ -8,6 +8,11 @@
 
 <script is:inline>
   window.addEventListener('DOMContentLoaded', () => {
+    const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const shortcutHint = isMac ? '⌘K' : 'Ctrl+K';
+    const lang = document.documentElement.lang || 'en';
+    const placeholderText = lang === 'es' ? `Buscar (${shortcutHint} o /)` : `Search (${shortcutHint} or /)`;
+
     // Dynamically load Pagefind UI
     const script = document.createElement("script");
     script.src = "/pagefind/pagefind-ui.js";
@@ -16,6 +21,9 @@
         element: "#search",
         showSubResults: true,
         resetStyles: false,
+        translations: {
+          placeholder: placeholderText
+        }
       });
     };
     script.onerror = () => {
@@ -37,6 +45,35 @@
     link.rel = "stylesheet";
     link.href = "/pagefind/pagefind-ui.css";
     document.head.appendChild(link);
+
+    // Keyboard shortcut to focus/blur search input
+    window.addEventListener('keydown', (event) => {
+      const activeEl = document.activeElement;
+      
+      // If user is focused on input-like element, don't trigger search focus shortcut
+      const isInputActive = activeEl && (
+        activeEl.tagName === 'INPUT' || 
+        activeEl.tagName === 'TEXTAREA' || 
+        activeEl.isContentEditable
+      );
+
+      const isCmdOrCtrl = isMac ? event.metaKey : event.ctrlKey;
+      const searchInput = document.querySelector('.pagefind-ui__search-input');
+
+      if (!isInputActive) {
+        if ((isCmdOrCtrl && event.key.toLowerCase() === 'k') || event.key === '/') {
+          if (searchInput) {
+            event.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      } else if (event.key === 'Escape' && activeEl === searchInput) {
+        if (searchInput) {
+          searchInput.blur();
+        }
+      }
+    });
   });
 </script>
 
