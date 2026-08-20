@@ -58,6 +58,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· When to move to pyproject', slug: 'how-to/pyproject-toml-migration' },
           { label: '· GitHub Best Practices', slug: 'how-to/github-best-practices' },
           { label: '· Why You Need a security.txt File', slug: 'how-to/security-txt' },
+          { label: '· Access Linux Disks from macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
+          { label: '· Add User to Sudoers in Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
         ]
       },
       {
@@ -132,6 +134,8 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Cuándo pasar a pyproject', slug: 'how-to/pyproject-toml-migration' },
           { label: '· Buenas prácticas en GitHub', slug: 'how-to/github-best-practices' },
           { label: '· Por qué necesitas un archivo security.txt', slug: 'how-to/security-txt' },
+          { label: '· Acceder a discos Linux desde macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
+          { label: '· Añadir usuario a sudoers en Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
         ]
       },
       {
