@@ -191,6 +191,10 @@ Con `mise` se puede resolver, pero normalmente toca simplificar:
 
 Y, sinceramente, muchas veces eso termina siendo una mejora. Menos magia suele significar menos sorpresas.
 
+## Mise packages
+
+https://mise-versions.jdx.dev
+
 ## Seguridad: `aqua` frente a `mise`
 
 En seguridad, `aqua` me dejó mejor sensación por defecto.
