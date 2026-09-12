@@ -46,6 +46,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         items: [
           { label: '· Rebase Without Fear', slug: 'git/rebase-without-fear' },
           { label: '· Rebase Cheat Sheet', slug: 'git/rebase-cheat-sheet' },
+          { label: '· Multiple GitHub Accounts', slug: 'git/multiple-github-accounts' },
         ],
       },
       {
@@ -122,6 +123,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         items: [
           { label: '· Rebase sin miedo', slug: 'git/rebase-without-fear' },
           { label: '· Hoja de referencia de rebase', slug: 'git/rebase-cheat-sheet' },
+          { label: '· Dos cuentas de GitHub en el mismo equipo', slug: 'git/multiple-github-accounts' },
         ],
       },
       {
