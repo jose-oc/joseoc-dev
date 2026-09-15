@@ -158,7 +158,7 @@ bindkey '^[^?' backward-kill-word
 bindkey '^[\x7f' backward-kill-word
 ```
 
-![ghostty-word-navigation](../../../assets/terminal-recording-20260425_204243.cast)
+[Download the Ghostty word-navigation terminal recording](/assets/terminal-recording-20260425_204243.cast)
 
 ---
 
