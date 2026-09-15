@@ -106,8 +106,16 @@
 
   /* Target the input explicitly for better styling */
   .pagefind-ui__search-input {
+    color: var(--pagefind-ui-text) !important;
     font-weight: 400 !important;
     outline: none !important;
+  }
+  .pagefind-ui__search-input::placeholder {
+    color: #475569 !important; /* surface-600: accessible on white */
+    opacity: 1 !important;
+  }
+  html.dark .pagefind-ui__search-input::placeholder {
+    color: #cbd5e1 !important; /* surface-300: accessible on surface-950 */
   }
   .pagefind-ui__search-input:focus {
     border-color: var(--pagefind-ui-primary) !important;
