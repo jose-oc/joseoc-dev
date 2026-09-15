@@ -7,8 +7,6 @@ slug: "git/rebase-without-fear"
 draft: false
 ---
 
-# Git Rebase sin miedo
-
 Esta guía es para personas que usan Git a diario para `commit` y `push`, pero se sienten perdidas cuando alguien dice:
 
 - "haz rebase de tu rama"

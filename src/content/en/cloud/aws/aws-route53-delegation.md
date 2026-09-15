@@ -12,8 +12,6 @@ slug: "splitting-aws-route53-hosted-zone-into-delegated-subdomains"
 
 All this has been automated with a CLI, and is available on githb [route53-delegation-cli](https://github.com/jose-oc/route53-delegation-cli).
 
-# Splitting One Route 53 Hosted Zone into Delegated Subdomains
-
 If you already manage `xyz.com` in Amazon Route 53 and your records are starting to look like this:
 
 - `a.abc.xyz.com`

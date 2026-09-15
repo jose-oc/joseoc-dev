@@ -7,8 +7,6 @@ slug: "git/rebase-without-fear"
 draft: false
 ---
 
-# Git Rebase Without Fear
-
 This guide is for people who use Git every day for `commit` and `push`, but feel lost when someone says:
 
 - "rebase your branch"

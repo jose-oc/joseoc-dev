@@ -7,8 +7,6 @@ slug: "git/rebase-cheat-sheet"
 draft: false
 ---
 
-# Git Rebase Cheat Sheet
-
 If you want the full explanation, read [Git Rebase Without Fear](/docs/git/rebase-without-fear).
 
 ## Normal safe flow

@@ -7,8 +7,6 @@ slug: "git/multiple-github-accounts"
 draft: false
 ---
 
-# Using Multiple GitHub Accounts on the Same Machine
-
 If you use your primary development laptop for both your company job and personal projects or open source contributions, you quickly run into a classic problem:
 
 1. **Permission Denied**: You try to push to your personal repository, and GitHub rejects you with `Permission to user/repo denied to work-user` or `Repository not found`.
