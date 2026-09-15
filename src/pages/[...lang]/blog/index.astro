@@ -15,6 +15,9 @@ export async function getStaticPaths() {
 }
 
 const { lang = 'en' } = Astro.params;
+const copy = lang === 'es'
+  ? { title: 'Blog', description: 'Lee los últimos artículos del blog.', empty: 'Aún no hay artículos disponibles en español.' }
+  : { title: 'Blog', description: 'Read the latest blog posts.', empty: 'No blog posts are available in this language yet.' };
 const isProd = import.meta.env.PROD;
 const blogs = await getCollection('blog', (entry) => {
   const searchLang = lang || 'en';
@@ -30,13 +33,13 @@ blogs.sort((a, b) => {
 });
 ---
 
-<BaseLayout title="Blog" description="Read our latest blog posts." lang={lang}>
+<BaseLayout title={copy.title} description={copy.description} lang={lang}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50 mb-8">Blog</h1>
     
     <div class="space-y-8">
       {blogs.length === 0 ? (
-        <p class="text-surface-600 dark:text-surface-400">No blog posts available in this language yet.</p>
+        <p class="text-surface-600 dark:text-surface-400">{copy.empty}</p>
       ) : (
         blogs.map((post) => {
           const fallbackSlug = post.id.split('/').slice(1).join('/').replace(/\.mdx?$/, '');

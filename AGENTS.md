@@ -18,16 +18,13 @@ Use Bun or Node `>=24` as declared in `package.json`.
 Follow the existing style: ESM modules, TypeScript where configured, and 2-space indentation in `.ts`, `.mjs`, and Astro frontmatter. Keep components in PascalCase, for example `Header.astro`; keep content slugs lowercase and URL-safe, for example `python-environment-direnv.md`. Prefer small, focused components and keep shared site constants in `src/config/`. There is no dedicated lint script here, so match surrounding formatting exactly.
 
 ## Testing Guidelines
-Add or update Playwright coverage for routing, language switching, taxonomy pages, and SEO metadata when behavior changes. Keep test files in `tests/` and name them `*.spec.ts`. Run `npm run test` before opening a PR; at minimum, run `npm run test:e2e` for UI or routing changes and `npm run test:links` when editing content or navigation.
+Add or update Playwright coverage for routing, language switching, taxonomy pages, and SEO metadata when behavior changes. Keep test files in `tests/` and name them `*.spec.ts`. Run `bun run test` before opening a PR; at minimum, run `npm run test:e2e` for UI or routing changes and `npm run test:links` when editing content or navigation.
 
 ## Commit & Pull Request Guidelines
 Recent history mixes concise fixes (`content grammar`) with Conventional Commit style such as `feat(seo): ...`. Prefer short, imperative commit messages and use a scope when it adds clarity, for example `feat(routing): preserve localized doc slugs`. PRs should explain the user-visible change, list validation performed, and link related issues. Include screenshots for layout or styling changes.
 
-## Content & SEO Notes
-Keep English and Spanish article pairs aligned on the same slug when they represent the same page. When editing metadata or routing, verify canonical links, `hreflang` tags, and raw Markdown endpoints under `/raw/`.
-
 ## Adding New Content
-Add documentation pages under `src/content/en/` and `src/content/es/`. Publish content in both languages when the topic is meant to exist in both locales, and keep the same `slug` in each file so language switching and SEO metadata stay aligned. Use `src/content/*/drafts/` with `draft: true` for work that should not be treated as published.
+Add documentation pages under `src/content/en/` and `src/content/es/`. Publish content in both languages when the topic is meant to exist in both locales, using the same `slug` so language switching and SEO metadata stay aligned. Use `src/content/*/drafts/` with `draft: true` for work that should not be treated as published. When editing metadata or routing, verify canonical links, `hreflang` tags, and raw Markdown endpoints under `/raw/`.
 
 Use frontmatter consistently:
 

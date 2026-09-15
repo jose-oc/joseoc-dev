@@ -129,7 +129,7 @@ bindkey '^[^?' backward-kill-word
 bindkey '^[\x7f' backward-kill-word
 ```
 
-![ghostty-word-navigation](../../../assets/terminal-recording-20260425_204243.cast)
+[Descargar la grabación de terminal sobre navegación por palabras en Ghostty](/assets/terminal-recording-20260425_204243.cast)
 
 ---
 

@@ -59,7 +59,11 @@ const t = content[lang as keyof typeof content];
       <div class="mb-8 overflow-hidden rounded-2xl shadow-2xl border border-surface-200 dark:border-surface-800">
         <Image 
           src={heroImage} 
-          alt="Minimalist workspace" 
+          alt="Minimalist workspace"
+          loading="eager"
+          fetchpriority="high"
+          widths={[640, 960, 1280]}
+          sizes="(max-width: 768px) calc(100vw - 2rem), 768px"
           class="w-full h-64 object-cover grayscale hover:grayscale-0 transition-all duration-700"
         />
       </div>
@@ -78,7 +82,7 @@ const t = content[lang as keyof typeof content];
     </header>
 
     <section class="mb-16 animate-fade-in" style="animation-delay: 100ms;">
-      <h2 class="text-sm uppercase tracking-widest text-primary-600 dark:text-primary-500 font-bold mb-6">
+      <h2 class="text-sm uppercase tracking-widest text-primary-700 dark:text-primary-400 font-bold mb-6">
         {t.interestsTitle}
       </h2>
       <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-surface-700 dark:text-surface-300">

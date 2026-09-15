@@ -7,8 +7,6 @@ slug: "git/multiple-github-accounts"
 draft: false
 ---
 
-# Cómo usar 2 cuentas de GitHub en el mismo equipo
-
 Si utilizas tu portátil de trabajo tanto para tu empleo diario como para proyectos personales o contribuciones open source, tarde o temprano te toparás con dos problemas clásicos:
 
 1. **Permiso denegado al hacer push**: Intentas subir cambios a un repositorio personal y GitHub te rechaza con un mensaje como `Permission to user/repo denied to work-user` o `Repository not found`.

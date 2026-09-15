@@ -8,8 +8,6 @@ language: "es"
 slug: "how-to/recording-terminal-to-svg-with-termsvg"
 ---
 
-# Grabar sesiones de terminal en SVG con termsvg
-
 Cuando escribes documentación técnica, a veces una captura estática no basta para explicar un flujo CLI complejo, pero un vídeo es demasiado pesado o necesita un reproductor específico.
 
 **termsvg** resuelve ese problema capturando tu sesión de terminal y convirtiéndola en una animación SVG ligera, escalable y visualmente atractiva que se reproduce directamente en cualquier navegador moderno.

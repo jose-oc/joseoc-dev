@@ -9,8 +9,6 @@ slug: "how-to/add-user-to-sudoers-ubuntu"
 draft: false
 ---
 
-# Cómo añadir un usuario a sudoers en Ubuntu Server
-
 Al configurar una nueva instancia de Ubuntu Server o aprovisionar máquinas virtuales, otorgar privilegios administrativos (`sudo`) a un usuario habitual es una de las primeras tareas esenciales.
 
 Aunque muchos tutoriales recomiendan editar directamente el archivo monolítico `/etc/sudoers` o añadir usuarios al grupo `sudo` con `usermod`, el enfoque más limpio, mantenible y preparado para automatización es el uso de **archivos de configuración modulares** en `/etc/sudoers.d/`.

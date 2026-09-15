@@ -9,8 +9,6 @@ slug: "how-to/ubuntu-apple-silicon-utm-ext4"
 draft: false
 ---
 
-# Accede a tus discos Linux desde macOS: UTM, Passthrough USB ext4 y Carpetas Compartidas
-
 Si trabajas en un Mac con Apple Silicon (M1, M2, M3, M4 o M5) y necesitas interactuar con sistemas de archivos nativos de Linux como **ext4**, macOS presenta un obstáculo importante: no puede montar ni escribir de forma nativa en sistemas de archivos ext4 sin recurrir a extensiones de kernel inestables o software de pago de terceros.
 
 La solución más limpia, rápida y fiable es ejecutar una máquina virtual **Ubuntu Server ARM64** mediante [UTM](https://mac.getutm.app/). Dado que Apple Silicon funciona sobre arquitectura ARM64, UTM virtualiza Linux a velocidades prácticamente nativas aprovechando el framework Hypervisor integrado de macOS.
