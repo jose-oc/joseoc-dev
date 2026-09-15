@@ -184,7 +184,9 @@ if (currentItem) {
           {availableLangs.includes('es') && (
             <link rel="alternate" hreflang="es" href={esUrl} />
           )}
-          <link rel="alternate" hreflang="x-default" href={enUrl} />
+          {availableLangs.includes('en') && (
+            <link rel="alternate" hreflang="x-default" href={enUrl} />
+          )}
         </>
       );
     })()}
