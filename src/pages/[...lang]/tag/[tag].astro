@@ -40,7 +40,10 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { lang, tag } = Astro.params;
+const { lang = 'en', tag } = Astro.params;
+const copy = lang === 'es'
+  ? { title: `Artículos con la etiqueta #${tag}`, description: `Explora todos los artículos con la etiqueta ${tag}`, back: 'Volver al inicio', label: 'Etiqueta', found: (count: number) => `${count} resultado(s).` }
+  : { title: `Posts tagged with #${tag}`, description: `Explore all articles tagged with ${tag}`, back: 'Back to Home', label: 'Tag', found: (count: number) => `Found ${count} result(s).` };
 const isProd = import.meta.env.PROD;
 
 const docs = await getCollection('docs', (entry) => {
@@ -66,21 +69,21 @@ const tagContent = [...allDocsForTag, ...allBlogsForTag].filter(item => item.dat
 const availableLangs = [...new Set(tagContent.map(item => item.id.split('/')[0]))];
 ---
 
-<BaseLayout title={`Posts tagged with #${tag}`} description={`Explore all articles tagged with ${tag}`} lang={lang} availableLangs={availableLangs}>
+<BaseLayout title={copy.title} description={copy.description} lang={lang} availableLangs={availableLangs}>
   <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       {(() => {
         const langPrefix = lang === 'es' ? '/es' : '';
         return (
           <a href={`${langPrefix}/`} class="inline-flex items-center text-sm font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors mb-4">
-            &larr; Back to Home
+            &larr; {copy.back}
           </a>
         );
       })()}
       <h1 class="text-4xl font-extrabold text-surface-900 dark:text-surface-50">
-        Tag: <span class="text-primary-600 dark:text-primary-500">#{tag}</span>
+        {copy.label}: <span class="text-primary-600 dark:text-primary-500">#{tag}</span>
       </h1>
-      <p class="mt-2 text-surface-600 dark:text-surface-400">Found {allContent.length} result(s).</p>
+      <p class="mt-2 text-surface-600 dark:text-surface-400">{copy.found(allContent.length)}</p>
     </div>
     
     <div class="space-y-6">
