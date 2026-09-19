@@ -299,6 +299,14 @@ export AWS_SECRET_ACCESS_KEY="miniopassword"
 ```
 
 ### Backblaze B2 (API compatible con S3)
+```bash
+export RESTIC_REPOSITORY="s3:https://s3.<region>.backblazeb2.com/mi-bucket-backups/restic-data"
+export AWS_ACCESS_KEY_ID="tu-key-id"
+export AWS_SECRET_ACCESS_KEY="tu-application-key"
+export RESTIC_PASSWORD="PasswordDelRepositorio"
+
+restic init
+```
 
 ### Servidor REST de Restic (Protección Append-Only)
 El [rest-server](https://github.com/restic/rest-server) es un servidor HTTP ligero optimizado para Restic.
