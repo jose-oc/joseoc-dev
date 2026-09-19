@@ -11,7 +11,7 @@ draft: false
 
 Backups are one of those things everyone knows they need, but many implementations end up fragile, slow, or cumbersome to verify. Traditional tools like `rsync` or `tar` either lack built-in client-side encryption, transfer redundant data across runs, or make point-in-time restores tedious.
 
-[Restic](https://restic.net) is an open-source backup program written in Go that treats backups as a first-class data structure. It delivers zero-trust security by encrypting everything by default, avoids wasted storage through content-defined deduplication, and supports virtually any storage backend—from a simple USB drive or SFTP server to Amazon S3, MinIO, and Backblaze B2.
+[Restic](https://restic.net) is an open-source backup program written in Go. It encrypts repository data by default, reduces duplicate storage through content-defined deduplication, and supports local storage plus remote backends such as SFTP, Amazon S3, MinIO, and Backblaze B2.
 
 ```mermaid
 flowchart LR
