@@ -116,6 +116,15 @@ restic backup ~/projects
 
 Restic analiza la ruta de origen, trocea los archivos en bloques, calcula sus hashes criptográficos, comprueba el índice del repositorio y solo sube los datos nuevos o modificados.
 
+```console
+Files:           1 new,     0 changed,     0 unmodified
+Dirs:            2 new,     0 changed,     0 unmodified
+Added to the repository: 1.117 KiB (988 B stored)
+
+processed 1 files, 6 B in 0:00
+snapshot c7273d18 saved
+```
+
 
 ### Respaldar varias rutas y etiquetar snapshots
 Puedes respaldar múltiples directorios a la vez y asignar etiquetas (`tags`) para facilitar búsquedas y políticas de retención:
