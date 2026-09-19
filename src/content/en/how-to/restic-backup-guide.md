@@ -123,6 +123,7 @@ Added to the repository: 1.117 KiB (988 B stored)
 
 processed 1 files, 6 B in 0:00
 snapshot c7273d18 saved
+```
 
 ### Backing Up Multiple Targets with Tags
 You can pass multiple directories in one backup command and attach tags to make searching and retention easier:
