@@ -54,8 +54,14 @@ brew install restic
 sudo apt update && sudo apt install restic
 ```
 
-### Linux (Fedora / RHEL)
+### Linux (Fedora)
 ```bash
+sudo dnf install restic
+```
+
+### Linux (RHEL / CentOS Stream)
+```bash
+sudo dnf install epel-release
 sudo dnf install restic
 ```
 
