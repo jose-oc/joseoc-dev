@@ -61,6 +61,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Why You Need a security.txt File', slug: 'how-to/security-txt' },
           { label: '· Access Linux Disks from macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
           { label: '· Add User to Sudoers in Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
+          { label: '· Secure Backups with Restic', slug: 'how-to/restic-backup-guide' },
         ]
       },
       {
@@ -138,6 +139,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Por qué necesitas un archivo security.txt', slug: 'how-to/security-txt' },
           { label: '· Acceder a discos Linux desde macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
           { label: '· Añadir usuario a sudoers en Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
+          { label: '· Copias de seguridad seguras con Restic', slug: 'how-to/restic-backup-guide' },
         ]
       },
       {
