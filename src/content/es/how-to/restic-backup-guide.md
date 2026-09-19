@@ -11,7 +11,7 @@ draft: false
 
 Todo el mundo sabe que necesita copias de seguridad, pero muchas implementaciones acaban siendo frágiles, lentas o difíciles de restaurar y comprobar. Herramientas tradicionales como `rsync` o `tar` no incluyen cifrado de cliente por defecto, transfieren datos redundantes entre ejecuciones o hacen que restaurar a un punto exacto en el tiempo sea tedioso.
 
-[Restic](https://restic.net) es un programa de copias de seguridad de código abierto escrito en Go que trata los backups como una estructura de datos de primer nivel. Ofrece seguridad zero-trust cifrando absolutamente todo por defecto, evita el desperdicio de almacenamiento gracias a la deduplicación basada en contenido y soporta prácticamente cualquier backend de almacenamiento: desde un disco USB o servidor SFTP hasta Amazon S3, MinIO o Backblaze B2.
+[Restic](https://restic.net) es un programa de copias de seguridad de código abierto escrito en Go. Cifra los datos del repositorio por defecto, reduce el almacenamiento duplicado mediante deduplicación basada en contenido y admite almacenamiento local y backends remotos como SFTP, Amazon S3, MinIO y Backblaze B2.
 
 ```mermaid
 flowchart LR
@@ -32,11 +32,11 @@ flowchart LR
 
 Restic destaca por varias decisiones de diseño clave:
 
-- **Cifrado por defecto**: Cada dato, metadato, índice de snapshots y estructura de directorios se cifra mediante AES-256 (en modo CTR) y se autentica con Poly1305. El servidor de almacenamiento nunca ve los nombres de archivo ni el contenido en texto plano.
-- **Deduplicación por contenido**: Los archivos se dividen en bloques dinámicos según su contenido real y no por bloques de tamaño fijo. Si renombras un archivo, lo mueves de carpeta o modificas unas pocas líneas de un archivo enorme, solo se subirán los fragmentos modificados.
-- **Restauraciones basadas en snapshots**: Cada copia genera una instantánea inmutable. Restaurar un directorio a su estado exacto de hace dos semanas es tan sencillo e inmediato como restaurar la última copia.
-- **Binario estático único**: Sin demonios en segundo plano, bases de datos auxiliares ni dependencias complejas.
-- **Variedad de backends**: Soporte nativo para discos locales, SFTP, REST Server, AWS S3, MinIO, Backblaze B2, Google Cloud Storage y Azure Blob Storage.
+- **Cifrado por defecto**: cada dato, metadato, índice de snapshots y estructura de directorios se cifra mediante AES-256 (en modo CTR) y se autentica con Poly1305. El servidor de almacenamiento nunca ve los nombres de archivo ni el contenido en texto plano.
+- **Deduplicación por contenido**: los archivos se dividen en bloques dinámicos según su contenido real y no por bloques de tamaño fijo. Si renombras un archivo, lo mueves de carpeta o modificas unas pocas líneas de un archivo enorme, solo se subirán los fragmentos modificados.
+- **Restauraciones basadas en snapshots**: cada copia genera una instantánea inmutable. Restaurar un directorio a su estado exacto de hace dos semanas es tan sencillo e inmediato como restaurar la última copia.
+- **Binario estático único**: sin demonios en segundo plano, bases de datos auxiliares ni dependencias complejas.
+- **Variedad de backends**: soporte nativo para discos locales, SFTP, REST Server, AWS S3, MinIO, Backblaze B2, Google Cloud Storage y Azure Blob Storage.
 
 ---
 
@@ -110,13 +110,6 @@ restic backup ~/projects
 
 Restic analiza la ruta de origen, trocea los archivos en bloques, calcula sus hashes criptográficos, comprueba el índice del repositorio y solo sube los datos nuevos o modificados.
 
-```console
-repository 33002c5e opened (version 2, compression level auto)
-created new cache in /Users/jose/.cache/restic
-[0:04] 100.00%  1.242 GiB / 1.242 GiB  14,520 / 14,520 items  0 errors
-
-snapshot a8f419c2 saved
-```
 
 ### Respaldar varias rutas y etiquetar snapshots
 Puedes respaldar múltiples directorios a la vez y asignar etiquetas (`tags`) para facilitar búsquedas y políticas de retención:
@@ -136,9 +129,9 @@ restic backup ~/projects \
   --exclude-caches
 ```
 
-- `--exclude-caches`: Omite automáticamente cualquier directorio que contenga un archivo `CACHEDIR.TAG` (estándar de caché).
-- `--exclude-file=excludes.txt`: Carga patrones de exclusión línea por línea desde un archivo de texto.
-- `--one-file-system`: Evita que Restic salte a otros sistemas de archivos montados (unidades de red, volúmenes externos, etc.).
+- `--exclude-caches`: omite automáticamente cualquier directorio que contenga un archivo `CACHEDIR.TAG` (estándar de caché).
+- `--exclude-file=excludes.txt`: carga patrones de exclusión línea por línea desde un archivo de texto.
+- `--one-file-system`: evita que Restic salte a otros sistemas de archivos montados (unidades de red, volúmenes externos, etc.).
 
 ---
 
@@ -227,8 +220,8 @@ Puedes copiar archivos sueltos usando cualquier comando estándar (`cp`, `rsync`
 
 El mantenimiento de las copias en Restic se divide en dos fases:
 
-1. **`restic forget`**: Elimina el registro de los snapshots según las reglas de retención configuradas. Los bloques de datos reales permanecen en el repositorio.
-2. **`restic prune`**: Revisa todo el repositorio, identifica los bloques de datos a los que ya ningún snapshot hace referencia, reempaqueta los bloques activos y borra los archivos obsoletos para liberar espacio en disco.
+1. **`restic forget`**: elimina el registro de los snapshots según las reglas de retención configuradas. Los bloques de datos reales permanecen en el repositorio.
+2. **`restic prune`**: revisa todo el repositorio, identifica los bloques de datos a los que ya ningún snapshot hace referencia, reempaqueta los bloques activos y borra los archivos obsoletos para liberar espacio en disco.
 
 ```mermaid
 flowchart TD
@@ -299,15 +292,7 @@ export AWS_ACCESS_KEY_ID="minioadmin"
 export AWS_SECRET_ACCESS_KEY="miniopassword"
 ```
 
-### Backblaze B2
-```bash
-export RESTIC_REPOSITORY="b2:mi-bucket-backups:restic-data"
-export B2_ACCOUNT_ID="tu-key-id"
-export B2_ACCOUNT_KEY="tu-application-key"
-export RESTIC_PASSWORD="PasswordDelRepositorio"
-
-restic init
-```
+### Backblaze B2 (API compatible con S3)
 
 ### Servidor REST de Restic (Protección Append-Only)
 El [rest-server](https://github.com/restic/rest-server) es un servidor HTTP ligero optimizado para Restic.
@@ -321,9 +306,9 @@ restic backup ~/projects
 
 ---
 
-## 9. Ejemplo de automatización para producción
+## 9. Ejemplo de automatización
 
-A continuación se muestra un script en Bash preparado para programarse mediante cron o un temporizador de systemd:
+A continuación se muestra un ejemplo de automatización en Bash como punto de partida para programarlo con cron o un temporizador de systemd:
 
 ```bash
 #!/usr/bin/env bash

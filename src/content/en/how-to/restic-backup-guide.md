@@ -299,15 +299,7 @@ export AWS_ACCESS_KEY_ID="minioadmin"
 export AWS_SECRET_ACCESS_KEY="miniopassword"
 ```
 
-### Backblaze B2
-```bash
-export RESTIC_REPOSITORY="b2:my-backup-bucket:restic-data"
-export B2_ACCOUNT_ID="your-key-id"
-export B2_ACCOUNT_KEY="your-application-key"
-export RESTIC_PASSWORD="RepositoryPassword"
-
-restic init
-```
+### Backblaze B2 (S3-compatible API)
 
 ### Restic REST Server (Append-Only Protection)
 The [rest-server](https://github.com/restic/rest-server) is a lightweight HTTP server designed specifically for Restic.
@@ -321,9 +313,9 @@ restic backup ~/projects
 
 ---
 
-## 9. Production Automation Example
+## 9. Automation Example
 
-Below is a production-ready bash script suitable for cron or systemd timer execution:
+Below is a Bash automation example suitable as a starting point for a cron job or systemd timer:
 
 ```bash
 #!/usr/bin/env bash
