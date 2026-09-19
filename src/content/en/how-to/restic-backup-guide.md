@@ -111,12 +111,12 @@ restic backup ~/projects
 Restic scans the target path, splits files into blobs, computes cryptographic hashes, compares them against the repository index, and uploads only new or modified data.
 
 ```console
-repository 33002c5e opened (version 2, compression level auto)
-created new cache in /Users/jose/.cache/restic
-[0:04] 100.00%  1.242 GiB / 1.242 GiB  14,520 / 14,520 items  0 errors
+Files:           1 new,     0 changed,     0 unmodified
+Dirs:            2 new,     0 changed,     0 unmodified
+Added to the repository: 1.117 KiB (988 B stored)
 
-snapshot a8f419c2 saved
-```
+processed 1 files, 6 B in 0:00
+snapshot c7273d18 saved
 
 ### Backing Up Multiple Targets with Tags
 You can pass multiple directories in one backup command and attach tags to make searching and retention easier:
