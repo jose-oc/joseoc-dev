@@ -71,7 +71,7 @@ Este es un ejemplo de `~/.config/ghostty/config`. Personalmente dejo este archiv
 font-family = Hack Nerd Font
 font-size = 13
 theme = Deep
-scrollback-limit = 100000
+scrollback-limit = 50000000
 copy-on-select = true
 window-padding-x = 8
 window-padding-y = 8
@@ -88,6 +88,30 @@ ghostty +list-themes
 ```
 
 ![ghostty list themes](../../../assets/ghostty-list-themes.png)
+
+### Cómo entender `scrollback-limit`: Ghostty vs iTerm2
+
+Una diferencia importante entre **Ghostty** e **iTerm2** es cómo gestionan el historial de desplazamiento (*scrollback*).
+
+En **Ghostty**, `scrollback-limit` se mide en **bytes**, no en líneas. Cubre tanto la **pantalla visible** como el **búfer de scrollback**, y una vez alcanzado el límite, se descarta el contenido más antiguo. El valor por defecto actual es de **10 000 000 de bytes por superficie de terminal**. Una "superficie" (*surface*) es, en la práctica, una pestaña, una división (*split*) o un panel de ventana.
+
+Esto importa porque Ghostty mantiene el scrollback **en memoria**. Un valor más alto te proporciona más historial, pero también incrementa el consumo potencial de RAM del terminal, especialmente si mantienes muchas pestañas o splits abiertos. La buena noticia es que Ghostty asigna esta memoria de forma perezosa (*lazy allocation*), por lo que definir un límite mayor **no** reserva toda esa memoria de golpe por adelantado.
+
+```ini
+# Ejemplo: mantener más historial que el valor por defecto
+scrollback-limit = 50000000
+```
+
+Por contra, **iTerm2** gestiona el scrollback en **líneas** y además ofrece una opción de **scrollback ilimitado** (*unlimited scrollback*). Esto suena cómodo, pero puede crecer indefinidamente y terminar consumiendo una gran cantidad de memoria durante lecturas largas de logs (`tail`), ejecuciones de tests con salida verbosa o sesiones intensas de Kubernetes.
+
+En la práctica, el balance es sencillo:
+
+* **Ghostty**: consumo de memoria más predecible, pero todavía sin un modo de scrollback verdaderamente ilimitado.
+* **iTerm2**: retención de historial más flexible, incluyendo modo ilimitado, pero con menor control sobre el crecimiento de memoria en el peor de los casos.
+
+Si pasas la mayor parte del día analizando logs extensos, `scrollback-limit` es uno de los pocos ajustes de Ghostty que merece la pena configurar explícitamente. Si sueles usar shells y editores de corta duración, el valor por defecto suele ser suficiente.
+
+Fuentes: [Referencia de configuración de Ghostty](https://ghostty.org/docs/config/reference), [Preferencias de perfiles de terminal en iTerm2](https://iterm2.com/documentation-preferences-profiles-terminal.html)
 
 ---
 
@@ -128,6 +152,48 @@ bindkey "^[[8~" end-of-line
 bindkey '^[^?' backward-kill-word
 bindkey '^[\x7f' backward-kill-word
 ```
+
+### Mapeo de teclas en iTerm2
+
+Los atajos de la shell anteriores esperan que `Option + Backspace` envíe `Escape` seguido de `Delete`. En iTerm2, mantén la tecla Option izquierda en **Normal** y añade este mapeo de teclas en tu perfil:
+
+1. Abre **iTerm2 -> Settings -> Profiles -> Keys -> Key Mappings**.
+2. Haz clic en **+**, pulsa `Option + Delete` y elige **Send Hex Code**.
+3. Introduce `0x1b 0x7f` y guarda el mapeo.
+
+Esto mantiene todos estos comportamientos:
+
+* `Option + Left/Right` navega por palabras.
+* `Option + Delete` borra la palabra anterior.
+* En un teclado de macOS en español, `Option + ñ` escribe `~`. Si la distribución del teclado lo trata como tecla muerta (*dead key*), pulsa `Option + N` seguido de `Espacio`.
+
+No cambies la tecla Option izquierda a **Esc+** si quieres que `Option + ñ` genere `~`; el mapeo de teclas dedicado permite que el borrado de palabras funcione sin alterar el uso de Option para la introducción de caracteres.
+
+### Colores para modo claro y oscuro en iTerm2
+
+iTerm2 puede seguir la apariencia de macOS usando paletas independientes para modo claro y modo oscuro:
+
+1. Abre **Settings -> Profiles -> Colors**.
+2. Activa **Use separate colors for light and dark mode**.
+3. Selecciona **Light Mode** en **Editing**.
+4. Cambia los colores ANSI del modo claro por variantes más oscuras. Por ejemplo:
+
+   | Color ANSI | Valor hexadecimal (modo claro) |
+   | --- | --- |
+   | Rojo | `#B00020` |
+   | Verde | `#006B3C` |
+   | Amarillo | `#7A4F00` |
+   | Azul | `#0057B8` |
+   | Magenta | `#8F0075` |
+   | Cian | `#006D77` |
+   | Blanco / blanco brillante | `#333333` / `#1A1A1A` |
+
+   Aplica los mismos valores más oscuros a los colores ANSI brillantes correspondientes cuando los utilice tu prompt o tus herramientas CLI.
+5. Selecciona **Dark Mode** en **Editing** y deja la paleta de modo oscuro como está, o ajústala de forma independiente para un fondo oscuro.
+
+Esto evita que el texto en amarillo brillante, verde, cian o blanco desaparezca sobre el fondo blanco durante el día, manteniendo al mismo tiempo la apariencia en el modo oscuro.
+
+Estos ajustes y secuencias de teclas de iTerm2 se probaron en macOS `26.6.2` con iTerm2 `3.7.2`.
 
 [Descargar la grabación de terminal sobre navegación por palabras en Ghostty](/assets/terminal-recording-20260425_204243.cast)
 
