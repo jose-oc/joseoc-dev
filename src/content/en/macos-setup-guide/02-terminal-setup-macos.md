@@ -158,6 +158,58 @@ bindkey '^[^?' backward-kill-word
 bindkey '^[\x7f' backward-kill-word
 ```
 
+### iTerm2 Key Mappings
+
+The shell bindings above expect `Option + Backspace` to send `Escape` followed
+by `Delete`. In iTerm2, keep the left Option key set to **Normal**, then add
+this profile key mapping:
+
+1. Open **iTerm2 -> Settings -> Profiles -> Keys -> Key Mappings**.
+2. Click **+**, press `Option + Delete`, and choose **Send Hex Code**.
+3. Enter `0x1b 0x7f` and save the mapping.
+
+This preserves all of these behaviours:
+
+* `Option + Left/Right` navigates by word.
+* `Option + Delete` deletes the previous word.
+* On a Spanish macOS keyboard, `Option + ñ` types `~`. If the layout exposes
+  it as a dead key, press `Option + N` followed by `Space` instead.
+
+Do not change the left Option key to **Esc+** if you want `Option + ñ` to
+produce `~`; the dedicated key mapping makes word deletion work without
+changing how Option is used for character input.
+
+### iTerm2 Light and Dark Mode Colours
+
+iTerm2 can follow the macOS appearance while using separate palettes for
+light and dark mode:
+
+1. Open **Settings -> Profiles -> Colors**.
+2. Enable **Use separate colors for light and dark mode**.
+3. Select **Light Mode** in **Editing**.
+4. Change the light-mode ANSI colours to darker variants. For example:
+
+   | ANSI colour | Light-mode hex value |
+   | --- | --- |
+   | Red | `#B00020` |
+   | Green | `#006B3C` |
+   | Yellow | `#7A4F00` |
+   | Blue | `#0057B8` |
+   | Magenta | `#8F0075` |
+   | Cyan | `#006D77` |
+   | White/bright white | `#333333` / `#1A1A1A` |
+
+   Apply the same darker values to the corresponding bright ANSI colours
+   when they are used by your prompt or CLI tools.
+5. Select **Dark Mode** in **Editing** and leave the dark-mode palette as it
+   is, or tune it independently for a dark background.
+
+This avoids bright yellow, green, cyan, and white text disappearing against
+the daytime white background while preserving the night-time appearance.
+
+These iTerm2 settings and key sequences were tested on macOS `26.6.2` with
+iTerm2 `3.7.2`.
+
 [Download the Ghostty word-navigation terminal recording](/assets/terminal-recording-20260425_204243.cast)
 
 ---
@@ -172,4 +224,3 @@ Both Ghostty and iTerm2 use GPU acceleration (Metal) on macOS. This offloads tex
 
 ## Summary
 You now have a high-performance window into your system. With **Ghostty** and **Nerd Fonts**, your environment is fast, readable, and ready for icons. Next, we'll secure your identity by [setting up SSH and Authentication](/docs/macos-setup-guide/ssh-and-authentication).
-
