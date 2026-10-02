@@ -62,6 +62,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Access Linux Disks from macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
           { label: '· Add User to Sudoers in Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
           { label: '· Secure Backups with Restic', slug: 'how-to/restic-backup-guide' },
+          { label: '· SSH Access Through a Jump Host', slug: 'how-to/ssh-jump-host' },
         ]
       },
       {
@@ -140,6 +141,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Acceder a discos Linux desde macOS', slug: 'how-to/ubuntu-apple-silicon-utm-ext4' },
           { label: '· Añadir usuario a sudoers en Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
           { label: '· Copias de seguridad seguras con Restic', slug: 'how-to/restic-backup-guide' },
+          { label: '· Acceso SSH mediante un Jump Host', slug: 'how-to/ssh-jump-host' },
         ]
       },
       {
