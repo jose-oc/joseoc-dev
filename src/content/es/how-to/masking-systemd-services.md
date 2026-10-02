@@ -13,7 +13,7 @@ Al administrar servicios en segundo plano en Ubuntu y sistemas basados en Debian
 
 Sin embargo, los comandos habituales de systemd como `systemctl stop` y `systemctl disable` no garantizan que un servicio permanezca inactivo.
 
-Para hacer que una unidad sea completamente imposible de iniciar—incluso si es invocada por temporizadores, sockets, dependencias de otros servicios o comandos manuales accidentales—es necesario **enmascarar** (*mask*) el servicio.
+Para impedir que systemd inicie una unidad—ya sea por temporizadores, sockets, dependencias de otros servicios o comandos manuales accidentales—puedes **enmascararla** (*mask*). Una máscara efectiva bloquea la activación a través de systemd mientras siga instalada.
 
 A continuación se explica cómo funciona el enmascaramiento en systemd, en qué se diferencia de `stop` y `disable`, y cómo utilizarlo con ejemplos prácticos.
 
@@ -25,62 +25,64 @@ Es común confundir el alcance real de `stop`, `disable` y `mask`:
 
 ```mermaid
 flowchart TD
-    subgraph Eventos ["Eventos de activación"]
-        T1["Arranque del sistema (Boot)"]
-        T2["Comando manual<br/>(systemctl start)"]
-        T3["Dependencia / Timer / Socket<br/>(Requires=, .timer, .socket)"]
+    subgraph Eventos ["Solicitudes de activación"]
+        T1["Arranque: enlaces de enable<br/>y otras dependencias"]
+        T2["Comando manual, timer, socket<br/>o dependencia (systemctl start, .timer, .socket, Requires=)"]
     end
 
-    subgraph Resolucion ["Evaluación de la unidad en Systemd"]
-        C{"¿Está enmascarada?<br/>(/etc/systemd/system/unit -> /dev/null)"}
-        D{"¿Está habilitada?<br/>(enlace en .wants/)"}
+    subgraph Resolucion ["Evaluación de la unidad en systemd"]
+        C{"¿La unidad efectiva está enmascarada?<br/>(enlace a /dev/null)"}
     end
 
     subgraph Resultado ["Resultado"]
         R1["❌ Bloqueado con error<br/>'Unit is masked'"]
-        R2["⚡ El servicio se inicia"]
-        R3["⏳ Permanece inactivo (espera)"]
+        R2["⚡ systemd intenta activarla y evalúa<br/>condiciones y dependencias"]
     end
 
     T1 --> C
     T2 --> C
-    T3 --> C
 
     C -- "Sí" --> R1
-    C -- "No" --> D
-
-    D -- "Habilitada" --> R2
-    D -- "Deshabilitada" --> T2
-    D -- "Deshabilitada en arranque" --> R3
-    D -- "Deshabilitada + llamada por dependencia" --> R2
+    C -- "No" --> R2
 ```
+
+> [!NOTE]
+> `enable` no es una puerta para todo inicio: un `systemctl start` manual no necesita que la unidad esté habilitada, y estar habilitada tampoco garantiza que el proceso termine arrancando bien. `enable` solo añade enlaces que generan solicitudes de activación en el arranque.
 
 ### 1. `systemctl stop` (Solo en tiempo de ejecución)
 * **Qué hace**: Detiene el proceso en ejecución de forma inmediata.
 * **Qué no hace**: No altera la configuración en disco ni los enlaces de inicio.
-* **Por qué vuelve a iniciarse**: El servicio volverá a levantarse en el siguiente reinicio del sistema, o en cualquier momento si otro servicio, temporizador (`.timer`), socket o administrador lo invoca.
+* **Por qué vuelve a iniciarse**: Tras un `stop`, el servicio puede volver a iniciarse si otro servicio, temporizador (`.timer`), socket o administrador lo invoca. En un reinicio solo volverá si algo lo activa en el arranque (por ejemplo, un enlace de `enable` o una dependencia), pero no hay garantía de que no lo haga.
 
 ```bash
 sudo systemctl stop apt-daily.service
 ```
 
-### 2. `systemctl disable` (Eliminación del enlace de arranque)
-* **Qué hace**: Elimina el enlace simbólico del destino de arranque (como `/etc/systemd/system/multi-user.target.wants/<unidad>.service`). El servicio ya no arrancará automáticamente al encender el equipo.
+### 2. `systemctl disable` (Eliminación de los enlaces de habilitación)
+* **Qué hace**: Elimina los enlaces de habilitación de la unidad (como `/etc/systemd/system/multi-user.target.wants/<unidad>.service`), de modo que ese mecanismo deje de activarla en el arranque. No la detiene ni impide otras activaciones, incluso durante el arranque (dependencias, timers, sockets).
+* **Unidades `static`**: una unidad sin sección `[Install]`, como `apt-daily.service`, es `static`; no tiene enlaces de enable que eliminar, así que `disable` no le hace nada. En ese caso actúa sobre el timer que la activa.
 * **Qué no hace**: No detiene una instancia que ya esté corriendo en memoria, ni impide que se active bajo demanda.
 * **Por qué vuelve a iniciarse**: Cualquier administrador puede ejecutar `systemctl start`, o un servicio activo con directiva `Wants=` o `Requires=` puede iniciarlo, o una unidad `.timer` / `.socket` asociada puede activarlo.
 
 ```bash
-sudo systemctl disable apt-daily.service
+sudo systemctl disable apt-daily.timer
+
+# disable no detiene el timer si ya está activo.
+# Para deshabilitarlo y detenerlo a la vez:
+sudo systemctl disable --now apt-daily.timer
 ```
 
 ### 3. `systemctl mask` (Bloqueo total)
 * **Qué hace**: Crea un enlace simbólico de la unidad apuntando directamente a `/dev/null`.
-* **Qué garantiza**: Systemd trata la unidad como inválida o permanentemente prohibida. Cualquier intento de inicio—manual, en el arranque, por temporizador o por dependencias—falla de inmediato arrojando un error explícito.
-* **Cómo restaurarlo**: La única forma de volver a utilizarlo es mediante `systemctl unmask`.
+* **Qué consigue**: Mientras la máscara sea efectiva, systemd rechaza cualquier intento de inicio a través de él—manual, en el arranque, por temporizador o por dependencias—con un error explícito. No aísla el binario ni es una barrera frente a un administrador que pueda cambiar la configuración.
+* **Cómo restaurarlo**: El método habitual es `systemctl unmask`.
 
 ```bash
 sudo systemctl mask apt-daily.service
 ```
+
+> [!NOTE]
+> `mask` es especialmente útil para unidades de paquetes situadas en el directorio vendor. Si creaste la unidad tú en `/etc/systemd/system` o `/run/systemd/system`, `mask` puede fallar porque el archivo ya existe (`already exists`). Inspecciona el origen de la unidad y conserva su definición antes de decidir cómo gestionarla; no borres una unidad local a ciegas.
 
 ---
 
@@ -89,7 +91,7 @@ sudo systemctl mask apt-daily.service
 | Característica / Comportamiento | `systemctl stop` | `systemctl disable` | `systemctl mask` |
 | :--- | :---: | :---: | :---: |
 | **¿Detiene el proceso en ejecución?** | ✅ Sí | ❌ No (requiere stop manual) | ❌ No (requiere stop manual) |
-| **¿Evita el inicio automático en el arranque?** | ❌ No | ✅ Sí | ✅ Sí |
+| **¿Elimina los enlaces de habilitación del arranque?** | ❌ No | ✅ Sí (si la unidad tiene `[Install]`) | ⚠️ No los elimina, pero bloquea la activación |
 | **¿Impide el inicio manual con `systemctl start`?** | ❌ No | ❌ No | ✅ Sí (falla con error) |
 | **¿Impide la activación por temporizador o socket?** | ❌ No | ❌ No | ✅ Sí |
 | **¿Impide el inicio por dependencias (`Requires=`)?** | ❌ No | ❌ No | ✅ Sí |
@@ -107,9 +109,13 @@ sudo systemctl mask apt-daily.service
 
 Systemd busca y resuelve las unidades siguiendo un orden de prioridad estricto en el sistema de archivos:
 
-1. `/etc/systemd/system/` (Configuración local del administrador — **máxima prioridad**)
+Como simplificación para unidades habituales instaladas por paquetes:
+
+1. `/etc/systemd/system/` (Configuración local del administrador — prioridad alta)
 2. `/run/systemd/system/` (Unidades en tiempo de ejecución / efímeras generadas en el arranque)
-3. `/lib/systemd/system/` o `/usr/lib/systemd/system/` (Unidades por defecto instaladas por paquetes — **mínima prioridad**)
+3. `/lib/systemd/system/` o `/usr/lib/systemd/system/` (Unidades por defecto instaladas por paquetes — prioridad baja)
+
+El load path completo incluye otras rutas, por ejemplo unidades transient y `generator.early`. El manual también lista directorios `system.control` por encima de `/etc/systemd/system`.
 
 Cuando ejecutas `sudo systemctl mask apt-daily.service`, systemd genera un enlace simbólico:
 
@@ -117,12 +123,14 @@ Cuando ejecutas `sudo systemctl mask apt-daily.service`, systemd genera un enlac
 /etc/systemd/system/apt-daily.service -> /dev/null
 ```
 
+*Salida ilustrativa; el formato y los detalles pueden variar según la versión de systemd y el estado de la unidad.*
+
 ```text
 $ ls -l /etc/systemd/system/apt-daily.service
 lrwxrwxrwx 1 root root 9 Oct  1 12:00 /etc/systemd/system/apt-daily.service -> /dev/null
 ```
 
-Dado que `/etc/systemd/system/` tiene prioridad sobre `/lib/systemd/system/`, systemd lee el enlace a `/dev/null` en lugar del archivo original del paquete. Como resultado, systemd considera que la unidad está bloqueada y rechaza cualquier solicitud de arranque.
+Dado que `/etc/systemd/system/` tiene prioridad sobre `/lib/systemd/system/`, systemd lee el enlace a `/dev/null` en lugar del archivo original del paquete. Como resultado, systemd considera que la unidad está bloqueada y rechaza las solicitudes de arranque mientras ese enlace siga siendo la definición efectiva.
 
 ### Qué NO hace el enmascaramiento
 
@@ -144,16 +152,37 @@ Estos servicios se activan mediante sus respectivos temporizadores: `apt-daily.t
 
 En entornos automatizados, pipelines de CI/CD o tareas de aprovisionamiento con Ansible, estas ejecuciones automáticas pueden dispararse en el momento menos oportuno, bloqueando `/var/lib/dpkg/lock-frontend` y provocando errores de despliegue.
 
+> [!WARNING]
+> Enmascarar estos servicios y timers desactiva esta vía de actualización automática, **incluidas las actualizaciones de seguridad**. Úsalo solo en imágenes CI desechables o en sistemas con otro proceso explícito de parcheado, y documenta cuándo restaurarlo. Antes de usar `--now`, comprueba que no hay una instalación o configuración de paquetes en curso: no fuerces la interrupción de `dpkg`/`apt` para liberar un lock.
+
+#### Alternativa más limitada: `Persistent=false`
+
+Si el problema son las ejecuciones pendientes que se disparan al arrancar, Canonical documenta una opción menos agresiva: modificar `Persistent` en los timers en lugar de bloquear todo el mecanismo.
+
+```bash
+sudo systemctl edit apt-daily.timer
+sudo systemctl edit apt-daily-upgrade.timer
+```
+
+En cada override:
+
+```ini
+[Timer]
+Persistent=false
+```
+
+`Persistent=false` evita recuperar una ejecución perdida mientras la máquina estaba apagada y conserva las próximas ejecuciones programadas. No elimina toda posibilidad de que dos procesos de paquetes coincidan.
+
 #### Paso 1: Detener y enmascarar servicios y temporizadores
 
-Para anular definitivamente tanto los temporizadores como los servicios:
+Si, aun así, necesitas anular tanto los temporizadores como los servicios:
 
 ```bash
 # Detener instancias en ejecución y enmascarar todo simultáneamente
 sudo systemctl mask --now apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer
 ```
 
-Systemd confirmará la creación de los enlaces:
+Systemd confirmará la creación de los enlaces (salida ilustrativa; el formato puede variar según la versión de systemd):
 
 ```text
 Created symlink /etc/systemd/system/apt-daily.service → /dev/null.
@@ -170,7 +199,7 @@ Comprueba el estado de cualquiera de los servicios:
 systemctl status apt-daily.service
 ```
 
-Salida:
+Salida ilustrativa; el formato y los detalles pueden variar según la versión de systemd y el estado de la unidad:
 ```text
 ○ apt-daily.service
      Loaded: masked (Reason: Unit apt-daily.service is masked.)
@@ -193,13 +222,14 @@ Failed to start apt-daily.service: Unit apt-daily.service is masked.
 
 #### Paso 4: Comprobar que los comandos manuales siguen funcionando
 
-Enmascarar la unidad de systemd no afecta al uso interactivo de las herramientas. Puedes actualizar e instalar paquetes manualmente sin problemas:
+Enmascarar la unidad de systemd no afecta al uso interactivo de las herramientas. La máscara de estas unidades no impide ejecutar APT manualmente:
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update
+sudo apt upgrade
 ```
 
-El comando se ejecuta sin trabas porque la llamada directa a `apt` no interactúa con `apt-daily.service`.
+La operación sigue sujeta a los locks de otros procesos, al estado de `dpkg` y a los errores habituales del gestor de paquetes. Ejecutar los comandos por separado te permite revisar los cambios antes de aceptarlos.
 
 ---
 
@@ -208,10 +238,12 @@ El comando se ejecuta sin trabas porque la llamada directa a `apt` no interactú
 Para auditar qué unidades están actualmente enmascaradas en la máquina:
 
 ```bash
-systemctl list-unit-files --state=masked
+systemctl list-unit-files --state=masked,masked-runtime
 ```
 
-Salida de ejemplo:
+`masked` identifica las máscaras persistentes y `masked-runtime` las temporales (`--runtime`). Si solo filtras por `masked`, no verás estas últimas.
+
+Salida de ejemplo (ilustrativa; el formato puede variar):
 ```text
 UNIT FILE                  STATE  PRESET 
 apt-daily-upgrade.service  masked enabled
@@ -229,10 +261,20 @@ apt-daily.timer            masked enabled
 Si necesitas evitar que un servicio se inicie durante una ventana de mantenimiento o pruebas de diagnóstico, pero quieres que el bloqueo desaparezca automáticamente en el próximo reinicio, utiliza el parámetro `--runtime`:
 
 ```bash
-sudo systemctl mask --runtime nginx.service
+sudo systemctl mask --runtime --now nginx.service
 ```
 
-Esto crea el enlace simbólico en `/run/systemd/system/nginx.service -> /dev/null`. Como `/run` es un sistema de archivos temporal en memoria (`tmpfs`), el bloqueo se descarta al reiniciar el servidor.
+`--runtime` crea el enlace simbólico en `/run/systemd/system/nginx.service -> /dev/null`, y `--now` detiene además el servicio si ya estaba activo (sin `--now`, `mask --runtime` no para un nginx que ya esté en marcha). Como `/run` es un sistema de archivos temporal en memoria (`tmpfs`), la máscara se descarta al reiniciar el servidor.
+
+Para retirarla sin reiniciar, y arrancar el servicio solo cuando corresponda:
+
+```bash
+sudo systemctl unmask --runtime nginx.service
+sudo systemctl start nginx.service
+```
+
+> [!NOTE]
+> Una definición con el mismo nombre en `/etc/systemd/system` tiene precedencia sobre la máscara en `/run/systemd/system`. Reiniciar elimina la máscara runtime, pero no garantiza por sí solo que el servicio arranque: depende de la configuración restante.
 
 ---
 
@@ -248,7 +290,7 @@ sudo systemctl unmask apt-daily.service apt-daily.timer apt-daily-upgrade.servic
 sudo systemctl enable --now apt-daily.timer apt-daily-upgrade.timer
 ```
 
-Salida tras desenmascarar:
+Salida tras desenmascarar (ilustrativa; el formato puede variar):
 ```text
 Removed /etc/systemd/system/apt-daily.service.
 Removed /etc/systemd/system/apt-daily.timer.
@@ -264,6 +306,6 @@ Removed /etc/systemd/system/apt-daily-upgrade.timer.
 ## Buenas prácticas y recomendaciones
 
 1. **Enmascara también los temporizadores y sockets asociados**: Si el servicio tiene un archivo `.timer` (como `apt-daily.timer`) o `.socket` (como `cups.socket`), enmascarar solo el `.service` provocará que el temporizador siga activándose y genere advertencias en los logs. Enmascara ambos.
-2. **Utiliza `--now` para detener inmediatamente**: Por defecto, `systemctl mask` solo bloquea ejecuciones futuras. Combínalo con `systemctl mask --now <unidad>` para forzar la detención inmediata del proceso.
+2. **Utiliza `--now` para detener inmediatamente**: Por defecto, `systemctl mask` solo bloquea ejecuciones futuras. Combínalo con `systemctl mask --now <unidad>` para detener el proceso inmediatamente, tras comprobar que no hay una operación crítica en curso.
 3. **No borres archivos en `/lib/systemd/system/`**: Nunca elimines manualmente las definiciones de paquetes del sistema. Las actualizaciones de paquetes volverán a crearlos. El enmascaramiento en `/etc/systemd/system/` es la vía oficial y limpia.
-4. **Revisa unidades enmascaradas en auditorías**: Si un servicio no arranca y arroja `Unit is masked`, consulta `systemctl list-unit-files --state=masked` para verificar el motivo del bloqueo.
+4. **Revisa unidades enmascaradas en auditorías**: Si un servicio no arranca y arroja `Unit is masked`, consulta `systemctl list-unit-files --state=masked,masked-runtime` para verificar el motivo del bloqueo.
