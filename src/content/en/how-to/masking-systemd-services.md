@@ -24,26 +24,22 @@ Here is a practical guide explaining how systemd masking works, how it compares 
 System administrators often confuse what `stop`, `disable`, and `mask` actually accomplish:
 
 ```mermaid
-flowchart TD
-    subgraph Eventos ["Activation requests"]
-        T1["Boot: enable links<br/>and other dependencies"]
-        T2["Manual command, timer, socket<br/>or dependency (systemctl start, .timer, .socket, Requires=)"]
-    end
-
-    subgraph Resolucion ["Unit evaluation in systemd"]
-        C{"Is the effective unit masked?<br/>(link to /dev/null)"}
-    end
-
-    subgraph Resultado ["Result"]
-        R1["❌ Blocked with error<br/>'Unit is masked'"]
-        R2["⚡ systemd tries to activate it and evaluates<br/>conditions and dependencies"]
-    end
+---
+config:
+  themeVariables:
+    fontSize: 14px
+---
+flowchart TB
+    T1["Boot<br/>(enable links<br/>and dependencies)"]
+    T2["Manual command,<br/>timer, socket or<br/>dependency<br/>(systemctl start,<br/>Requires=)"]
+    C{"Is the effective unit<br/>masked?<br/>(link to /dev/null)"}
+    R1["❌ Blocked with error<br/>'Unit is masked'"]
+    R2["⚡ systemd tries to activate it<br/>and evaluates conditions<br/>and dependencies"]
 
     T1 --> C
     T2 --> C
-
-    C -- "Yes" --> R1
-    C -- "No" --> R2
+    C -->|"Yes"| R1
+    C -->|"No"| R2
 ```
 
 > [!NOTE]

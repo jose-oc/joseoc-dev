@@ -24,26 +24,22 @@ A continuación se explica cómo funciona el enmascaramiento en systemd, en qué
 Es común confundir el alcance real de `stop`, `disable` y `mask`:
 
 ```mermaid
-flowchart TD
-    subgraph Eventos ["Solicitudes de activación"]
-        T1["Arranque: enlaces de enable<br/>y otras dependencias"]
-        T2["Comando manual, timer, socket<br/>o dependencia (systemctl start, .timer, .socket, Requires=)"]
-    end
-
-    subgraph Resolucion ["Evaluación de la unidad en systemd"]
-        C{"¿La unidad efectiva está enmascarada?<br/>(enlace a /dev/null)"}
-    end
-
-    subgraph Resultado ["Resultado"]
-        R1["❌ Bloqueado con error<br/>'Unit is masked'"]
-        R2["⚡ systemd intenta activarla y evalúa<br/>condiciones y dependencias"]
-    end
+---
+config:
+  themeVariables:
+    fontSize: 14px
+---
+flowchart TB
+    T1["Arranque<br/>(enlaces de enable<br/>y dependencias)"]
+    T2["Comando manual,<br/>timer, socket o<br/>dependencia<br/>(systemctl start,<br/>Requires=)"]
+    C{"¿La unidad efectiva<br/>está enmascarada?<br/>(enlace a /dev/null)"}
+    R1["❌ Bloqueado con error<br/>'Unit is masked'"]
+    R2["⚡ systemd intenta activarla<br/>y evalúa condiciones<br/>y dependencias"]
 
     T1 --> C
     T2 --> C
-
-    C -- "Sí" --> R1
-    C -- "No" --> R2
+    C -->|"Sí"| R1
+    C -->|"No"| R2
 ```
 
 > [!NOTE]
