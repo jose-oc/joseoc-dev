@@ -27,6 +27,11 @@ In this guide, we use the following realistic environment:
 ### Network Layout
 
 ```mermaid
+---
+config:
+  themeVariables:
+    fontSize: 14px
+---
 flowchart TB
     Mac["Your Local Machine<br/>(SSH key & ssh-agent)"]
     Jump["bastion03<br/>.lab3.poclabs.com<br/>(Jump Host / Bastion)"]

@@ -27,6 +27,11 @@ En esta guía utilizaremos el siguiente entorno práctico:
 ### Diagrama de red
 
 ```mermaid
+---
+config:
+  themeVariables:
+    fontSize: 14px
+---
 flowchart TB
     Mac["Tu equipo local<br/>(Clave SSH y ssh-agent)"]
     Jump["bastion03<br/>.lab3.poclabs.com<br/>(Jump Host / Bastión)"]
