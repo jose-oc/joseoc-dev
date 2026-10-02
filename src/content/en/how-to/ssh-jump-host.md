@@ -9,7 +9,7 @@ slug: "how-to/ssh-jump-host"
 draft: false
 ---
 
-When managing cloud infrastructure or on-premise environments, servers in private subnets or isolated VLANs are deliberately isolated from direct internet access. To manage these private virtual machines, administrators often route connections through a **jump host** (also known as a **bastion host**).
+When managing cloud infrastructure or on-premise environments, some virtual machines cannot be reached directly over SSH from your workstation, for example because they sit in a private subnet or behind firewall rules. A jump host that you can reach can act as the entry point. To manage these private virtual machines, administrators often route connections through a **jump host** (also known as a **bastion host**).
 
 An SSH jump host allows you to access private internal machines securely without copying your private SSH keys to intermediary servers or relying on passwords.
 
@@ -39,11 +39,125 @@ flowchart LR
 > [!NOTE]
 > The fact that `bastion03.lab3.poclabs.com` has a public DNS record does not mean that `privatehost01` needs a public IP address. DNS simply resolves a hostname to an IP address. The jump host resolves and reaches `privatehost01` directly across its internal, private network interface.
 
-There are two primary methods for reaching target VMs through a jump host: **Agent Forwarding (`-A`)** and **ProxyJump (`-J`)**.
+There are two primary methods for reaching target VMs through a jump host: **ProxyJump (`-J`)**, the recommended default, and **Agent Forwarding (`-A`)**, for specific cases.
+
+## Prerequisites
+
+Neither method sets up the network or authorizes keys for you. Before you start you need:
+
+- An SSH server on the bastion and on the target VM.
+- Access from your workstation to the bastion.
+- The bastion must resolve `privatehost01` and reach its SSH port.
+- Your public key authorized for the accounts you will use, **on both servers**.
+- The bastion must allow TCP forwarding to the target: check `AllowTcpForwarding`, `PermitOpen`, and any restrictions in `authorized_keys`. Routes and firewalls must allow it too.
+
+> [!WARNING]
+> Before accepting a new host key, compare its fingerprint with a trusted source from the administrator. Check the bastion and the target VM separately. Do not disable host key checking just to make it work.
 
 ---
 
-## Method 1: SSH Agent Forwarding (`-A`)
+## Method 1: ProxyJump (`-J`) — The Modern, Recommended Standard
+
+`ProxyJump` (introduced natively in OpenSSH 7.3) uses the jump host strictly as a network proxy. Your local OpenSSH client establishes an end-to-end encrypted connection directly to the target VM through an encrypted tunnel over the jump host.
+
+### How It Works
+
+```bash
+ssh -J bastion@bastion03.lab3.poclabs.com bastion@privatehost01
+```
+
+This single command automatically performs the following:
+
+1. Connects and authenticates to `bastion03.lab3.poclabs.com`.
+2. Instructs the jump host to open a TCP forwarding channel (`ssh -W`) to `privatehost01:22`.
+3. Negotiates end-to-end SSH encryption and authenticates directly to `privatehost01` as `bastion` from your local machine.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Local as Local Client
+    participant Jump as Jump Host (bastion03)
+    participant Target as Target VM (privatehost01)
+
+    Local->>Jump: SSH Handshake & Authenticate
+    Local->>Jump: Request TCP Forwarding to privatehost01:22
+    Jump->>Target: TCP Connect (Port 22)
+    Local->>Target: SSH Handshake (session encryption is negotiated here)
+    Note over Local,Target: End-to-end encrypted session between Local and Target
+    Local->>Target: Authenticate (bastion)
+    Local->>Target: Interactive Shell Session
+```
+
+### Advantages
+
+- **Single command execution**: Connects straight to the target VM in one step.
+- **End-to-end encryption**: The jump host only sees encrypted traffic packets; it cannot inspect your session content.
+- **No remote agent socket needed**: ProxyJump does not require Agent Forwarding and does not enable it by itself, so no `$SSH_AUTH_SOCK` is created on the jump host unless some other part of your configuration enables `ForwardAgent`. Keep `ForwardAgent no` if you do not need an agent in a remote session.
+- **Tool compatibility**: Works seamlessly with `scp`, `rsync`, `sftp`, and VS Code Remote SSH.
+
+### Important Detail: Target Username
+
+If you do not specify a user in the command, SSH uses the matching `User` directive from your `~/.ssh/config`; if there is none, it uses your local username. You can write `user@host` or set it in `~/.ssh/config`.
+
+```bash
+# No User in your config: uses your local username (e.g., 'jose'), which probably does not exist on the VM
+ssh -J bastion@bastion03.lab3.poclabs.com privatehost01
+```
+
+In standalone commands, state both the jump host user and the target user explicitly:
+
+```bash
+# Correct: explicit user on both hops
+ssh -J bastion@bastion03.lab3.poclabs.com bastion@privatehost01
+```
+
+
+---
+
+## Recommended Configuration (`~/.ssh/config`)
+
+To streamline your workflow and avoid typing jump host parameters every time, declare the target VM in `~/.ssh/config`:
+
+```ssh-config
+# Target private VM
+Host privatehost01
+  HostName privatehost01
+  User bastion
+  ProxyJump bastion03.lab3.poclabs.com
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  ForwardAgent no
+
+# Optional: configure the jump host defaults
+Host bastion03.lab3.poclabs.com
+  User bastion
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  ForwardAgent no
+```
+
+With this configuration in place, you can connect directly with:
+
+```bash
+ssh privatehost01
+```
+
+All other standard utilities will automatically honor this tunnel:
+
+```bash
+# Copy a file to the private VM
+scp ./backup.tar.gz privatehost01:/tmp/
+
+# Sync files with rsync
+rsync -avz ./src/ privatehost01:/opt/app/
+```
+
+> [!NOTE]
+> If you have broader blocks that enable `ForwardAgent` (for example `Host *`), remove or narrow them. In `~/.ssh/config` the first value obtained for an option usually wins, so adding a block at the end does not guarantee it overrides an earlier one.
+
+---
+
+## Method 2: SSH Agent Forwarding (`-A`)
 
 Agent forwarding makes your local SSH authentication agent (`ssh-agent`) available inside your interactive jump-host session.
 
@@ -56,7 +170,7 @@ Agent forwarding makes your local SSH authentication agent (`ssh-agent`) availab
 
 ```bash
 # Step 1: Connect to the jump host with agent forwarding
-ssh -A bastion03.lab3.poclabs.com
+ssh -A bastion@bastion03.lab3.poclabs.com
 
 # Step 2: From the jump host, connect to the private target VM
 ssh bastion@privatehost01
@@ -67,7 +181,8 @@ ssh bastion@privatehost01
 Instead of specifying flags manually, configure agent forwarding in `~/.ssh/config`:
 
 ```ssh-config
-Host *.poclabs.com
+# Only for the trusted bastion, not the whole domain
+Host bastion03.lab3.poclabs.com
   User bastion
   IdentityFile ~/.ssh/id_ed25519
   ForwardAgent yes
@@ -75,11 +190,14 @@ Host *.poclabs.com
 
 ### Loading Your Key into the Local Agent
 
-Before connecting, ensure your SSH key is loaded into your local agent:
+Before connecting, ensure your SSH key is loaded into your local agent. The key must exist and its public key must be authorized on the relevant servers. If your desktop session already provides an agent, you do not need to start a new one:
 
 ```bash
-# Check currently loaded keys
-ssh-add --list
+# Check the fingerprints of the loaded keys (-L shows the public keys)
+ssh-add -l
+
+# If no agent is available, on a Linux shell:
+eval "$(ssh-agent -s)"
 
 # Add your key if it is not listed
 ssh-add ~/.ssh/id_ed25519
@@ -103,99 +221,6 @@ ssh-add -L
 >
 > Avoid enabling `ForwardAgent yes` globally for all hosts (`Host *`). Only enable it for trusted intermediate bastions.
 
----
-
-## Method 2: ProxyJump (`-J`) — The Modern Standard
-
-`ProxyJump` (introduced natively in OpenSSH 7.3) uses the jump host strictly as a network proxy. Your local OpenSSH client establishes an end-to-end encrypted connection directly to the target VM through an encrypted tunnel over the jump host.
-
-### How It Works
-
-```bash
-ssh -J bastion03.lab3.poclabs.com bastion@privatehost01
-```
-
-This single command automatically performs the following:
-
-1. Connects and authenticates to `bastion03.lab3.poclabs.com`.
-2. Instructs the jump host to open a TCP forwarding channel (`ssh -W`) to `privatehost01:22`.
-3. Negotiates end-to-end SSH encryption and authenticates directly to `privatehost01` as `bastion` from your local machine.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Local as Local Client
-    participant Jump as Jump Host (bastion03)
-    participant Target as Target VM (privatehost01)
-
-    Local->>Jump: SSH Handshake & Authenticate
-    Local->>Jump: Request TCP Forwarding to privatehost01:22
-    Jump->>Target: TCP Connect (Port 22)
-    Note over Local,Target: End-to-End Encrypted Tunnel Established
-    Local->>Target: SSH Handshake & Authenticate (bastion)
-    Local->>Target: Interactive Shell Session
-```
-
-### Advantages
-
-- **Single command execution**: Connects straight to the target VM in one step.
-- **End-to-end encryption**: The jump host only sees encrypted traffic packets; it cannot inspect your session content.
-- **No remote agent socket**: No `$SSH_AUTH_SOCK` is created on the jump host, eliminating the risk of rogue socket abuse.
-- **Tool compatibility**: Works seamlessly with `scp`, `rsync`, `sftp`, and VS Code Remote SSH.
-
-### Important Detail: Target Username
-
-If you omit the username on the target VM argument:
-
-```bash
-# Incomplete: defaults to your local username (e.g., 'jose')
-ssh -J bastion03.lab3.poclabs.com privatehost01
-```
-
-SSH will attempt to log into `privatehost01` with your local workstation username. Always specify the target user explicitly:
-
-```bash
-# Correct: explicitly specifies 'bastion' on privatehost01
-ssh -J bastion03.lab3.poclabs.com bastion@privatehost01
-```
-
----
-
-## Recommended Configuration (`~/.ssh/config`)
-
-To streamline your workflow and avoid typing jump host parameters every time, declare the target VM in `~/.ssh/config`:
-
-```ssh-config
-# Target private VM
-Host privatehost01
-  HostName privatehost01
-  User bastion
-  ProxyJump bastion03.lab3.poclabs.com
-  IdentityFile ~/.ssh/id_ed25519
-  IdentitiesOnly yes
-
-# Optional: configure the jump host defaults
-Host bastion03.lab3.poclabs.com
-  User bastion
-  IdentityFile ~/.ssh/id_ed25519
-  IdentitiesOnly yes
-```
-
-With this configuration in place, you can connect directly with:
-
-```bash
-ssh privatehost01
-```
-
-All other standard utilities will automatically honor this tunnel:
-
-```bash
-# Copy a file to the private VM
-scp ./backup.tar.gz privatehost01:/tmp/
-
-# Sync files with rsync
-rsync -avz ./src/ privatehost01:/opt/app/
-```
 
 ---
 
@@ -207,7 +232,7 @@ rsync -avz ./src/ privatehost01:/opt/app/
 | **Main purpose** | Expose local authentication agent on jump host | Route encrypted connection through jump host |
 | **Final authentication** | Handled from the jump host shell | Handled directly by your local SSH client |
 | **Private key copied to jump host** | No | No |
-| **Agent socket exposed on jump host** | Yes (`$SSH_AUTH_SOCK`) | No |
+| **Agent socket exposed on jump host** | Yes (`$SSH_AUTH_SOCK`) | No, unless you enable `ForwardAgent` elsewhere |
 | **End-to-end session encryption** | No (jump host decrypts its leg) | Yes (tunnel transparent to jump host) |
 | **File transfer support (`scp`/`rsync`)** | Requires manual multi-step transfer | Direct single-step transfer |
 | **Recommended for simple access** | Generally no | **Yes (Best Practice)** |
@@ -220,10 +245,10 @@ rsync -avz ./src/ privatehost01:/opt/app/
 - You want direct, secure access to one or more private servers from your local machine.
 - You transfer files using `scp`, `sftp`, or `rsync`.
 - You use IDEs like VS Code Remote SSH or JetBrains Gateway.
-- You want the most secure default that leaves no authentication sockets on intermediary bastions.
+- You want the most secure default that needs no authentication sockets on intermediary bastions.
 
 ```bash
-ssh -J bastion03.lab3.poclabs.com bastion@privatehost01
+ssh -J bastion@bastion03.lab3.poclabs.com bastion@privatehost01
 # Or with ~/.ssh/config:
 ssh privatehost01
 ```
@@ -233,7 +258,7 @@ ssh privatehost01
 - You run orchestration scripts on the jump host that must pull private Git repositories or connect out to internal nodes using your personal credentials.
 
 ```bash
-ssh -A bastion03.lab3.poclabs.com
+ssh -A bastion@bastion03.lab3.poclabs.com
 ssh bastion@privatehost01
 ```
 
