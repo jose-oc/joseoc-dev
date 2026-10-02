@@ -27,13 +27,13 @@ In this guide, we use the following realistic environment:
 ### Network Layout
 
 ```mermaid
-flowchart LR
+flowchart TB
     Mac["Your Local Machine<br/>(SSH key & ssh-agent)"]
-    Jump["bastion03.lab3.poclabs.com<br/>(Jump Host / Bastion)"]
+    Jump["bastion03<br/>.lab3.poclabs.com<br/>(Jump Host / Bastion)"]
     Registry["privatehost01<br/>(Private VM)"]
 
-    Mac -->|"SSH connection (Port 22)"| Jump
-    Jump -->|"Private network routing"| Registry
+    Mac -->|"SSH<br/>(port 22)"| Jump
+    Jump -->|"Private network"| Registry
 ```
 
 > [!NOTE]

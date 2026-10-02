@@ -27,13 +27,13 @@ En esta guía utilizaremos el siguiente entorno práctico:
 ### Diagrama de red
 
 ```mermaid
-flowchart LR
+flowchart TB
     Mac["Tu equipo local<br/>(Clave SSH y ssh-agent)"]
-    Jump["bastion03.lab3.poclabs.com<br/>(Jump Host / Bastión)"]
+    Jump["bastion03<br/>.lab3.poclabs.com<br/>(Jump Host / Bastión)"]
     Registry["privatehost01<br/>(VM Privada)"]
 
-    Mac -->|"Conexión SSH (Puerto 22)"| Jump
-    Jump -->|"Enrutamiento en red privada"| Registry
+    Mac -->|"SSH<br/>(puerto 22)"| Jump
+    Jump -->|"Red privada"| Registry
 ```
 
 > [!NOTE]
