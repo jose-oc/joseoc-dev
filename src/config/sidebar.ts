@@ -63,6 +63,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Add User to Sudoers in Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
           { label: '· Secure Backups with Restic', slug: 'how-to/restic-backup-guide' },
           { label: '· Masking Systemd Services in Ubuntu', slug: 'how-to/masking-systemd-services' },
+          { label: '· SSH Access Through a Jump Host', slug: 'how-to/ssh-jump-host' },
         ]
       },
       {
@@ -142,6 +143,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Añadir usuario a sudoers en Ubuntu Server', slug: 'how-to/add-user-to-sudoers-ubuntu' },
           { label: '· Copias de seguridad seguras con Restic', slug: 'how-to/restic-backup-guide' },
           { label: '· Enmascarar servicios de systemd en Ubuntu', slug: 'how-to/masking-systemd-services' },
+          { label: '· Acceso SSH mediante un Jump Host', slug: 'how-to/ssh-jump-host' },
         ]
       },
       {
