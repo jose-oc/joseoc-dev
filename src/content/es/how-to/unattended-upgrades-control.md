@@ -32,7 +32,7 @@ APT::Periodic::Unattended-Upgrade "0";
 
 Es la opción **más débil si va sola**:
 
-- Solo cierra la vía periódica. El paquete y el binario siguen instalados y se pueden ejecutar.
+- Sólo cierra la vía periódica (la del timer). El paquete y el binario siguen instalados y se pueden ejecutar.
 - La configuración vive en `/etc/apt/apt.conf.d/`, y la puede tocar el tooling de imágenes (por ejemplo cloud-init) o una actualización del paquete.
 - Es la que menos deja ver la intención: un `0` en un fichero no dice "esto está apagado a propósito".
 
@@ -55,7 +55,7 @@ La máscara es un enlace a `/dev/null` en `/etc/systemd/system/`, así que sobre
 sudo apt purge unattended-upgrades
 ```
 
-Sin paquete no hay nada que activar ni que ejecutar a mano. El hueco: un metapaquete o un `Recommends` futuro podría reinstalarlo, y volvería con los timers vivos. La máscara, en cambio, vive en `/etc` y sigue ahí aunque el paquete vuelva.
+Sin paquete no hay nada que activar ni que ejecutar a mano. La trampa: un metapaquete o un `Recommends` futuro podría reinstalarlo, y volvería con los timers vivos. La máscara, en cambio, vive en `/etc` y sigue ahí aunque el paquete vuelva.
 
 ```mermaid
 ---
@@ -75,7 +75,7 @@ flowchart TB
     C --> P
 ```
 
-Cada capa tapa un camino: la máscara los timers, el `0` la vía periódica y el purge la ejecución manual.
+Cada capa bloquea un camino: la máscara los timers, el `0` la vía periódica y el purge la ejecución manual.
 
 ---
 
