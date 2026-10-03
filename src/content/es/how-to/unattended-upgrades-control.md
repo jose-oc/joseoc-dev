@@ -11,7 +11,7 @@ draft: false
 
 Hay máquinas que no deben actualizarse solas: tienen su propio proceso de parcheado (Ansible, una ventana de mantenimiento, un pipeline) y lo último que quieres es que `unattended-upgrades` se cuele por detrás. La pregunta es cómo dejarlo apagado **de forma que se quede apagado**.
 
-Este artículo parte de una conversación real sobre varias VMs en datacenters, y complementa la guía de [enmascarar servicios de systemd](/es/docs/how-to/masking-systemd-services), donde se explica qué hace `mask` por dentro.
+Parte de un caso habitual, varias VMs en datacenters, y complementa la guía de [enmascarar servicios de systemd](/es/docs/how-to/masking-systemd-services), donde se explica qué hace `mask` por dentro.
 
 > [!NOTE]
 > El paquete se llama `unattended-upgrades` (con *s*), pero el comando es `unattended-upgrade`, en singular. Es una confusión muy habitual.

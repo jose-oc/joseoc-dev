@@ -11,7 +11,7 @@ draft: false
 
 Some machines must not update themselves: they have their own patching process (Ansible, a maintenance window, a pipeline) and the last thing you want is `unattended-upgrades` sneaking in behind it. The question is how to turn it off **so that it stays off**.
 
-This article comes from a real conversation about several VMs in datacenters. It complements the guide on [masking systemd services](/en/docs/how-to/masking-systemd-services), which explains what `mask` does internally.
+It starts from a common case, several VMs in datacenters, and complements the guide on [masking systemd services](/en/docs/how-to/masking-systemd-services), which explains what `mask` does internally.
 
 > [!NOTE]
 > The package is called `unattended-upgrades` (with an *s*), but the command is `unattended-upgrade`, singular. An easy thing to mix up.
