@@ -32,7 +32,7 @@ APT::Periodic::Unattended-Upgrade "0";
 
 Es la opción **más débil si va sola**:
 
-- Sólo cierra la vía periódica (la del timer). El paquete y el binario siguen instalados y se pueden ejecutar.
+- Sólo cierra la vía periódica: la tarea que lanzan `apt-daily-upgrade.timer` y su servicio. El timer sigue disparándose; lo que hace el `0` es que esa tarea no ejecute `unattended-upgrade`. El paquete y el binario siguen instalados y se pueden ejecutar.
 - La configuración vive en `/etc/apt/apt.conf.d/`, y la puede tocar el tooling de imágenes (por ejemplo cloud-init) o una actualización del paquete.
 - Es la que menos deja ver la intención: un `0` en un fichero no dice "esto está apagado a propósito".
 
@@ -75,7 +75,7 @@ flowchart TB
     C --> P
 ```
 
-Cada capa bloquea un camino: la máscara los timers, el `0` la vía periódica y el purge la ejecución manual.
+Cada capa bloquea un camino: la máscara impide que `apt-daily-upgrade.timer` lance nada, el `0` hace que la tarea periódica no actualice aunque se lance, y el purge bloquea la ejecución manual.
 
 ---
 
@@ -109,6 +109,11 @@ No instala nada y te enseña qué candidatos ve. El log queda en `/var/log/unatt
 
 ---
 
+> [!WARNING]
+> Todo esto cubre **APT**. En Ubuntu muchos paquetes llegan también como snaps (el propio `snapd`, `lxd`, etc.) y se actualizan solos con otro mecanismo. Está en la guía siguiente: [Snap: controlar las actualizaciones automáticas](/es/docs/how-to/snap-refresh-control).
+
+---
+
 ## Resumen
 
 - La config en `"0"` sola es lo más frágil: cierra una vía y deja el resto abierto.
@@ -118,5 +123,6 @@ No instala nada y te enseña qué candidatos ve. El log queda en `/var/log/unatt
 
 ## Referencias
 
+- [Snap: controlar las actualizaciones automáticas](/es/docs/how-to/snap-refresh-control)
 - [Documentación de unattended-upgrades (repositorio oficial)](https://github.com/mvo5/unattended-upgrades)
 - [Enmascarar servicios de systemd en Ubuntu](/es/docs/how-to/masking-systemd-services)

@@ -64,6 +64,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Secure Backups with Restic', slug: 'how-to/restic-backup-guide' },
           { label: '· Masking Systemd Services in Ubuntu', slug: 'how-to/masking-systemd-services' },
           { label: '· unattended-upgrades: turn it off for real', slug: 'how-to/unattended-upgrades-control' },
+          { label: '· Snap: controlling automatic updates', slug: 'how-to/snap-refresh-control' },
           { label: '· SSH Access Through a Jump Host', slug: 'how-to/ssh-jump-host' },
         ]
       },
@@ -146,6 +147,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Enmascarar servicios de systemd en Ubuntu', slug: 'how-to/masking-systemd-services' },
           { label: '· Acceso SSH mediante un Jump Host', slug: 'how-to/ssh-jump-host' },
           { label: '· unattended-upgrades: apagarlo de verdad', slug: 'how-to/unattended-upgrades-control' },
+          { label: '· Snap: controlar las actualizaciones automáticas', slug: 'how-to/snap-refresh-control' },
         ]
       },
       {

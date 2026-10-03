@@ -11,7 +11,7 @@ draft: false
 
 Some machines must not update themselves: they have their own patching process (Ansible, a maintenance window, a pipeline) and the last thing you want is `unattended-upgrades` sneaking in behind it. The question is how to turn it off **so that it stays off**.
 
-It starts from a common case, several VMs in datacenters, and complements the guide on [masking systemd services](/en/docs/how-to/masking-systemd-services), which explains what `mask` does internally.
+It starts from a common case, several VMs in datacenters, and complements the guide on [masking systemd services](/docs/how-to/masking-systemd-services), which explains what `mask` does internally.
 
 > [!NOTE]
 > The package is called `unattended-upgrades` (with an *s*), but the command is `unattended-upgrade`, singular. An easy thing to mix up.
@@ -32,7 +32,7 @@ APT::Periodic::Unattended-Upgrade "0";
 
 This is the **weakest option on its own**:
 
-- It only closes the periodic path. The package and the binary stay installed and runnable.
+- It only closes the periodic path: the job that `apt-daily-upgrade.timer` and its service launch. The timer still fires; what the `0` does is make that job skip `unattended-upgrade`. The package and the binary stay installed and runnable.
 - The config lives in `/etc/apt/apt.conf.d/`, where image tooling (cloud-init, for example) or a package update can touch it.
 - It states your intent the least: a `0` in a file doesn't say "this is off on purpose".
 
@@ -75,7 +75,7 @@ flowchart TB
     C --> P
 ```
 
-Each layer closes one path: the mask the timers, the `0` the periodic path, and the purge the manual run.
+Each layer closes one path: the mask stops `apt-daily-upgrade.timer` from launching anything, the `0` makes the periodic job skip upgrades even if it does run, and the purge blocks the manual run.
 
 ---
 
@@ -109,6 +109,11 @@ It installs nothing and shows which candidates it sees. The log goes to `/var/lo
 
 ---
 
+> [!WARNING]
+> All of this covers **APT**. On Ubuntu many packages also arrive as snaps (`snapd` itself, `lxd`, and so on) and update themselves through a different mechanism. That is covered in the next guide: [Snap: controlling automatic updates](/docs/how-to/snap-refresh-control).
+
+---
+
 ## Summary
 
 - Config at `"0"` alone is the most fragile: it closes one path and leaves the rest open.
@@ -118,5 +123,6 @@ It installs nothing and shows which candidates it sees. The log goes to `/var/lo
 
 ## References
 
+- [Snap: controlling automatic updates](/docs/how-to/snap-refresh-control)
 - [unattended-upgrades documentation (official repository)](https://github.com/mvo5/unattended-upgrades)
-- [Masking systemd services in Ubuntu](/en/docs/how-to/masking-systemd-services)
+- [Masking systemd services in Ubuntu](/docs/how-to/masking-systemd-services)
