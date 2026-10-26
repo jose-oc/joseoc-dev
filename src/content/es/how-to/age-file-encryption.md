@@ -11,7 +11,7 @@ draft: false
 
 Cifrar archivos desde la línea de comandos siempre ha sido una tarea frustrante. Durante décadas, administradores de sistemas y desarrolladores recurrieron a **GnuPG (GPG)** o a comandos improvisados de **OpenSSL**. En la práctica, ambas herramientas acarrean una enorme complejidad: opciones crípticas en la CLI, algoritmos criptográficos obsoletos, demonios en segundo plano problemáticos y cientos de configuraciones propensas a errores.
 
-[age](https://github.com/FiloSottile/age) es una herramienta de cifrado de archivos moderna, simple y segura diseñada para resolver este problema de raíz. Creada por el criptógrafo [Filippo Valsorda](https://words.filippo.io/) (ex-responsable de seguridad y criptografía en Go en Google), su nombre significa *"Actually Good Encryption"* (un juego de palabras en respuesta al *"Pretty Good Privacy"* de PGP).
+[age](https://github.com/FiloSottile/age) es una herramienta, un formato y una biblioteca de cifrado de archivos. Fue diseñada por [Filippo Valsorda](https://words.filippo.io/) y [Ben Cox](https://github.com/benjojo) para ofrecer cifrado sencillo de archivos y flujos de datos.
 
 Destaca por claves compactas que caben en una sola línea de texto, total compatibilidad con flujos de trabajo UNIX (tuberías, entrada y salida estándar), ausencia absoluta de archivos de configuración y primitivas criptográficas modernas que eliminan la negociación de algoritmos y los ataques de degradación.
 
