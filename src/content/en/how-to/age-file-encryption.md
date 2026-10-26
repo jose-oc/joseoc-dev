@@ -11,7 +11,7 @@ draft: false
 
 Encrypting files on the command line has historically been frustrating. For decades, developers and system administrators defaulted to **GnuPG (GPG)** or ad-hoc **OpenSSL** commands. In practice, both tools bring massive complexity: obscure CLI flags, legacy cryptographic algorithms, finicky background daemons, and endless configuration options that make secure usage difficult.
 
-[age](https://github.com/FiloSottile/age) is a modern, simple, and secure file encryption tool designed to solve this problem. Created by cryptographer [Filippo Valsorda](https://words.filippo.io/) (the former Go cryptography lead at Google), `age` stands for *"Actually Good Encryption"* (a playful nod to PGP's "Pretty Good Privacy").
+[age](https://github.com/FiloSottile/age) is a file encryption tool, format, and library. It was designed by [Filippo Valsorda](https://words.filippo.io/) and [Ben Cox](https://github.com/benjojo) to provide simple encryption for files and streams.
 
 It features tiny keys that fit into text files, UNIX-style composability with standard streams, zero configuration files, and modern cryptographic primitives that eliminate cipher negotiation and downgrade attacks.
 
