@@ -64,6 +64,31 @@ test.describe('Language Switcher & SEO', () => {
     const esTag = page.locator('link[hreflang="es"]');
     await expect(esTag).toHaveAttribute('href', 'https://www.joseoc.dev/es/docs/python-environment-direnv');
   });
+
+  test('age file encryption guide loads in en and es with valid headings and raw markdown', async ({ page }) => {
+    await page.goto('/docs/how-to/age-file-encryption');
+    await expect(page.locator('main h1')).toContainText('Modern File Encryption with age');
+
+    const langSwitcher = page.locator('a[aria-label="Switch to Spanish"]');
+    await expect(langSwitcher).toBeVisible();
+    await langSwitcher.click();
+
+    await expect(page).toHaveURL(/.*\/es\/docs\/how-to\/age-file-encryption/);
+    await expect(page.locator('main h1')).toContainText('Cifrado moderno de archivos con age');
+  });
+});
+
+test('age guide keeps glossary and complete runnable examples in both languages', async ({ page }) => {
+  for (const prefix of ['', '/es']) {
+    await page.goto(`${prefix}/docs/how-to/age-file-encryption`);
+    await expect(page.getByRole('heading', { name: /Glosario:|Glossary:/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Comandos más usados:|Common commands:/ })).toBeVisible();
+    const code = await page.locator('main pre').allTextContents();
+    expect(code.some(text => text.includes('RECIPIENT=$(age-keygen -y key.txt)'))).toBeTruthy();
+    expect(code.some(text => text.includes('TMP_ARCHIVE=$(mktemp)') && text.includes('if age --decrypt') && text.includes('rm -f "$TMP_ARCHIVE"'))).toBeTruthy();
+    expect(code.some(text => text.includes('set -o pipefail') && text.includes('tar -xzf'))).toBeTruthy();
+    await expect(page.getByRole('heading', { name: /ASCII Armor for|Formato ASCII Armor/ })).toBeVisible();
+  }
 });
 
 test.describe('Taxonomy Routing', () => {
