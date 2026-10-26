@@ -78,6 +78,19 @@ test.describe('Language Switcher & SEO', () => {
   });
 });
 
+test('age guide keeps glossary and complete runnable examples in both languages', async ({ page }) => {
+  for (const prefix of ['', '/es']) {
+    await page.goto(`${prefix}/docs/how-to/age-file-encryption`);
+    await expect(page.getByRole('heading', { name: /Glosario:|Glossary:/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Comandos más usados:|Common commands:/ })).toBeVisible();
+    const code = await page.locator('main pre').allTextContents();
+    expect(code.some(text => text.includes('RECIPIENT=$(age-keygen -y key.txt)'))).toBeTruthy();
+    expect(code.some(text => text.includes('TMP_ARCHIVE=$(mktemp)') && text.includes('if age --decrypt') && text.includes('rm -f "$TMP_ARCHIVE"'))).toBeTruthy();
+    expect(code.some(text => text.includes('set -o pipefail') && text.includes('tar -xzf'))).toBeTruthy();
+    await expect(page.getByRole('heading', { name: /ASCII Armor for|Formato ASCII Armor/ })).toBeVisible();
+  }
+});
+
 test.describe('Taxonomy Routing', () => {
 
   test('Category links route to the correct category archive page', async ({ page }) => {

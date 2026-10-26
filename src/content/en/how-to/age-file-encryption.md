@@ -175,6 +175,11 @@ AGE-SECRET-KEY-10QW8S8R5...
 
 First extract the public key from the identity you just generated and save it in a variable:
 
+```bash
+RECIPIENT=$(age-keygen -y key.txt)
+```
+
+Now encrypt using that public key:
 
 ```bash
 age --recipient "$RECIPIENT" secrets.env > secrets.env.age
@@ -285,6 +290,23 @@ tar -czf - ~/Documents/Project | age --recipient "$RECIPIENT" > project-backup.t
 
 First decrypt to a private temporary file. Extract its contents only if age succeeds. Extraction writes the files to disk.
 
+```bash
+umask 077
+TMP_ARCHIVE=$(mktemp)
+if age --decrypt --identity key.txt project-backup.tar.gz.age > "$TMP_ARCHIVE"; then
+  mkdir -p restored
+  tar -xzf "$TMP_ARCHIVE" -C restored
+fi
+rm -f "$TMP_ARCHIVE"
+```
+
+#### One-line alternative: decrypt and extract through a pipe
+
+> [!WARNING]
+> This is convenient, but `tar` may extract files before age detects an error in a later chunk. `pipefail` reports the failure; it does not undo files already extracted. Use an empty directory and prefer the previous method when you need to check the complete archive before extraction. This example uses Bash.
+
+```bash
+(set -o pipefail; mkdir -p restored && age --decrypt --identity key.txt project-backup.tar.gz.age | tar -xzf - -C restored)
 ```
 
 #### ASCII Armor for text copy-pasting
@@ -303,18 +325,34 @@ YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwTVN3d...
 
 ---
 
-### Passphrase-Protected Identity Files
+### Protecting the Identity File with a Passphrase
 
-If you store your private key (`key.txt`) on a shared drive, backup server, or cloud storage, you can encrypt the identity file itself with `age`:
+If you already have `key.txt`, protect that same identity so you can keep opening files encrypted for it:
 
 ```bash
-age-keygen | age --passphrase > key.age
+age --passphrase key.txt > key.age
 ```
 
-When decrypting files, `age --identity key.age` automatically prompts for the passphrase to unlock the identity:
+You can also **generate a new identity and encrypt it in one command**:
+
+```bash
+age-keygen | age --passphrase > new-key.age
+```
+
+These are different cases: the new identity cannot open files encrypted for the old one. Extract its public key before encrypting files for it:
+
+```bash
+age --decrypt new-key.age | age-keygen -y
+```
+
+age prompts for the passphrase when reading a protected identity. To open `secrets.env.age`, previously encrypted for the identity in `key.txt`, use its protected copy:
+
 ```bash
 age --decrypt --identity key.age secrets.env.age > secrets.env
 ```
+
+> [!IMPORTANT]
+> Encrypting `key.txt` does not remove the unencrypted original. Decide where to keep it and retain a recoverable copy of the identity and its passphrase. Do not publish either identity file or assume ordinary deletion removes every copy from backups or storage.
 
 ---
 
@@ -376,10 +414,33 @@ Understanding the deliberate omissions in `age` is just as important as knowing 
 
 ---
 
-## 7. Quick Reference Cheat Sheet
+## Glossary: the terms in this guide
+
+- **Encrypt / decrypt**: turn a readable file into protected data, then recover its contents with the right key. Encryption does not delete the original.
+- **Public key**: share this so others can encrypt files you can open. The native keys used here start with `age1`.
+- **Private key or identity**: the secret that opens those files. `key.txt` contains an identity; it is not a password and must not be shared.
+- **Recipient**: the public key you encrypt for, not a name or email address. It may belong to a person, a server, or yourself. With multiple recipients, any corresponding private key can open the file. age does not send it to anyone.
+- **Passphrase**: the secret text entered with `--passphrase`. This is different from an identity file. It can protect a file or an identity.
+- **Key derivation**: calculating a key from other secret information. It does not mean discovering a private key from a public key. age performs these calculations for you.
+- **scrypt**: the procedure age uses with your passphrase and a random value to calculate a key that protects the internal file key. Its time and memory cost makes password guessing harder; it does not make a weak password strong.
+- **HKDF**: a procedure that calculates internal keys for different uses from secret material age already has. You do not need to choose its parameters.
+- **Authenticated encryption**: hides the contents and checks for tampering. It does not prove who sent the file or replace a digital signature. Streaming may detect a failure after some output has been produced.
+- **Standard input/output and pipes (`stdin`, `stdout`, `|`)**: pass data between commands without an intermediate file. `>` saves output to a file and may overwrite it.
+- **ASCII Armor (`--armor`)**: represents encrypted data as text for copying or sending over text channels. It does not add a passphrase or change who can decrypt it.
+
+X25519 and ChaCha20-Poly1305 name the cryptographic mechanisms age uses internally. You do not need their mathematics to follow the examples.
+
+Sources: [age manual](https://filippo.io/age/age.1) and [format specification](https://age-encryption.org/v1).
+
+---
+
+## 7. Common commands: quick reference
+
+Values in `<...>` are placeholders to replace, not literal text to paste. Commands assume the input files already exist. Streaming extraction has the limitations explained above.
 
 | Task | Command |
 | :--- | :--- |
+| **Save the public key in a variable** | `RECIPIENT=$(age-keygen -y key.txt)` |
 | **Generate a new keypair** | `age-keygen --output key.txt` |
 | **Extract public key from identity** | `age-keygen -y key.txt` |
 | **Encrypt to public key** | `age --recipient <recipient> --output file.age file` |
@@ -392,7 +453,7 @@ Understanding the deliberate omissions in `age` is just as important as knowing 
 | **Decrypt using SSH private key** | `age --decrypt --identity ~/.ssh/id_ed25519 file.age > file` |
 | **Encrypt to ASCII armor (text)** | `age --armor --recipient <recipient> file > file.age` |
 | **Stream tar backup into age** | `tar czf - ./data \| age --recipient <recip> > data.tar.gz.age` |
-| **Decrypt and unpack stream** | `age --decrypt --identity key.txt data.tar.gz.age \| tar xzf -` |
+| **Decrypt and unpack stream** | `(set -o pipefail; age --decrypt --identity key.txt data.tar.gz.age \| tar xzf -)` |
 
 ---
 

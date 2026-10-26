@@ -175,6 +175,11 @@ AGE-SECRET-KEY-10QW8S8R5...
 
 Primero obtén la clave pública de la identidad que acabas de generar y guárdala en una variable:
 
+```bash
+RECIPIENT=$(age-keygen -y key.txt)
+```
+
+Ahora cifra usando esa clave pública:
 
 ```bash
 age --recipient "$RECIPIENT" secrets.env > secrets.env.age
@@ -285,6 +290,23 @@ tar -czf - ~/Proyectos/Documentos | age --recipient "$RECIPIENT" > backup-proyec
 
 Descifra primero a un archivo temporal privado. Extrae su contenido solo si age termina correctamente. Al extraer se escribirán los archivos en disco.
 
+```bash
+umask 077
+TMP_ARCHIVE=$(mktemp)
+if age --decrypt --identity key.txt backup-proyectos.tar.gz.age > "$TMP_ARCHIVE"; then
+  mkdir -p restaurado
+  tar -xzf "$TMP_ARCHIVE" -C restaurado
+fi
+rm -f "$TMP_ARCHIVE"
+```
+
+#### Alternativa en una línea: descifrar y extraer por tubería
+
+> [!WARNING]
+> Esta opción es cómoda, pero `tar` puede haber extraído archivos antes de que age detecte un error en un bloque posterior. `pipefail` permite detectar el fallo; no deshace lo que ya se haya extraído. Usa un directorio vacío y prefiere el método anterior si necesitas comprobar el archivo completo antes de extraerlo. El ejemplo usa Bash.
+
+```bash
+(set -o pipefail; mkdir -p restaurado && age --decrypt --identity key.txt backup-proyectos.tar.gz.age | tar -xzf - -C restaurado)
 ```
 
 #### Formato ASCII Armor para copiar y pegar texto
@@ -305,16 +327,32 @@ YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwTVN3d...
 
 ### Proteger el archivo de identidad con contraseña
 
-Si necesitas almacenar tu archivo de claves privadas (`key.txt`) en un servidor remoto, un almacenamiento en la nube o un repositorio de backups, puedes cifrar la identidad misma con `age`:
+Si ya tienes `key.txt`, protege esa misma identidad para seguir abriendo los archivos cifrados para ella:
 
 ```bash
-age-keygen | age --passphrase > key.age
+age --passphrase key.txt > key.age
 ```
 
-Al descifrar archivos, `age --identity key.age` detecta que el archivo de identidad está protegido y te pide la contraseña para cargarlo en memoria:
+También puedes **generar una identidad nueva y cifrarla en un solo comando**:
+
+```bash
+age-keygen | age --passphrase > nueva-key.age
+```
+
+Son dos casos distintos: la identidad nueva no abre los archivos cifrados para la anterior. Obtén su clave pública antes de empezar a cifrar para ella:
+
+```bash
+age --decrypt nueva-key.age | age-keygen -y
+```
+
+age pide la contraseña para leer una identidad protegida. Para abrir `secrets.env.age`, cifrado antes para la identidad de `key.txt`, usa su copia protegida:
+
 ```bash
 age --decrypt --identity key.age secrets.env.age > secrets.env
 ```
+
+> [!IMPORTANT]
+> Cifrar `key.txt` no elimina el original sin contraseña. Decide dónde conservarlo y mantén una copia recuperable de la identidad y de su contraseña. No publiques ninguno de esos archivos ni confíes en que el borrado normal elimine todas las copias de backups o del almacenamiento.
 
 ---
 
@@ -376,10 +414,33 @@ Conocer las limitaciones deliberadas de `age` es tan importante como entender su
 
 ---
 
-## 7. Hoja de referencia rápida
+## Glosario: los términos de esta guía
+
+- **Cifrar / descifrar**: convertir un archivo legible en datos protegidos y recuperar después su contenido con la clave adecuada. Cifrar no borra el original.
+- **Clave pública**: la que compartes para que otros cifren archivos que puedas abrir tú. Las claves nativas usadas aquí empiezan por `age1`.
+- **Clave privada o identidad**: el secreto que permite abrir esos archivos. `key.txt` contiene una identidad; no es una contraseña ni debes compartirlo.
+- **Destinatario (`recipient`)**: la clave pública para la que cifras, no un nombre ni un correo. Puede corresponder a una persona, un servidor o a ti mismo. Con varios destinatarios, cualquiera de sus claves privadas puede abrir el archivo. age no lo envía a nadie.
+- **Contraseña o frase de paso (`passphrase`)**: el texto secreto que introduces con `--passphrase`. No es lo mismo que el archivo de identidad. Puede proteger un archivo o una identidad.
+- **Derivar una clave**: calcular una clave a partir de otra información secreta. No significa descubrir una clave privada a partir de una pública. age hace estos cálculos por ti.
+- **scrypt**: el procedimiento que age usa con tu contraseña y un dato aleatorio para calcular una clave que protege la clave interna del archivo. Su coste de tiempo y memoria dificulta probar muchas contraseñas; no convierte una contraseña débil en una fuerte.
+- **HKDF**: un procedimiento que calcula las claves internas necesarias para distintos usos a partir de material secreto que age ya tiene. No tienes que elegir sus parámetros.
+- **Cifrado autenticado**: además de ocultar el contenido, comprueba que no se haya alterado. No acredita quién envió el archivo ni sustituye una firma digital. En streaming puede detectarse un fallo después de emitir parte del resultado.
+- **Entrada/salida estándar y tubería (`stdin`, `stdout`, `|`)**: permiten pasar los datos de un comando al siguiente sin crear un archivo intermedio. `>` guarda la salida en un archivo y puede sobrescribirlo.
+- **ASCII Armor (`--armor`)**: representa el archivo cifrado como texto para copiarlo o enviarlo por canales de texto. No añade una contraseña ni cambia quién puede descifrarlo.
+
+Los nombres X25519 y ChaCha20-Poly1305 identifican los mecanismos criptográficos que age usa internamente. No necesitas conocer sus matemáticas para seguir los ejemplos.
+
+Fuentes: [manual de age](https://filippo.io/age/age.1) y [especificación del formato](https://age-encryption.org/v1).
+
+---
+
+## 7. Comandos más usados: referencia rápida
+
+Los valores entre `<...>` son marcadores que debes sustituir, no texto para pegar literalmente. Los comandos suponen que ya existen los archivos de entrada. La extracción por tubería tiene las limitaciones explicadas arriba.
 
 | Tarea | Comando |
 | :--- | :--- |
+| **Guardar la clave pública en una variable** | `RECIPIENT=$(age-keygen -y key.txt)` |
 | **Generar nuevo par de claves** | `age-keygen --output key.txt` |
 | **Obtener clave pública de una identidad** | `age-keygen -y key.txt` |
 | **Cifrar para una clave pública** | `age --recipient <destinatario> --output archivo.age archivo` |
@@ -392,7 +453,7 @@ Conocer las limitaciones deliberadas de `age` es tan importante como entender su
 | **Descifrar con clave privada SSH** | `age --decrypt --identity ~/.ssh/id_ed25519 archivo.age > archivo` |
 | **Cifrar a formato ASCII blindado (texto)** | `age --armor --recipient <destinatario> archivo > archivo.age` |
 | **Cifrar flujo tar directamente a age** | `tar czf - ./datos \| age --recipient <dest> > backup.tar.gz.age` |
-| **Descifrar y extraer flujo en el acto** | `age --decrypt --identity key.txt backup.tar.gz.age \| tar xzf -` |
+| **Descifrar y extraer flujo en el acto** | `(set -o pipefail; age --decrypt --identity key.txt backup.tar.gz.age \| tar xzf -)` |
 
 ---
 
