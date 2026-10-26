@@ -78,7 +78,7 @@ flowchart TD
     subgraph Primitivas ["Pila Criptográfica de age"]
         A["Intercambio Asimétrico: X25519"] --- B["Diffie-Hellman sobre Curve25519"]
         C["Cifrado Simétrico: ChaCha20-Poly1305"] --- D["Cifrado autenticado con datos asociados (AEAD)"]
-        E["Derivación de Claves: HKDF-SHA-256"] --- F["Genera claves efímeras independientes por archivo"]
+        E["Derivación de claves: HKDF-SHA-256"] --- F["Deriva las claves de cifrado de cada archivo"]
         G["Hash de Contraseña: scrypt"] --- H["Función de memoria dura resistente a ataques con GPU/ASIC"]
     end
 ```
@@ -281,9 +281,10 @@ El destinatario podrá descifrar `mensaje.txt.age` de forma inmediata con su cla
 tar -czf - ~/Proyectos/Documentos | age --recipient "$RECIPIENT" > backup-proyectos.tar.gz.age
 ```
 
-#### Descifrar y descomprimir sin tocar el disco en texto claro:
-```bash
-age --decrypt --identity key.txt backup-proyectos.tar.gz.age | tar -xzf -
+#### Descifrar y extraer después de comprobar el resultado
+
+Descifra primero a un archivo temporal privado. Extrae su contenido solo si age termina correctamente. Al extraer se escribirán los archivos en disco.
+
 ```
 
 #### Formato ASCII Armor para copiar y pegar texto

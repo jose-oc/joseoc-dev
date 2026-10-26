@@ -78,7 +78,7 @@ flowchart TD
     subgraph Primitives ["Underlying Cryptographic Stack"]
         A["Asymmetric Exchange: X25519"] --- B["Diffie-Hellman Key Exchange (Curve25519)"]
         C["Symmetric Encryption: ChaCha20-Poly1305"] --- D["Authenticated Encryption with Associated Data (AEAD)"]
-        E["Key Derivation: HKDF-SHA-256"] --- F["Generates ephemeral payload keys per file"]
+        E["Key derivation: HKDF-SHA-256"] --- F["Derives encryption keys for each file"]
         G["Passphrase Hashing: scrypt"] --- H["Memory-hard password hashing against GPU cracking"]
     end
 ```
@@ -281,9 +281,10 @@ The recipient can immediately decrypt `message.txt.age` using their local SSH pr
 tar -czf - ~/Documents/Project | age --recipient "$RECIPIENT" > project-backup.tar.gz.age
 ```
 
-#### Decrypt and unpack on the fly without writing unencrypted data to disk:
-```bash
-age --decrypt --identity key.txt project-backup.tar.gz.age | tar -xzf -
+#### Decrypt and extract after checking success
+
+First decrypt to a private temporary file. Extract its contents only if age succeeds. Extraction writes the files to disk.
+
 ```
 
 #### ASCII Armor for text copy-pasting
