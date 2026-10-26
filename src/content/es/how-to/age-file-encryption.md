@@ -61,8 +61,8 @@ Muchos administradores usan `openssl enc -aes-256-cbc -pbkdf2` para cifrar fiche
 | :--- | :--- | :--- | :--- |
 | **Objetivo principal** | Cifrado directo y seguro de archivos | Suite criptográfica universal (email, firma, auth) | Librería TLS y utilidades criptográficas generales |
 | **Criptografía moderna** | X25519, ChaCha20-Poly1305, HKDF, scrypt | Mixta (soporta Ed25519, pero mantiene RSA/3DES) | Depende de los flags elegidos y la versión instalada |
-| **Cifrado autenticado** | Obligatorio por defecto (Poly1305) | Opcional (el MDC se puede omitir en formatos viejos) | Requiere flags manuales de AEAD |
-| **Formato de clave pública** | Cadena de 58 caracteres (`age1...`) | Huella hex larga o bloque ASCII de varios KiB | Certificados PEM X.509 o bloques RSA en crudo |
+| **Cifrado autenticado** | Obligatorio: detecta alteraciones | Depende del formato y la versión | `enc` no lo admite; `cms` ofrece otras opciones |
+| **Formato de clave pública** | Cadena de 62 caracteres (`age1...`) | Huella hex larga o bloque ASCII de varios KiB | Certificados PEM X.509 o bloques RSA en crudo |
 | **Demonios en segundo plano** | Ninguno | `gpg-agent`, `dirmngr`, `scdaemon` | Ninguno |
 | **Tuberías UNIX (pipes)** | Impecable (diseño nativo para stdin/stdout) | Complicado (mezcla mensajes de estado con stderr) | Moderado |
 | **Archivos de configuración** | Ninguno | `~/.gnupg/gpg.conf`, `gpg-agent.conf` | `openssl.cnf` |
@@ -85,8 +85,8 @@ flowchart TD
 
 Aspectos clave del formato `age`:
 - **Claves públicas y privadas**: La clave pública sirve para cifrar archivos destinados a una persona. En age empieza por `age1` y puedes compartirla. La clave privada permite descifrarlos, empieza por `AGE-SECRET-KEY-1` y debes guardarla en secreto.
-- **Carga dividida en bloques (chunks)**: Los archivos se cifran en fragmentos independientes de 64 KiB mediante ChaCha20-Poly1305. Esto permite procesar archivos gigantes en streaming sin cargarlos enteros en la memoria RAM. Si un solo byte es alterado, `age` aborta el descifrado al instante.
-- **Cifrado por contraseña**: El cifrado simétrico emplea `scrypt` con un factor de trabajo alto en memoria ($N=2^{18}, r=8, p=1$), haciendo que los ataques de fuerza bruta sean órdenes de magnitud más costosos que con PBKDF2.
+- **Archivos grandes sin llenar la RAM**: age cifra y comprueba los datos por bloques de hasta 64 KiB. Si detecta una alteración o un archivo incompleto, termina con un error. Puede haber escrito parte del resultado antes de detectar el problema: comprueba siempre que el comando termine correctamente antes de usarlo.
+- **Cifrado por contraseña**: age usa `scrypt` para que probar muchas contraseñas consuma más tiempo y memoria. Aun así, elige una contraseña larga y difícil de adivinar, o deja que age genere una.
 - **Interoperabilidad con claves SSH**: Permite cifrar de manera nativa utilizando claves públicas de SSH ya existentes (`ssh-ed25519` y `ssh-rsa` $\ge$ 2048 bits).
 
 ---
@@ -102,13 +102,13 @@ brew install age
 ```
 
 ### Ubuntu y Debian
-Disponible en los repositorios oficiales de Debian 11+ y Ubuntu 21.04+:
+En Debian 12+ y Ubuntu 22.04+, mediante los repositorios de la distribución:
 ```bash
 sudo apt update
 sudo apt install age
 ```
 
-### Fedora y RHEL / Rocky Linux
+### Fedora
 ```bash
 sudo dnf install age
 ```
@@ -147,7 +147,7 @@ Para utilizar criptografía asimétrica, genera un archivo de identidad que cont
 age-keygen --output key.txt
 ```
 
-Salida del comando:
+Ejemplo de salida (tu clave pública será distinta):
 ```text
 Public key: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
 ```
@@ -173,15 +173,16 @@ AGE-SECRET-KEY-10QW8S8R5...
 
 ### Cifrar y descifrar con claves públicas
 
-Para cifrar un archivo destinado a un destinatario, utiliza el flag `--recipient` (o `-r`) con su clave pública:
+Primero obtén la clave pública de la identidad que acabas de generar y guárdala en una variable:
+
 
 ```bash
-age --recipient age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p secrets.env > secrets.env.age
+age --recipient "$RECIPIENT" secrets.env > secrets.env.age
 ```
 
 O indica el archivo resultante directamente con `--output` (o `-o`):
 ```bash
-age --recipient age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p --output secrets.env.age secrets.env
+age --recipient "$RECIPIENT" --output secrets.env.age secrets.env
 ```
 
 Para descifrar el archivo, utiliza el flag `--decrypt` (o `-d`) e introduce tu clave privada con `--identity` (o `-i`):
@@ -218,7 +219,7 @@ age --decrypt base-datos.sql.age > base-datos.sql
 
 ### Cifrar para varios destinatarios simultáneos
 
-Puedes cifrar un mismo archivo para varios destinatarios a la vez. Cada destinatario podrá descifrar el archivo con su propia clave privada sin duplicar el cuerpo de los datos:
+Puedes cifrar el mismo archivo para varios destinatarios; cada uno podrá descifrarlo con su clave privada. Los ejemplos siguientes son plantillas: sustituye todas las claves con `...` por claves públicas completas y válidas.
 
 ```bash
 age \
@@ -277,7 +278,7 @@ El destinatario podrá descifrar `mensaje.txt.age` de forma inmediata con su cla
 
 #### Crear un archivo comprimido y cifrarlo al vuelo:
 ```bash
-tar -czf - ~/Proyectos/Documentos | age --recipient age1ql3z... > backup-proyectos.tar.gz.age
+tar -czf - ~/Proyectos/Documentos | age --recipient "$RECIPIENT" > backup-proyectos.tar.gz.age
 ```
 
 #### Descifrar y descomprimir sin tocar el disco en texto claro:
@@ -289,7 +290,7 @@ age --decrypt --identity key.txt backup-proyectos.tar.gz.age | tar -xzf -
 Por defecto, `age` genera un archivo binario. Si necesitas pegar el contenido cifrado en un mensaje de chat, un correo, un issue de GitHub o un documento Markdown, añade el flag `--armor` (o `-a`):
 
 ```bash
-echo "DATABASE_PASSWORD=super-secreto" | age --armor --recipient age1ql3z...
+echo "DATABASE_PASSWORD=super-secreto" | age --armor --recipient "$RECIPIENT"
 ```
 
 Salida del comando:
@@ -341,10 +342,10 @@ En la administración moderna de clústeres Kubernetes con herramientas de GitOp
 
 Históricamente, [SOPS](https://github.com/getsops/sops) dependía de GPG o de servicios KMS de la nube (AWS KMS, GCP KMS). La gestión de claves GPG en máquinas de desarrolladores y la importación de llaveros en entornos de CI/CD era una fuente continua de errores.
 
-Hoy en día, **SOPS con age** es el estándar de la industria:
-- Las claves públicas se declaran limpiamente en el archivo `.sops.yaml`.
-- En el pipeline de CI/CD o en el controlador de Kubernetes solo se necesita una variable de entorno: `SOPS_AGE_KEY="AGE-SECRET-KEY-1..."`.
-- Flux CD y Argo CD soportan descifrado nativo de secretos de SOPS cifrados con `age`, sin demonios ni agentes externos.
+SOPS permite usar age para proteger los secretos guardados en Git:
+- Los destinatarios públicos pueden declararse en `.sops.yaml`.
+- El CLI de SOPS puede leer la clave privada desde `SOPS_AGE_KEY` o un archivo de claves.
+- Flux integra el descifrado con SOPS, pero hay que configurar la clave y `spec.decryption`. Argo CD requiere una integración adicional, por ejemplo un Config Management Plugin.
 
 ### 2. Passage: Modernizando el gestor de contraseñas de UNIX
 El clásico gestor de contraseñas de terminal `pass` dependía por completo de GPG. [Passage](https://github.com/FiloSottile/passage) es una bifurcación directa creada por Filippo Valsorda que sustituye GPG por `age`. Mantiene la misma simplicidad (árbol de ficheros bajo Git) pero con compatibilidad con YubiKey y sin los cuelgues del agente de GPG.
@@ -370,7 +371,7 @@ Conocer las limitaciones deliberadas de `age` es tan importante como entender su
 
 - **No genera firmas digitales**: `age` cifra y autentica el contenido contra alteraciones, pero no sirve para firmar binarios, commits de Git ni paquetes de software. Para firmar, utiliza herramientas dedicadas como [minisign](https://jedisct1.github.io/minisign/), [signify](https://man.openbsd.org/signify.1) o firmas SSH (`git config gpg.format ssh`).
 - **No gestiona identidades ni redes de confianza**: `age` no comprueba si `age1ql3z...` pertenece realmente a Alicia o a Roberto. La verificación de la clave del destinatario se realiza fuera de banda (por canal seguro, gestor de contraseñas o configuración de infraestructura), de forma análoga a las claves SSH.
-- **No gestiona expiración de claves**: Las claves no caducan automáticamente. Si una clave se ve comprometida, se genera una nueva y se vuelven a cifrar los archivos afectados.
+- **No gestiona expiración ni revocación de claves**: Las claves no caducan automáticamente. Si se compromete una clave privada, genera otra, actualiza los destinatarios y vuelve a cifrar los archivos que controles. Esto no protege las copias antiguas que alguien ya tenga junto con la clave comprometida.
 
 ---
 

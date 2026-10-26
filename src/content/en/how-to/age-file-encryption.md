@@ -61,8 +61,8 @@ Engineers frequently use `openssl enc -aes-256-cbc -pbkdf2` for quick symmetric 
 | :--- | :--- | :--- | :--- |
 | **Primary Goal** | Streamlined file encryption | Universal crypto suite (email, auth, sign) | TLS library & general cryptographic toolbox |
 | **Modern Cryptography** | X25519, ChaCha20-Poly1305, HKDF, scrypt | Mixed (supports Ed25519, but retains legacy RSA/3DES) | Varies by chosen flags and OpenSSL version |
-| **Authenticated Encryption** | Enforced by default (Poly1305) | Optional (MDC can be stripped in old formats) | Requires manual AEAD flag selection |
-| **Public Key Format** | 58-character string (`age1...`) | Long hex fingerprint or 4 KiB ASCII block | X.509 PEM certificates or raw RSA blocks |
+| **Authenticated encryption** | Required: detects tampering | Depends on format and version | Not supported by `enc`; `cms` offers other options |
+| **Public Key Format** | 62-character string (`age1...`) | Long hex fingerprint or 4 KiB ASCII block | X.509 PEM certificates or raw RSA blocks |
 | **Background Daemons** | None | `gpg-agent`, `dirmngr`, `scdaemon` | None |
 | **UNIX Pipes & Composability** | Flawless (stdin/stdout native) | Awkward (mixes status and stderr) | Moderate |
 | **Configuration Files** | None | `~/.gnupg/gpg.conf`, `gpg-agent.conf` | `openssl.cnf` |
@@ -84,9 +84,9 @@ flowchart TD
 ```
 
 Key features of the `age` format:
-- **X25519 Key Exchange**: Public keys are 32-byte Curve25519 points encoded using Bech32, prefixed with `age1`. Private keys (identities) are encoded with the prefix `AGE-SECRET-KEY-1`.
-- **Chunked Payload**: Files are encrypted in independent 64 KiB chunks using ChaCha20-Poly1305. This allows streaming encryption without buffering the entire file into memory. If any byte is altered, `age` rejects the file immediately.
-- **Passphrase Encryption**: Symmetric encryption uses `scrypt` with a memory-hard work factor ($N=2^{18}, r=8, p=1$), making brute-force attacks significantly more expensive than standard PBKDF2 or SHA-256 loops.
+- **Public and private keys**: Use a public key to encrypt files for someone. In age it starts with `age1` and can be shared. The private key decrypts those files, starts with `AGE-SECRET-KEY-1`, and must be kept secret.
+- **Large files without filling RAM**: age encrypts and checks data in chunks of up to 64 KiB. Tampering or an incomplete file causes an error. Some output may already have been written before the problem is detected: always check that the command succeeds before using the result.
+- **Passphrase encryption**: age uses `scrypt` to make password guessing cost more time and memory. Still choose a long, hard-to-guess passphrase, or let age generate one.
 - **SSH Key Interoperability**: `age` can encrypt natively to standard SSH public keys (`ssh-ed25519` and `ssh-rsa` $\ge$ 2048-bit), reusing existing system infrastructure.
 
 ---
@@ -102,13 +102,13 @@ brew install age
 ```
 
 ### Ubuntu & Debian
-Available in Debian 11+ and Ubuntu 21.04+:
+On Debian 12+ and Ubuntu 22.04+, using the distribution repositories:
 ```bash
 sudo apt update
 sudo apt install age
 ```
 
-### Fedora & RHEL / CentOS
+### Fedora
 ```bash
 sudo dnf install age
 ```
@@ -147,7 +147,7 @@ To use public-key cryptography, generate an identity file containing your privat
 age-keygen --output key.txt
 ```
 
-Output:
+Example output (your public key will be different):
 ```text
 Public key: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
 ```
@@ -173,15 +173,16 @@ AGE-SECRET-KEY-10QW8S8R5...
 
 ### Encrypting and Decrypting with Public Keys
 
-To encrypt a file for a recipient, use the `--recipient` (or `-r`) flag with their public key:
+First extract the public key from the identity you just generated and save it in a variable:
+
 
 ```bash
-age --recipient age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p secrets.env > secrets.env.age
+age --recipient "$RECIPIENT" secrets.env > secrets.env.age
 ```
 
 Or specify the output file directly with `--output` (or `-o`):
 ```bash
-age --recipient age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p --output secrets.env.age secrets.env
+age --recipient "$RECIPIENT" --output secrets.env.age secrets.env
 ```
 
 To decrypt the file, use `--decrypt` (or `-d`) and provide your private key with `--identity` (or `-i`):
@@ -218,7 +219,7 @@ age --decrypt database-dump.sql.age > database-dump.sql
 
 ### Encrypting for Multiple Recipients
 
-You can encrypt a file for multiple people simultaneously. Each recipient will be able to decrypt the exact same file using their own private key, without duplicating the payload:
+You can encrypt one file for multiple recipients, each of whom can decrypt it with their private key. The following examples are templates: replace every key containing `...` with a complete, valid public key.
 
 ```bash
 age \
@@ -277,7 +278,7 @@ The recipient can immediately decrypt `message.txt.age` using their local SSH pr
 
 #### Stream an archive straight into an encrypted file:
 ```bash
-tar -czf - ~/Documents/Project | age --recipient age1ql3z... > project-backup.tar.gz.age
+tar -czf - ~/Documents/Project | age --recipient "$RECIPIENT" > project-backup.tar.gz.age
 ```
 
 #### Decrypt and unpack on the fly without writing unencrypted data to disk:
@@ -289,7 +290,7 @@ age --decrypt --identity key.txt project-backup.tar.gz.age | tar -xzf -
 By default, `age` outputs raw binary. If you need to send encrypted text through Slack, email, GitHub issues, or Markdown files, pass `--armor` (or `-a`):
 
 ```bash
-echo "DATABASE_PASSWORD=super-secret" | age --armor --recipient age1ql3z...
+echo "DATABASE_PASSWORD=super-secret" | age --armor --recipient "$RECIPIENT"
 ```
 
 Output:
@@ -341,10 +342,10 @@ In modern Kubernetes and cloud infrastructure, managing encrypted secrets inside
 
 Historically, [SOPS](https://github.com/getsops/sops) relied on GPG or cloud KMS (AWS KMS, GCP KMS). Setting up GPG keys on developer machines, handling key expiration, and importing GPG rings into CI/CD pipelines caused persistent operational pain.
 
-Today, **SOPS + age** is the gold standard for GitOps:
-- Public keys are stored directly in `.sops.yaml` configuration files.
-- CI/CD systems only need a single environment variable: `SOPS_AGE_KEY="AGE-SECRET-KEY-1..."`.
-- Flux CD and Argo CD have native support for decrypting `age`-encrypted SOPS secrets without running GPG agents or mounting external keyrings.
+SOPS can use age to protect secrets stored in Git:
+- Public recipients can be declared in `.sops.yaml`.
+- The SOPS CLI can read the private key from `SOPS_AGE_KEY` or a key file.
+- Flux integrates SOPS decryption, but requires key configuration and `spec.decryption`. Argo CD needs an additional integration, such as a Config Management Plugin.
 
 ### 2. Passage: Modernizing the UNIX Password Store
 The standard UNIX password manager `pass` relied entirely on GPG. [Passage](https://github.com/FiloSottile/passage) is a drop-in fork created by Filippo Valsorda that replaces GPG with `age`. It allows managing passwords in a Git repo with standard text editors, YubiKey support, and zero GPG agent freezes.
@@ -370,7 +371,7 @@ Understanding the deliberate omissions in `age` is just as important as knowing 
 
 - **No digital signatures**: `age` only encrypts and authenticates ciphertext. If you need to sign software releases, Git commits, or distribution packages, use tools designed specifically for signatures, such as [minisign](https://jedisct1.github.io/minisign/), [signify](https://man.openbsd.org/signify.1), or SSH signing (`git config gpg.format ssh`).
 - **No identity validation or Web of Trust**: `age` does not verify whether `age1ql3z...` belongs to Alice or Bob. You verify recipient keys out-of-band (via a secure chat, configuration management, or 1Password), exactly like SSH keys.
-- **No key rotation or expiration metadata**: Keys do not expire automatically. If a key is compromised, generate a new one and re-encrypt the target files.
+- **No key expiration or revocation**: Keys do not expire automatically. If a private key is compromised, generate a new one, update recipients, and re-encrypt the files you control. This does not protect old copies already held by someone with the compromised key.
 
 ---
 
