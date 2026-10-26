@@ -84,7 +84,7 @@ flowchart TD
 ```
 
 Aspectos clave del formato `age`:
-- **Intercambio X25519**: Las claves públicas son puntos de 32 bytes de Curve25519 codificados en formato Bech32, con el prefijo `age1`. Las claves privadas (identidades) se identifican con el prefijo `AGE-SECRET-KEY-1`.
+- **Claves públicas y privadas**: La clave pública sirve para cifrar archivos destinados a una persona. En age empieza por `age1` y puedes compartirla. La clave privada permite descifrarlos, empieza por `AGE-SECRET-KEY-1` y debes guardarla en secreto.
 - **Carga dividida en bloques (chunks)**: Los archivos se cifran en fragmentos independientes de 64 KiB mediante ChaCha20-Poly1305. Esto permite procesar archivos gigantes en streaming sin cargarlos enteros en la memoria RAM. Si un solo byte es alterado, `age` aborta el descifrado al instante.
 - **Cifrado por contraseña**: El cifrado simétrico emplea `scrypt` con un factor de trabajo alto en memoria ($N=2^{18}, r=8, p=1$), haciendo que los ataques de fuerza bruta sean órdenes de magnitud más costosos que con PBKDF2.
 - **Interoperabilidad con claves SSH**: Permite cifrar de manera nativa utilizando claves públicas de SSH ya existentes (`ssh-ed25519` y `ssh-rsa` $\ge$ 2048 bits).
