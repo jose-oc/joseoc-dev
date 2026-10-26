@@ -35,7 +35,7 @@ Use this structure as a menu. Keep the sections the topic needs and drop the res
    description: "One-sentence SEO summary for humans and search results."
    date: "YYYY-MM-DD"
    tags: ["tool", "security", "cli", "devops"]
-   category: "engineering"
+   category: "engineering" # optional grouping label; not the folder. Omit unless it clearly fits.
    language: "en" # or "es"
    slug: "how-to/tool-name"
    draft: false
@@ -77,11 +77,11 @@ If the article covers a CLI tool, library, or protocol:
 
 ### Step 3: Write the Content
 Create the two content files:
-- `src/content/en/<category>/<slug>.md`
-- `src/content/es/<category>/<slug>.md`
+- `src/content/en/<folder>/<slug>.md`
+- `src/content/es/<folder>/<slug>.md`
 
 Ensure:
-- Both files have the exact same `slug: "<category>/<slug>"`.
+- Both files have the exact same `slug: "<folder>/<slug>"`. `<folder>` is the content directory (for example `how-to`) and must match the first part of the slug. It is not the frontmatter `category` field.
 - Code blocks specify syntax highlighting languages (e.g. `bash`, `console`, `yaml`, `mermaid`).
 - Callouts use GitHub-style alerts: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`.
 
@@ -89,11 +89,11 @@ Ensure:
 Add the new article to [`src/config/sidebar.ts`](src/config/sidebar.ts) in both language sections:
 - English section (`en.docs`):
   ```typescript
-  { label: '· Title of Article', slug: '<category>/<slug>' },
+  { label: '· Title of Article', slug: '<folder>/<slug>' },
   ```
 - Spanish section (`es.docs`):
   ```typescript
-  { label: '· Título del artículo', slug: '<category>/<slug>' },
+  { label: '· Título del artículo', slug: '<folder>/<slug>' },
   ```
 
 ### Step 5: Verification & End-to-End Testing
@@ -115,4 +115,12 @@ Add the new article to [`src/config/sidebar.ts`](src/config/sidebar.ts) in both 
 3. **Run E2E Suite**:
    ```bash
    bun run test:e2e
-   
+   ```
+
+4. **Full test suite**: run `bun run test` (includes the link check) and fix any failure.
+
+### Step 6: Finish
+Stop after verification and report the result. Commit or open a pull request only if the user asks. Never merge.
+
+### Updating an existing article
+Edit both language versions, keep the same `slug`, and run Step 5 again.
