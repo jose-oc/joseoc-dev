@@ -52,7 +52,7 @@ For over twenty years, PGP/GPG was the de-facto standard for encrypting files an
 Engineers frequently use `openssl enc -aes-256-cbc -pbkdf2` for quick symmetric encryption. While ubiquitous, OpenSSL was never meant to be an end-user file encryption tool:
 
 - **No authenticated encryption by default**: Basic OpenSSL symmetric modes do not authenticate ciphertext. Tampering or truncation can go undetected or lead to padding oracle exploits.
-- **Incompatible defaults across versions**: Key derivation iterations (`-iter`), salt handling, and default digests have changed between OpenSSL 1.1 and 3.x, leading to files encrypted on one OS version failing to decrypt on another.
+- **Parameters you must preserve**: Decryption needs the same password, cipher, and key derivation settings used for encryption. Record those settings alongside the file; the `enc` output does not describe all of them.
 - **No native public key recipient format**: Encrypting a file to someone else's public key using OpenSSL requires wrestling with X.509 certificates, S/MIME, or CMS/PKCS#7 commands (`openssl cms -encrypt -recip cert.pem`).
 
 ### Comparison Matrix

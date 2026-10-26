@@ -52,7 +52,7 @@ Durante más de 20 años, PGP/GPG fue el estándar por defecto para cifrar archi
 Muchos administradores usan `openssl enc -aes-256-cbc -pbkdf2` para cifrar ficheros rápidamente con contraseña. Sin embargo, OpenSSL nunca fue concebido como una utilidad de usuario final:
 
 - **Sin autenticación por defecto**: Los modos simétricos clásicos de OpenSSL no comprueban la autenticidad del contenido. Cualquier modificación accidental o maliciosa del archivo cifrado puede pasar inadvertida o causar vulnerabilidades de oráculo de relleno (*padding oracle*).
-- **Parámetros incompatibles entre versiones**: El número de iteraciones de PBKDF2 (`-iter`), el manejo de la sal (*salt*) y las funciones de resumen predeterminadas han variado sustancialmente entre OpenSSL 1.1 y 3.x, provocando que archivos cifrados en una máquina no puedan descifrarse en otra.
+- **Parámetros que hay que conservar**: Para descifrar necesitas usar la misma contraseña, cifrado y opciones de derivación de clave que al cifrar. Guarda esos parámetros junto al archivo; la salida de `enc` no los describe todos.
 - **Sin formato nativo de destinatarios públicos**: Cifrar para la clave pública de otra persona mediante OpenSSL obliga a gestionar certificados X.509, S/MIME o comandos complejos de CMS/PKCS#7 (`openssl cms -encrypt -recip cert.pem`).
 
 ### Tabla comparativa
