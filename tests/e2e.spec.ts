@@ -64,6 +64,18 @@ test.describe('Language Switcher & SEO', () => {
     const esTag = page.locator('link[hreflang="es"]');
     await expect(esTag).toHaveAttribute('href', 'https://www.joseoc.dev/es/docs/python-environment-direnv');
   });
+
+  test('age file encryption guide loads in en and es with valid headings and raw markdown', async ({ page }) => {
+    await page.goto('/docs/how-to/age-file-encryption');
+    await expect(page.locator('main h1')).toContainText('Modern File Encryption with age');
+
+    const langSwitcher = page.locator('a[aria-label="Switch to Spanish"]');
+    await expect(langSwitcher).toBeVisible();
+    await langSwitcher.click();
+
+    await expect(page).toHaveURL(/.*\/es\/docs\/how-to\/age-file-encryption/);
+    await expect(page.locator('main h1')).toContainText('Cifrado moderno de archivos con age');
+  });
 });
 
 test.describe('Taxonomy Routing', () => {
