@@ -5,3 +5,4 @@ Each technical decision gets a numbered file here: context, options considered, 
 Files are named `NNNN-short-title.md`.
 
 - [0001 Dependency update policy](0001-dependency-update-policy.md)
+- [0002 Pin the Mermaid CDN version](0002-pin-mermaid-cdn-version.md)
