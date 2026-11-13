@@ -75,6 +75,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         items: [
           { label: '· Basics and First Steps', slug: 'observability/observability-basics' },
           { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
+          { label: '· Ephemeral Storage in Kubernetes', slug: 'observability/ephemeral-storage' },
         ]
       },
       {
@@ -159,6 +160,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
         items: [
           { label: '· Conceptos basicos y primeros pasos', slug: 'observability/observability-basics' },
           { label: '· Memory Usage vs Working Set', slug: 'observability/memory-usage-vs-working-set' },
+          { label: '· Almacenamiento efímero en Kubernetes', slug: 'observability/ephemeral-storage' },
         ]
       },
       {

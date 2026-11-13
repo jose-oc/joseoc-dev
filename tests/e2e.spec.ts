@@ -137,3 +137,15 @@ test('kubernetes sidecar log rotation guide loads in en and es with valid headin
   await expect(page).toHaveURL(/.*\/es\/docs\/how-to\/kubernetes-sidecar-log-rotation/);
   await expect(page.locator('main h1')).toContainText('Rota logs que no controlas con un sidecar en Kubernetes');
 });
+
+test('ephemeral storage explainer loads in en and es with valid headings', async ({ page }) => {
+  await page.goto('/docs/observability/ephemeral-storage');
+  await expect(page.locator('main h1')).toContainText('Ephemeral Storage in Kubernetes');
+
+  const langSwitcher = page.locator('a[aria-label="Switch to Spanish"]');
+  await expect(langSwitcher).toBeVisible();
+  await langSwitcher.click();
+
+  await expect(page).toHaveURL(/.*\/es\/docs\/observability\/ephemeral-storage/);
+  await expect(page.locator('main h1')).toContainText('Almacenamiento efímero en Kubernetes');
+});

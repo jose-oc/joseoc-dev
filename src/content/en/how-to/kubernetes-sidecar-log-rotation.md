@@ -238,7 +238,7 @@ I would not roll this straight into a real cluster. On a throwaway `kind` or `mi
 - **Sidecar**: a secondary container in the same pod that supports the main one. The native form, an init container with `restartPolicy: Always`, is enabled by default since v1.29 and stable since v1.33; a regular second container works on any version.
 - **crond**: the cron daemon. Alpine ships BusyBox `crond`, which reads per-user crontabs from `/etc/crontabs/`.
 - **emptyDir**: an empty volume created when the pod is assigned to a node, shared by all containers in the pod and deleted with the pod.
-- **Ephemeral storage**: local node disk used by container writable layers, `emptyDir` volumes and the pod's own logs. The kubelet accounts for it and can evict pods that exceed their limits.
+- **Ephemeral storage**: local node disk used by container writable layers, `emptyDir` volumes and the pod's own logs. The kubelet accounts for it and can evict pods that exceed their limits. More detail: [Ephemeral Storage in Kubernetes](/docs/observability/ephemeral-storage).
 - **Eviction**: the kubelet terminating a pod to reclaim node resources, for example under disk pressure.
 - **copytruncate**: a logrotate mode that copies the log file and then empties the original, for programs that cannot be asked to reopen their log file.
 - **ConfigMap**: a Kubernetes object that holds configuration data, mountable as files in a volume or exposed as environment variables.

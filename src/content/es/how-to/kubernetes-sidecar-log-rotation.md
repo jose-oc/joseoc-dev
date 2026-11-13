@@ -238,7 +238,7 @@ No lo llevaría directamente a un clúster real. En un clúster desechable de `k
 - **Sidecar**: un contenedor secundario en el mismo pod que apoya al principal. La forma nativa, un contenedor init con `restartPolicy: Always`, está habilitada por defecto desde v1.29 y es estable desde v1.33; un segundo contenedor normal funciona en cualquier versión.
 - **crond**: el demonio de cron. Alpine incluye el `crond` de BusyBox, que lee crontabs por usuario de `/etc/crontabs/`.
 - **emptyDir**: un volumen vacío creado cuando el pod se asigna a un nodo, compartido por todos los contenedores del pod y borrado con el pod.
-- **Almacenamiento efímero**: disco local del nodo usado por las capas escribibles de los contenedores, volúmenes `emptyDir` y los logs del propio pod. El kubelet lo contabiliza y puede desalojar pods que excedan sus límites.
+- **Almacenamiento efímero**: disco local del nodo usado por las capas escribibles de los contenedores, volúmenes `emptyDir` y los logs del propio pod. El kubelet lo contabiliza y puede desalojar pods que excedan sus límites. Más detalle: [Almacenamiento efímero en Kubernetes](/es/docs/observability/ephemeral-storage).
 - **Desalojo (eviction)**: el kubelet terminando un pod para recuperar recursos del nodo, por ejemplo bajo presión de disco.
 - **copytruncate**: un modo de logrotate que copia el archivo de log y luego vacía el original, para programas a los que no se les puede pedir que reabran su archivo de log.
 - **ConfigMap**: un objeto de Kubernetes que guarda datos de configuración, montable como archivos en un volumen o expuesto como variables de entorno.
