@@ -125,3 +125,15 @@ test.describe('Taxonomy Routing', () => {
   });
 
 });
+
+test('kubernetes sidecar log rotation guide loads in en and es with valid headings', async ({ page }) => {
+  await page.goto('/docs/how-to/kubernetes-sidecar-log-rotation');
+  await expect(page.locator('main h1')).toContainText("Rotate Logs You Don't Control with a Kubernetes Sidecar");
+
+  const langSwitcher = page.locator('a[aria-label="Switch to Spanish"]');
+  await expect(langSwitcher).toBeVisible();
+  await langSwitcher.click();
+
+  await expect(page).toHaveURL(/.*\/es\/docs\/how-to\/kubernetes-sidecar-log-rotation/);
+  await expect(page.locator('main h1')).toContainText('Rota logs que no controlas con un sidecar en Kubernetes');
+});

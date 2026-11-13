@@ -67,6 +67,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· unattended-upgrades: turn it off for real', slug: 'how-to/unattended-upgrades-control' },
           { label: '· Snap: controlling automatic updates', slug: 'how-to/snap-refresh-control' },
           { label: '· SSH Access Through a Jump Host', slug: 'how-to/ssh-jump-host' },
+          { label: '· Rotate Logs with a Kubernetes Sidecar', slug: 'how-to/kubernetes-sidecar-log-rotation' },
         ]
       },
       {
@@ -150,6 +151,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Acceso SSH mediante un Jump Host', slug: 'how-to/ssh-jump-host' },
           { label: '· unattended-upgrades: apagarlo de verdad', slug: 'how-to/unattended-upgrades-control' },
           { label: '· Snap: controlar las actualizaciones automáticas', slug: 'how-to/snap-refresh-control' },
+          { label: '· Rotar logs con un sidecar en Kubernetes', slug: 'how-to/kubernetes-sidecar-log-rotation' },
         ]
       },
       {
