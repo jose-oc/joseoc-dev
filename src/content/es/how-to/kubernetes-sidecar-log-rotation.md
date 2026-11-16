@@ -9,21 +9,21 @@ slug: "how-to/kubernetes-sidecar-log-rotation"
 draft: false
 ---
 
-Tuve que desplegar una aplicación de un tercero como un pod. Escribía sus logs en archivos, dentro de su propio directorio, y nunca los rotaba. No tenía control sobre la imagen, así que no podía cambiar cómo registraba. Los logs crecieron hasta llenar el disco.
+Tuve que desplegar una aplicación de terceros en un pod. Ésta escribía sus logs en archivos dentro de su propio directorio y nunca los rotaba. No tenía control sobre la imagen del contenedor, por lo que no podía modificar su mecanismo de logging. Los archivos de logs crecieron progresivamente hasta llenar el disco del nodo.
 
-Este artículo recorre el patrón que lo contiene: un pequeño contenedor sidecar ejecutando `logrotate` sobre un volumen compartido, programado por `crond`, más un límite de tamaño en ese volumen como red de seguridad. Todo sin tocar la imagen del proveedor.
+Este artículo recorre el patrón que permite contener esta situación: un pequeño contenedor sidecar que ejecuta `logrotate` sobre un volumen compartido, planificado mediante `crond`, junto con un límite de tamaño (`sizeLimit`) en ese volumen como red de seguridad. Todo ello sin modificar la imagen provista por el proveedor.
 
-Mi clúster ejecuta Kubernetes 1.32.x, así que los manifiestos de abajo usan un segundo contenedor normal, que funciona en cualquier versión. También cubro dos modos de fallo que permanecen silenciosos y cómo cambiar la política de rotación más adelante sin reiniciar nada.
+Mi clúster ejecuta Kubernetes 1.32.x, por lo que los manifiestos mostrados a continuación utilizan un segundo contenedor convencional, compatible con cualquier versión. También analizo dos modos de fallo que pasan desapercibidos y cómo actualizar la política de rotación más adelante sin necesidad de reiniciar recursos.
 
 ---
 
 ## Por qué el mecanismo habitual no ayuda
 
-El kubelet ya rota los logs de los contenedores, pero solo los escritos en los flujos `stdout` y `stderr` del contenedor, los archivos que lees con `kubectl logs`. Dos ajustes del kubelet controlan esa rotación: `containerLogMaxSize` (10 Mi por defecto) y `containerLogMaxFiles` (5 por defecto).
+El `kubelet` ya rota los logs de los contenedores, pero únicamente aquellos emitidos hacia los flujos `stdout` y `stderr` gestionados por el runtime (los archivos capturados en `/var/log/pods` que se consultan mediante `kubectl logs`). Dos parámetros del `kubelet` regulan dicha rotación: `containerLogMaxSize` (por defecto, 10 Mi) y `containerLogMaxFiles` (por defecto, 5).
 
-Una aplicación que escribe en sus propios archivos de log se salta todo eso. Esos archivos viven en la capa escribible del contenedor o en un volumen montado, y el kubelet no los gestiona. Crecen hasta llenar el disco, y en un nodo bajo presión de disco el kubelet desaloja pods; con umbrales duros de desalojo el apagado es inmediato, sin periodo de gracia.
+Una aplicación que escribe directamente en sus propios archivos de registro elude todo este mecanismo. Dichos archivos residen en la capa de escritura del contenedor (`writable layer`) o en un volumen montado, y el `kubelet` no los gestiona de manera activa. Crecen de forma continua hasta agotar el espacio en disco, momento en el que el `kubelet` desaloja pods ante la presión de almacenamiento (`disk pressure`); con umbrales estrictos de desalojo (`hard eviction`), la terminación del pod es inmediata y sin período de gracia (`terminationGracePeriodSeconds: 0`).
 
-Así que la solución tiene que ocurrir donde están los archivos.
+Por tanto, la solución debe aplicarse en el lugar exacto donde residen los archivos.
 
 ```mermaid
 flowchart TD
@@ -38,21 +38,21 @@ flowchart TD
 
 | Opción | Problema |
 | --- | --- |
-| Arreglar la imagen o añadir un wrapper de arranque | Imposible: la imagen no es mía |
-| Pedir al proveedor opciones de log | Posible, pero depende del soporte y del ciclo de releases del proveedor, sin plazo garantizado |
-| Configurar la app para loguear a `stdout` | Depende por completo de lo que permita la configuración del proveedor |
-| Sidecar de streaming (`tail` del archivo al `stdout` del sidecar) | Funciona, pero añade una segunda copia de esos logs en el nodo, y el archivo original sigue creciendo salvo que también lo trunques |
-| **Sidecar logrotate sobre el volumen compartido** | Rota el archivo en su sitio; la app sigue escribiendo en el mismo archivo |
+| Modificar la imagen o añadir un wrapper de inicio | Inviable: la imagen de terceros no está bajo nuestro control |
+| Solicitar al proveedor soporte para rotación | Factible, pero sujeto a los tiempos de respuesta y al ciclo de releases del proveedor, sin un plazo garantizado |
+| Configurar la aplicación para emitir logs hacia `stdout` | Depende estrictamente de las capacidades de configuración que ofrezca el proveedor |
+| Sidecar de streaming (`tail` del archivo hacia el `stdout` del sidecar) | Funciona, pero duplica el almacenamiento ocupado en el nodo y el archivo de origen sigue creciendo a menos que se trunque manualmente |
+| **Sidecar con `logrotate` sobre el volumen compartido** | Rota el archivo in situ; la aplicación continúa escribiendo en el mismo descriptor sin interrupciones |
 
-La [documentación oficial de logging de Kubernetes](https://kubernetes.io/docs/concepts/cluster-administration/logging/) nombra exactamente este enfoque: "sidecar containers can also be used to rotate log files that cannot be rotated by the application itself", con un pequeño contenedor ejecutando `logrotate` periódicamente como ejemplo.
+La [documentación oficial de logging de Kubernetes](https://kubernetes.io/docs/concepts/cluster-administration/logging/) describe con precisión este enfoque: «sidecar containers can also be used to rotate log files that cannot be rotated by the application itself», señalando como ejemplo un contenedor auxiliar que ejecuta `logrotate` periódicamente.
 
 ## El patrón
 
-Tres piezas: un volumen `emptyDir` compartido, el contenedor del proveedor montándolo donde la app escribe, y un sidecar ejecutando `logrotate` contra ese mismo volumen con una programación.
+La arquitectura consta de tres piezas: un volumen `emptyDir` compartido, el contenedor del proveedor que lo monta en la ruta donde escribe la aplicación, y un sidecar que ejecuta `logrotate` sobre ese mismo volumen según una planificación periódica.
 
 ### La imagen del sidecar
 
-La imagen del proveedor es intocable, pero la del sidecar es tuya. Esta es Alpine con el paquete `logrotate`, más un pequeño entrypoint que registra una programación cron y arranca `crond` en primer plano:
+La imagen del proveedor es inmutable, pero la del sidecar está bajo tu control. Ésta se basa en Alpine con el paquete `logrotate`, complementada con un entrypoint mínimo que registra la planificación en cron e inicia `crond` en primer plano:
 
 **Dockerfile**
 
@@ -81,12 +81,12 @@ echo "${CRON_SCHEDULE} /usr/sbin/logrotate /config/logrotate.conf" > /etc/cronta
 exec crond -f
 ```
 
-El `crond` de BusyBox lee sus crontabs de `/etc/crontabs/<usuario>`, así que escribir el archivo antes de `exec crond -f` es todo el cableado que necesita. Un simple bucle `while : ; do logrotate ...; sleep 600; done` funciona igual de bien; cron solo te da una sintaxis de programación conocida.
+El binario `crond` de BusyBox lee las tablas de cron en `/etc/crontabs/<usuario>`, por lo que escribir el archivo antes de invocar `exec crond -f` es toda la configuración requerida. Un bucle convencional como `while : ; do logrotate ...; sleep 600; done` funcionaría de forma idéntica; el uso de cron únicamente aporta una sintaxis de temporización más conocida y estructurada.
 
-Fíjate en la ruta: logrotate lee su configuración de `/config/logrotate.conf`, no del clásico `/etc/logrotate.conf`. La sección sobre montajes de ConfigMap más abajo explica por qué.
+Presta atención a la ruta: `logrotate` lee su configuración desde `/config/logrotate.conf`, en lugar del clásico `/etc/logrotate.conf`. La sección sobre montajes de `ConfigMap` expuesta más adelante detalla la razón técnica.
 
 > [!NOTE]
-> Construye esta imagen tú mismo, fija una versión de Alpine soportada (v3.24 es la rama estable actual en el momento de escribir esto; consulta [alpinelinux.org/releases](https://alpinelinux.org/releases/)) o un digest, y escanéala como cualquier otra imagen que ejecutes. Descargar e instalar paquetes al arrancar el contenedor vale para un laboratorio, no para un nodo que te importe. BusyBox por sí solo tampoco basta: su binario incluye `crond` pero ningún applet `logrotate`, y por eso el Dockerfile instala el paquete.
+> Compila esta imagen tú mismo, fija una versión estable y soportada de Alpine (v3.24 es la rama estable actual; verifica [alpinelinux.org/releases](https://alpinelinux.org/releases/)) o un digest inmutable, y analízala con escáneres de seguridad como cualquier otra imagen de producción. Descargar e instalar paquetes durante el arranque del contenedor es aceptable en un laboratorio, pero desaconsejable en un nodo productivo. Asimismo, BusyBox por sí solo no basta: su binario incluye `crond`, pero carece del applet de `logrotate`, razón por la cual el Dockerfile instala el paquete correspondiente.
 
 ### El despliegue
 
@@ -140,11 +140,11 @@ spec:
             name: logrotate-config
 ```
 
-Los nombres y las imágenes están anonimizados; la forma es la que corre en producción.
+Los nombres de recursos e imágenes han sido anonimizados; la estructura es la implementada en producción.
 
-El sidecar monta el ConfigMap como **directorio** en `/config`, sin `subPath`. Esa única decisión es la que permite cambiar la política de rotación más adelante sin reiniciar el pod. No lo montes encima de `/etc`: un volumen montado sobre un directorio existente oculta su contenido.
+El sidecar monta el `ConfigMap` como **directorio** en `/config`, sin utilizar `subPath`. Ésta es la decisión clave que permite modificar la política de rotación en caliente sin reiniciar el pod. Evita montarlo directamente sobre `/etc`: cualquier volumen montado sobre un directorio preexistente en la imagen oculta su contenido previo.
 
-Desde Kubernetes v1.29 puedes definir en su lugar el sidecar como sidecar nativo (un contenedor init con `restartPolicy: Always`), lo que garantiza que arranca antes que la app y funciona mejor con jobs; la funcionalidad está activa por defecto desde v1.29 y es estable desde v1.33. En 1.32 un contenedor normal como el de arriba es una opción perfectamente buena. Migrar a la forma nativa más adelante es un cambio pequeño para este contenedor concreto: solo define `image`, `env`, `resources` y `volumeMounts`, todos campos válidos en un contenedor init, sin `ports` ni `probes` que traducir, así que el contenedor pasa a `initContainers` con `restartPolicy: Always` y la imagen, el ConfigMap y los volúmenes se quedan igual.
+Desde Kubernetes v1.29 es posible declarar el sidecar como un sidecar nativo (un contenedor en `initContainers` con `restartPolicy: Always`), lo que asegura que inicie antes que la aplicación principal y mejore la integración en recursos de tipo `Job`; esta funcionalidad está habilitada por defecto desde v1.29 y es estable desde v1.33. En Kubernetes 1.32, un contenedor complementario convencional como el expuesto anteriormente es una alternativa perfectamente válida. Migrar hacia la modalidad nativa requiere un cambio mínimo en este manifiesto: dado que solo define `image`, `env`, `resources` y `volumeMounts` (todos campos admitidos en un contenedor de inicialización, sin necesidad de adaptar `ports` ni `probes`), basta con trasladar el bloque bajo `initContainers` asignando `restartPolicy: Always`, manteniendo idénticos la imagen, el `ConfigMap` y los volúmenes.
 
 ### La configuración de logrotate
 
@@ -166,93 +166,93 @@ data:
     }
 ```
 
-- `size 100M` es un umbral que se comprueba en cada ejecución: cuando logrotate corre y el archivo ha superado los 100 MB, lo rota. Un disparador, no un tope: el archivo puede crecer más de 100 MB entre ejecuciones.
+- `size 100M` establece un umbral de evaluación en cada ciclo: cuando `logrotate` se ejecuta y el archivo ha superado los 100 MB, procede a rotarlo. Actúa como disparador y no como tope rígido: el archivo puede continuar creciendo más allá de 100 MB en el intervalo entre ejecuciones.
 - `rotate 3` conserva tres generaciones comprimidas.
-- `copytruncate` es la clave para una aplicación sin un mecanismo usable para reabrir su archivo de log. En vez de renombrar el archivo, logrotate lo copia y luego trunca el original a cero, y la aplicación sigue escribiendo en el mismo descriptor de archivo.
-- `su root root` rota como ese usuario y grupo en lugar del predeterminado. Con `crond` corriendo ya como root la identidad es la misma, pero la línea no es decorativa: sin ninguna directiva `su`, logrotate corriendo como root omite la rotación con un error cuando el directorio de logs es escribible por todos, o escribible por grupo con un grupo distinto de root. Cualquier `su` explícito se salta esa comprobación de permisos del directorio, así que elige el valor para reducir privilegios, no para satisfacer la comprobación: el usuario y grupo con menos privilegios que puedan leer y escribir esos logs. Verifica el propietario y los permisos reales del directorio de logs antes de producción.
+- `copytruncate` es el mecanismo esencial para aplicaciones que carecen de soporte para reabrir descriptores de archivo (como ante una señal `SIGHUP`). En lugar de renombrar el archivo en el sistema de ficheros, `logrotate` realiza una copia del contenido y luego trunca el original a cero bytes in situ, lo que permite que el proceso continúe escribiendo en el descriptor de archivo abierto sin interrupciones.
+- `su root root` fuerza la rotación bajo dicho usuario y grupo en lugar de los valores por defecto. Dado que `crond` ya se ejecuta como root, la identidad efectiva no varía, pero la directiva no es superflua: sin una cláusula `su`, si `logrotate` corre como root aborta la ejecución con un error si el directorio de logs posee permisos de escritura universal (`world-writable`) o de grupo ajeno a root (mecanismo de defensa interno contra escalada de privilegios y symlinks maliciosos). Cualquier especificación explícita de `su` elude dicha comprobación de seguridad; por tanto, conviene definir los privilegios mínimos necesarios (`least privilege`) para leer y escribir en ese directorio. Verifica la propiedad y los permisos reales del directorio antes de desplegar en producción.
 
 > [!WARNING]
-> `copytruncate` tiene un coste. La página de manual de logrotate advierte de que "there is a very small time slice between copying the file and truncating it, so some logging data might be lost." Que sea aceptable depende de lo que valgan esos logs para ti; para logs de auditoría, no lo es. Ten en cuenta también que el paso de copia duplica brevemente el espacio que ocupa el log activo en el volumen: dimensiona el volumen con margen para el log activo más grande, sus generaciones retenidas y una copia completa extra durante la rotación.
+> La directiva `copytruncate` conlleva una contrapartida técnica. La página de manual de `logrotate` advierte expresamente de que «there is a very small time slice between copying the file and truncating it, so some logging data might be lost». Determinar si esta pérdida potencial es tolerable depende de los requerimientos de tu carga de trabajo; en registros de auditoría o transacciones financieras, resulta inaceptable. Asimismo, considera que la fase de copia duplica momentáneamente el espacio ocupado por el log activo en el volumen: dimensiona el almacenamiento con margen suficiente para el log activo más voluminoso, sus generaciones retenidas y una copia completa adicional durante la rotación.
 
-Cómo pensar el `sizeLimit`: es un límite que eliges tú, y ningún artículo puede validarte un número. Una generación rotada puede superar `size` en lo que la aplicación escriba entre dos ejecuciones del cron, así que por cada archivo `*.log` que cubra el patrón, el volumen tiene que alojar: lo máximo que un log activo puede alcanzar antes de que se dispare la rotación (`size` más el pico de crecimiento entre ejecuciones), `rotate` generaciones a ese mismo tamaño máximo (contadas sin comprimir para ir seguro; comprimirlas también ocupa espacio transitorio mientras corre), y una copia completa extra de ese log más grande mientras `copytruncate` trabaja. El `sizeLimit: 500Mi` de arriba es coherente con un único archivo de log, `size 100M`, `rotate 3` y un crecimiento modesto entre ejecuciones; mide la tasa real de escritura, cuenta los archivos de log y añade margen antes de fiarte de cualquier número. Recuerda que la contabilidad es compartida: el kubelet cuenta este volumen dentro del almacenamiento efímero del pod junto con las capas escribibles de los contenedores y los logs del propio pod.
+Criterios para dimensionar el `sizeLimit`: se trata de una cota que debes definir según tu entorno; ninguna guía técnica puede fijar una cifra absoluta por ti. Una generación rotada puede exceder el parámetro `size` en la cantidad exacta que la aplicación escriba entre dos intervalos de cron. Por consiguiente, para cada archivo `*.log` monitorizado, el volumen debe soportar: el tamaño máximo que puede alcanzar el archivo activo antes de activar la rotación (`size` más el pico de escritura intermedio), `rotate` generaciones calculadas a ese tamaño tope (estimadas sin comprimir por prudencia, ya que la compresión consume espacio transitorio durante su ejecución) y una copia completa adicional del archivo mientras opera `copytruncate`. El valor `sizeLimit: 500Mi` indicado anteriormente resulta coherente para un único archivo de log con `size 100M`, `rotate 3` y una tasa de emisión moderada; mide la tasa real de escritura, contabiliza el número de archivos y añade margen antes de adoptar una cifra definitiva. Recuerda que el cómputo de recursos es compartido: el `kubelet` contabiliza este volumen dentro del almacenamiento efímero (`ephemeral-storage`) del pod junto con las capas de escritura de los contenedores y los propios logs del pod.
 
 ---
 
 ## Cambiar la política más adelante: opciones de montaje del ConfigMap
 
-Tarde o temprano querrás ajustar `size` o `rotate`. Lo que pasa después depende por completo de cómo llega el ConfigMap al contenedor. Estas son las tres opciones, con sus diferencias.
+Eventualmente requerirás ajustar `size` o `rotate`. La dinámica de actualización depende por completo del modo en que el `ConfigMap` se proyecta dentro del contenedor. Éstas son las tres alternativas con sus implicaciones:
 
-**Montaje como directorio (lo que usa este despliegue).** El ConfigMap se monta como directorio en `/config` y logrotate lee `/config/logrotate.conf`. Cuando editas el ConfigMap, Kubernetes proyecta el nuevo contenido en el volumen automáticamente. No es instantáneo: el retraso total puede llegar hasta el periodo de sincronización del kubelet más el retraso de propagación de la caché, y con la caché por defecto basada en watch suele ser de segundos a un par de minutos. A partir de ese momento, la siguiente ejecución del cron lee el archivo nuevo, porque cada ejecución es un proceso logrotate nuevo. Sin reinicio de pod, sin rollout. Solo se propagan así los contenidos de los archivos: la programación en sí, `LOGROTATE_CRON`, es una variable de entorno y sigue requiriendo recrear el pod para cambiarla.
+**Montaje como directorio (estrategia utilizada en este despliegue).** El `ConfigMap` se monta como directorio en `/config` y `logrotate` procesa `/config/logrotate.conf`. Al actualizar el `ConfigMap`, Kubernetes sincroniza automáticamente el nuevo contenido en el volumen proyectado. Este proceso no es instantáneo: la latencia total equivale al período de sincronización del `kubelet` más el tiempo de propagación de la caché del API server (que mediante la caché estándar basada en `watch` suele oscilar entre unos segundos y un par de minutos). A partir de ese instante, la siguiente ejecución temporizada por cron invoca un proceso nuevo de `logrotate` que lee la configuración actualizada, sin reinicios del pod ni ejecuciones de `rollout`. Solo los archivos proyectados se actualizan de este modo: la temporización en sí, regulada por la variable de entorno `LOGROTATE_CRON`, exige recrear el pod si se desea modificar.
 
-**Montaje como archivo con `subPath`.** Montar la clave como archivo la deja exactamente en una ruta como `/etc/logrotate.conf`, que algunos montajes esperan. El precio, directo de la [documentación de ConfigMaps de Kubernetes](https://kubernetes.io/docs/concepts/configuration/configmap/): un contenedor que usa un ConfigMap como montaje de volumen `subPath` no recibe actualizaciones del ConfigMap. El pod en ejecución mantiene la política vieja hasta que lo recreas.
+**Montaje como archivo individual mediante `subPath`.** Montar una clave específica deposita el archivo exactamente en rutas fijas como `/etc/logrotate.conf`, requeridas por ciertas utilidades. La desventaja, descrita en la [documentación de ConfigMaps de Kubernetes](https://kubernetes.io/docs/concepts/configuration/configmap/), es que los contenedores que consumen un `ConfigMap` mediante montajes `subPath` no reciben actualizaciones en caliente. El pod en ejecución mantendrá la política anterior hasta ser recreado explícitamente.
 
-**Anotación checksum de Helm (solo si un chart renderiza esto).** Si el Deployment y el ConfigMap vienen de un chart de Helm, hay un tercer patrón: añadir al pod template una anotación con el SHA-256 del ConfigMap renderizado. Un `helm upgrade` que cambie la política cambia el checksum, lo que cambia el pod template, lo que dispara un rollout, así que los pods nuevos arrancan con la política nueva incluso cuando el archivo está montado con `subPath`. Dos costes que sopesar: el rollout reemplaza el pod entero (aplicación y sidecar) y los logs del `emptyDir` no pasan al pod nuevo; y nada recalcula el checksum cuando editas el ConfigMap a mano, mientras que un `helm upgrade` posterior re-renderiza desde el chart y puede sobrescribir ediciones manuales. Elige una única fuente de verdad para el archivo. El patrón está documentado en la [página de consejos y trucos de Helm](https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments); este despliegue no usa Helm, así que no hay chart que mostrar.
+**Anotación de checksum con Helm (en despliegues orquestados por charts).** Si el `Deployment` y el `ConfigMap` son generados mediante un chart de Helm, existe un patrón común: incorporar en el `pod template` una anotación que contenga el hash SHA-256 del contenido renderizado del `ConfigMap`. Un comando `helm upgrade` que altere la política modificará el checksum, mutando la plantilla del pod y desencadenando un `rollout` automático; de este modo, los nuevos pods iniciarán con la configuración vigente incluso si se emplea `subPath`. Esta aproximación presenta dos consideraciones: el `rollout` sustituye el pod íntegro (aplicación principal y sidecar), por lo que los logs contenidos en el volumen `emptyDir` no viajan con el pod nuevo; adicionalmente, modificar el `ConfigMap` manualmente no recalcula el checksum, y una posterior ejecución de `helm upgrade` sobreescribirá los cambios manuales. Mantén siempre una única fuente de verdad. El patrón se documenta en la [guía de trucos de Helm](https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments); este despliegue no recurre a Helm, por lo que no se incluye dicha plantilla.
 
-Sea cual sea el montaje, una edición rota hace fallar la siguiente ejecución de logrotate en silencio. El hábito que te salva es vigilar el volumen en busca de generaciones comprimidas nuevas, no solo el estado del pod.
+Independientemente del modo de montaje, un error de sintaxis en el archivo de configuración provocará que la siguiente ejecución de `logrotate` falle silenciosamente. La práctica operativa más fiable consiste en auditar el volumen en busca de nuevas generaciones comprimidas y marcas de tiempo recientes, y no confiar únicamente en el estado `Running` del pod.
 
 ---
 
 ## Dos formas en que este patrón falla en silencio
 
-Mientras revisaba un despliegue real de este patrón y probaba su configuración en local, aparecieron dos modos de fallo. Ninguno hace que nada falle ruidosamente.
+Durante la revisión y prueba local de este patrón en entornos reales, surgieron dos modos de fallo que no generan alertas inmediatas ni errores explícitos.
 
-### `-f` convierte discretamente la rotación por tamaño en rotación por tiempo
+### `-f` convierte de forma inadvertida la rotación por tamaño en rotación por tiempo
 
-El despliegue en cuestión ejecutaba `logrotate -f /etc/logrotate.conf`. Sea cual sea la razón por la que acabó ahí, `-f` significa "rota aunque ninguna condición lo pida". Una ejecución local contra la configuración de arriba (`size 100M`) con logrotate 3.19.0 lo confirmó: un archivo de log de 13 bytes rotó inmediatamente con `-f`, mientras que `notifempty` siguió saltándose un archivo vacío. En ese despliegue, con su programación de diez minutos y `rotate 10`, eso significaba aproximadamente los últimos 100 minutos de logs, asumiendo una programación válida y que cada ejecución tenga éxito, en lugar de diez bloques de 100 MB. Ninguno de los dos comportamientos está mal, pero son diseños distintos: retención por tamaño o retención por tiempo. Elige uno. Quitar `-f` convierte el cron en una cadencia de comprobación: la programación decide con qué frecuencia mira logrotate, no si rota.
+En el despliegue examinado se ejecutaba `logrotate -f /etc/logrotate.conf`. El parámetro `-f` (`--force`) instruye a `logrotate` a «rotar incluso si ninguna condición lo exige». Pruebas locales sobre la configuración precedente (`size 100M`) con `logrotate` 3.19.0 confirmaron este comportamiento: un archivo de log de apenas 13 bytes se rotó inmediatamente al invocar `-f`, si bien la directiva `notifempty` continuó omitiendo archivos vacíos. En una configuración con ejecuciones cada diez minutos y `rotate 10`, dicho flag retiene únicamente los últimos 100 minutos de registro (asumiendo ejecuciones exitosas continuas), en lugar de diez segmentos de 100 MB. Ambos esquemas son válidos, pero responden a arquitecturas distintas: retención por volumen frente a retención temporal. Prescindir de `-f` restituye a cron su función adecuada de cadencia de muestreo: el cronjob determina la frecuencia de inspección, no la decisión de rotar.
 
-### Un volumen sin límite, y un límite de tamaño que es una red, no una garantía
+### Un volumen sin restricciones y un límite de tamaño reactivo
 
-Ese despliegue usaba un simple `emptyDir: {}`. La rotación acota los propios archivos de log, pero si la rotación alguna vez se detiene, o la app escribe archivos que el glob no captura (el patrón solo cubre `*.log`), nada más acota ese volumen. Añadir `sizeLimit` más requests y limits de almacenamiento efímero convierte un fallo del sidecar de nuevo en un problema acotado: el kubelet registra el almacenamiento efímero de cada pod y desaloja los pods que exceden sus límites. Mantén la honestidad en las palabras, eso sí: el kubelet evalúa esto en su intervalo de mantenimiento (10 segundos por defecto), el desalojo es reactivo, y otros pods, capas de contenedores y overlays de imágenes comparten el mismo almacenamiento del nodo. Un `sizeLimit` acota lo que este pod puede escribir; es una red de seguridad, no una promesa de que el nodo nunca se llene. Y comprueba qué aterriza realmente en el directorio de logs con `kubectl exec deploy/vendor-app -- ls -la /var/log/vendor-app`, ampliando el glob si la app escribe más que `*.log`.
+Aquel despliegue inicial utilizaba un volumen no acotado `emptyDir: {}`. La rotación gestiona los archivos contemplados, pero si el proceso sidecar se detiene o la aplicación genera archivos no capturados por la máscara (el patrón solo abarca `*.log`), el volumen crecerá indefinidamente. Definir `sizeLimit` junto con declaraciones de `requests` y `limits` para `ephemeral-storage` acota el fallo: el `kubelet` monitoriza el consumo de almacenamiento efímero del pod y desaloja las cargas que sobrepasan sus asignaciones. Conviene ser rigurosos con el comportamiento interno: el `kubelet` evalúa el consumo en intervalos de mantenimiento periódicos (`housekeeping-interval`, por defecto cada 10 s), el desalojo es una acción reactiva y otros pods, capas de contenedores e imágenes base comparten el mismo sistema de ficheros del nodo. El parámetro `sizeLimit` acota la capacidad máxima asignada al pod; opera como red de contención, no como salvaguarda absoluta frente a la saturación del disco del nodo. Inspecciona periódicamente los archivos generados mediante `kubectl exec deploy/vendor-app -- ls -la /var/log/vendor-app`, ampliando la máscara de búsqueda si la aplicación genera extensiones adicionales.
 
-Dos notas más pequeñas. Primero, logrotate mantiene un archivo de estado y toma un lock sobre él por defecto; la página de manual documenta `/var/lib/logrotate.status` como ruta por defecto (las compilaciones difieren) y `/dev/null` como forma de desactivar el estado por completo. En este diseño con cron cada ejecución es independiente, pero una ruta de estado que el contenedor no pueda escribir hará fallar la ejecución, visible en los logs del sidecar. Segundo, la señal más clara de que todo esto funciona son generaciones comprimidas nuevas apareciendo con marcas de tiempo recientes. Vigila el volumen, no solo el estado del pod.
+Dos observaciones complementarias: en primer lugar, `logrotate` gestiona un archivo de estado sobre el que adquiere un bloqueo exclusivo (`lock`); la documentación oficial establece `/var/lib/logrotate.status` como ruta estándar (sujeta a variaciones según la distribución) y `/dev/null` como alternativa para deshabilitar el guardado de estado. Aunque bajo este diseño cada ejecución de cron es independiente, una ruta de estado sin permisos de escritura abortará la ejecución, manifestándose en los logs del sidecar. En segundo lugar, la verificación empírica de funcionamiento radica en la presencia regular de nuevos archivos `.gz` con marcas de tiempo actualizadas en el volumen compartido.
 
 ---
 
 ## Pruébalo en un laboratorio antes de producción
 
-No lo llevaría directamente a un clúster real. En un clúster desechable de `kind` o `minikube`:
+Es aconsejable validar esta arquitectura en un clúster local desechable (`kind` o `minikube`) antes de implementarla en producción:
 
-1. Sustituye el contenedor del proveedor por un generador de logs para ver la rotación en minutos, por ejemplo un contenedor BusyBox ejecutando `sh -c 'while : ; do dd if=/dev/zero bs=1024 count=1 2>/dev/null | tr '\0' 'x' >> /var/log/vendor-app/app.log; usleep 100000; done'`. Eso escribe unos 10 KB/s, así que con `size 1M` abajo ves una rotación cada par de minutos.
-2. Baja `size` a algo pequeño, como `size 1M`, para no esperar 100 MB.
-3. Observa el volumen: `kubectl exec deploy/vendor-app -c logrotate -- ls -lh /var/log/vendor-app`. Deberías ver `app.log` encoger y aparecer generaciones comprimidas.
-4. Para ver la vía del cron funcionar de extremo a extremo, pon `LOGROTATE_CRON` a `* * * * *` en el laboratorio para que corra cada minuto.
-5. Para ver propagarse un cambio de política, edita el ConfigMap con `kubectl edit configmap logrotate-config`, baja `size` de nuevo y espera: una vez que Kubernetes proyecta la actualización, la siguiente ejecución la aplica con el pod intacto.
-6. Para ver actuar el `sizeLimit`, ponlo pequeño (por ejemplo `sizeLimit: 20Mi`), quita el `usleep` del generador para que el volumen se llene rápido y ejecuta `kubectl get pod -w`. El desalojo es reactivo, no instantáneo: el kubelet evalúa el uso periódicamente (el intervalo de mantenimiento por defecto es 10s), así que espera que el pod sea desalojado poco después de cruzar el límite, no en el instante exacto. Luego `kubectl describe pod` muestra un estado `Evicted` con un mensaje de almacenamiento efímero, y `kubectl get events` muestra el evento de desalojo.
+1. Sustituye el contenedor del proveedor por un generador de registros sintéticos para observar la rotación en pocos minutos; por ejemplo, un contenedor BusyBox que ejecute `sh -c 'while : ; do dd if=/dev/zero bs=1024 count=1 2>/dev/null | tr '\0' 'x' >> /var/log/vendor-app/app.log; usleep 100000; done'`. Este comando genera una tasa aproximada de 10 KB/s, permitiendo observar rotaciones continuas si se configura un umbral bajo.
+2. Reduce la directiva `size` temporalmente (por ejemplo, `size 1M`) para no demorar la prueba hasta alcanzar 100 MB.
+3. Inspecciona el contenido del volumen compartido: `kubectl exec deploy/vendor-app -c logrotate -- ls -lh /var/log/vendor-app`. Comprobarás cómo `app.log` se trunca a cero bytes y se generan los correspondientes archivos comprimidos.
+4. Para validar la ejecución programada de cron en ciclo corto, define `LOGROTATE_CRON` con el valor `* * * * *` en el laboratorio para forzar ejecuciones por minuto.
+5. Para verificar la propagación dinámica de cambios en el `ConfigMap`, modifícalo con `kubectl edit configmap logrotate-config`, reduce nuevamente el parámetro `size` y aguarda: una vez que Kubernetes actualice la proyección del volumen, la siguiente iteración de cron aplicará la nueva política sin reiniciar el pod.
+6. Para comprobar el mecanismo de `sizeLimit`, establece un valor reducido (como `sizeLimit: 20Mi`), suprime el retardo `usleep` en el generador para saturar el volumen rápidamente y monitoriza con `kubectl get pod -w`. El desalojo es reactivo y no instantáneo: el `kubelet` computa el almacenamiento en su ciclo de mantenimiento (por defecto cada 10 s), de modo que el pod pasará a estado `Evicted` instantes después de rebasar la cuota. La ejecución de `kubectl describe pod` reflejará el motivo asociado a `ephemeral-storage` y `kubectl get events` registrará el evento de desalojo correspondiente.
 
 > [!NOTE]
-> Los comportamientos de logrotate descritos en este artículo se verificaron localmente contra archivos de prueba en Linux (logrotate 3.19.0): sin rotación bajo el umbral de tamaño sin `-f`; rotación inmediata de un archivo de 13 bytes con `-f`; archivos vacíos omitidos incluso con `-f` gracias a `notifempty`; `copytruncate` dejando el original en cero bytes con todo el contenido preservado en la generación comprimida; retención limitada exactamente a las generaciones configuradas. Los manifiestos de Kubernetes y los pasos del laboratorio no se han ejecutado en un clúster para este artículo; pruébalos en tu propio entorno.
+> El comportamiento de `logrotate` documentado en este artículo fue validado localmente sobre Linux con la versión 3.19.0: ausencia de rotación bajo el umbral de tamaño sin `-f`; rotación inmediata de un archivo de 13 bytes al emplear `-f`; omisión de archivos vacíos incluso con `-f` gracias a `notifempty`; truncamiento efectivo del archivo original a cero bytes preservando la totalidad del registro en el bloque comprimido mediante `copytruncate`; y retención matemática del número exacto de generaciones configuradas. Los manifiestos de Kubernetes y los pasos del laboratorio descritos constituyen una guía de implementación de referencia que debe ser validada en tu entorno operativo.
 
 ---
 
 ## Lo que este patrón no hace
 
-- **No es envío de logs.** La rotación mantiene el disco sano; no lleva los logs a un sistema central. Si necesitas búsqueda y retención, ejecuta un agente de logging ([la misma documentación](https://kubernetes.io/docs/concepts/cluster-administration/logging/) cubre un sidecar con un agente, o un agente a nivel de nodo) y mantén la rotación como capa de seguridad del disco. Ojo con la interacción: un agente leyendo el archivo mientras `copytruncate` trabaja puede perder las líneas escritas en la ventana de copia-truncado.
-- **No sobrevive al borrado del pod.** Los datos de `emptyDir` se borran permanentemente cuando el pod abandona el nodo.
-- **No arregla el crecimiento desbocado dentro de la ventana de rotación.** Un pico puede seguir llenando el volumen entre dos ejecuciones; el `sizeLimit` acota el radio de la explosión, nada más.
-- **Puede soltar unas pocas líneas por rotación**, por diseño de `copytruncate`.
+- **No sustituye al transporte centralizado de logs (`log shipping`).** La rotación previene la saturación del almacenamiento local; no exporta los registros hacia plataformas de observabilidad centralizada. Si requieres indexación y retención duradera, implementa un agente de logging (mediante un sidecar especializado o un daemon a nivel de nodo, según describe la [documentación oficial](https://kubernetes.io/docs/concepts/cluster-administration/logging/)) manteniendo la rotación como mecanismo de contención del almacenamiento local. Presta atención a esta interacción: un agente que lee el archivo en tiempo real (`tail`) mientras opera `copytruncate` puede perder las líneas escritas durante la ventana entre la copia y el truncamiento.
+- **No persiste tras la eliminación del pod.** Los datos alojados en un volumen `emptyDir` se destruyen permanentemente cuando el pod finaliza su ciclo de vida en el nodo.
+- **No mitiga incrementos abruptos dentro del intervalo de muestreo.** Un pico masivo de escritura puede saturar el volumen antes de la siguiente ejecución de cron; el parámetro `sizeLimit` acota el radio de impacto (`blast radius`), evitando que afecte a otros recursos del nodo.
+- **Puede perder algunas líneas en cada rotación**, debido a la ventana inherente a la operación de `copytruncate`.
 
 ---
 
 ## Glosario
 
-- **Sidecar**: un contenedor secundario en el mismo pod que apoya al principal. La forma nativa, un contenedor init con `restartPolicy: Always`, está habilitada por defecto desde v1.29 y es estable desde v1.33; un segundo contenedor normal funciona en cualquier versión.
-- **crond**: el demonio de cron. Alpine incluye el `crond` de BusyBox, que lee crontabs por usuario de `/etc/crontabs/`.
-- **emptyDir**: un volumen vacío creado cuando el pod se asigna a un nodo, compartido por todos los contenedores del pod y borrado con el pod.
-- **Almacenamiento efímero**: disco local del nodo usado por las capas escribibles de los contenedores, volúmenes `emptyDir` y los logs del propio pod. El kubelet lo contabiliza y puede desalojar pods que excedan sus límites. Más detalle: [Almacenamiento efímero en Kubernetes](/es/docs/observability/ephemeral-storage).
-- **Desalojo (eviction)**: el kubelet terminando un pod para recuperar recursos del nodo, por ejemplo bajo presión de disco.
-- **copytruncate**: un modo de logrotate que copia el archivo de log y luego vacía el original, para programas a los que no se les puede pedir que reabran su archivo de log.
-- **ConfigMap**: un objeto de Kubernetes que guarda datos de configuración, montable como archivos en un volumen o expuesto como variables de entorno.
-- **subPath**: una opción de montaje de volumen que monta una única clave o archivo en lugar del volumen completo; los ConfigMaps montados así no reciben actualizaciones.
+- **Sidecar**: contenedor secundario integrado dentro del mismo pod para complementar o extender las funciones del contenedor principal. La modalidad nativa, implementada como un contenedor `init` con `restartPolicy: Always`, está activa por defecto desde Kubernetes v1.29 y es estable desde v1.33; un contenedor secundario estándar es compatible con cualquier versión de Kubernetes.
+- **crond**: demonio del servicio cron. Alpine incorpora la implementación de BusyBox, la cual gestiona las tablas de planificación de usuarios en `/etc/crontabs/`.
+- **emptyDir**: volumen efímero que se crea vacío al vincular un pod a un nodo, compartido por todos los contenedores de dicho pod y destruido definitivamente al finalizar el pod.
+- **Almacenamiento efímero (`ephemeral-storage`)**: espacio en el disco local del nodo consumido por las capas de escritura de los contenedores, los volúmenes `emptyDir` y los registros de log del pod. El `kubelet` computa este consumo y aplica el desalojo si se exceden los límites declarados. Para mayor detalle, consulta [Almacenamiento efímero en Kubernetes](/es/docs/observability/ephemeral-storage).
+- **Desalojo (`eviction`)**: mecanismo reactivo mediante el cual el `kubelet` termina la ejecución de pods para reclamar recursos locales del nodo, como ante episodios de presión de almacenamiento (`disk pressure`).
+- **copytruncate**: directiva de `logrotate` que duplica el archivo activo y posteriormente trunca el archivo original a cero bytes, concebida para aplicaciones que no admiten el cierre y reapertura dinámica de sus descriptores de log.
+- **ConfigMap**: recurso de Kubernetes diseñado para almacenar pares clave-valor de configuración desacoplados del código, proyectable como archivos dentro de un volumen o expuesto mediante variables de entorno.
+- **subPath**: mecanismo de montaje de volúmenes que proyecta un archivo o subdirectorio específico en lugar del volumen íntegro; los volúmenes proyectados mediante `subPath` no reciben actualizaciones dinámicas en caliente.
 
 ---
 
 ## Resumen
 
-- Un contenedor de terceros que loguea a archivos necesita rotación donde viven los archivos: un pequeño sidecar logrotate sobre un `emptyDir` compartido, sin tocar la imagen del proveedor.
-- Monta el ConfigMap como directorio y apunta logrotate a él: las ediciones de política se propagan solas y la siguiente ejecución del cron las recoge, sin rollout. Los montajes `subPath` no reciben actualizaciones, y la anotación checksum de Helm fuerza un rollout en su lugar.
-- `size` decide cuándo ocurre la rotación; `-f` la convierte en retención por tiempo. Elige un diseño.
-- Añade `sizeLimit` y límites de almacenamiento efímero: convierten un sidecar detenido de nuevo en un problema acotado, con el desalojo como red reactiva.
-- Verifica en local y luego en un clúster de laboratorio: la señal que importa son generaciones comprimidas nuevas en el volumen.
+- Una aplicación de terceros que emite registros en archivos locales requiere gestión de rotación en el propio volumen donde residen: un sidecar con `logrotate` sobre un `emptyDir` compartido contiene el problema sin alterar la imagen del proveedor.
+- Proyectar el `ConfigMap` como directorio garantiza que las actualizaciones de política se sincronicen automáticamente en el volumen, siendo adoptadas en la siguiente iteración de cron sin requerir reinicios del pod. Los montajes con `subPath` impiden actualizaciones en caliente y el hash de Helm fuerza un `rollout` completo.
+- El parámetro `size` condiciona la rotación al volumen alcanzado; la inclusión de `-f` la transmuta en una política basada en tiempo. Define con claridad el modelo requerido.
+- Declarar `sizeLimit` y límites de `ephemeral-storage` confina posibles anomalías del sidecar a un alcance predecible, con el desalojo reactivo como salvaguarda del nodo.
+- Valida la operativa en un clúster de pruebas: el indicador fiable del sistema es la aparición regular de generaciones comprimidas con marcas de tiempo recientes en el volumen compartido.
 
 ## Referencias
 
