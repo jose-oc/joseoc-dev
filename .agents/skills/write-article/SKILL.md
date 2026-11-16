@@ -84,6 +84,7 @@ Ensure:
 - Both files have the exact same `slug: "<folder>/<slug>"`. `<folder>` is the content directory (for example `how-to`) and must match the first part of the slug. It is not the frontmatter `category` field.
 - Code blocks specify syntax highlighting languages (e.g. `bash`, `console`, `yaml`, `mermaid`).
 - Callouts use GitHub-style alerts: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`.
+- Write the Spanish version in natural technical Spanish and review it against the English source with the `technical-localization-reviewer` skill (see `.agents/skills/technical-localization-reviewer/SKILL.md`) before considering it final: it enforces anti-calque phrasing, Spanish orthography, frontmatter parity, and register.
 
 ### Step 4: Update Sidebar Navigation
 Add the new article to [`src/config/sidebar.ts`](src/config/sidebar.ts) in both language sections:
