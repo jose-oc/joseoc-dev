@@ -88,6 +88,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· What a Reverse Proxy Is', slug: 'networking/what-is-a-reverse-proxy' },
           { label: '· Quick Networking Commands', slug: 'networking/networking-quick-commands' },
           { label: '· Troubleshooting Commands by Problem', slug: 'networking/troubleshooting-commands-by-problem' },
+          { label: '· MTU Mismatch: Connects, Then Hangs', slug: 'networking/mtu-mismatch-troubleshooting' },
         ]
       },
       {
@@ -173,6 +174,7 @@ const sidebarConfigByLang: Record<SidebarLang, SidebarCollectionConfig> = {
           { label: '· Qué es un reverse proxy', slug: 'networking/what-is-a-reverse-proxy' },
           { label: '· Comandos rápidos de red', slug: 'networking/networking-quick-commands' },
           { label: '· Comandos de troubleshooting por problema', slug: 'networking/troubleshooting-commands-by-problem' },
+          { label: '· MTU distinta: conecta y se cuelga', slug: 'networking/mtu-mismatch-troubleshooting' },
         ]
       },
       {

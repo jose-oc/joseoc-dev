@@ -149,3 +149,15 @@ test('ephemeral storage explainer loads in en and es with valid headings', async
   await expect(page).toHaveURL(/.*\/es\/docs\/observability\/ephemeral-storage/);
   await expect(page.locator('main h1')).toContainText('Almacenamiento efímero en Kubernetes');
 });
+
+test('mtu mismatch guide loads in en and es with valid headings', async ({ page }) => {
+  await page.goto('/docs/networking/mtu-mismatch-troubleshooting');
+  await expect(page.locator('main h1')).toContainText('MTU Mismatch: Connects Fine, Then Hangs');
+
+  const langSwitcher = page.locator('a[aria-label="Switch to Spanish"]');
+  await expect(langSwitcher).toBeVisible();
+  await langSwitcher.click();
+
+  await expect(page).toHaveURL(/.*\/es\/docs\/networking\/mtu-mismatch-troubleshooting/);
+  await expect(page.locator('main h1')).toContainText('MTU distinta: conecta bien y se cuelga al mover datos');
+});
