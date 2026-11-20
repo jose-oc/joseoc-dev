@@ -50,3 +50,10 @@ After content or navigation changes, prefer running `bun run build` to catch bro
 Write for people first. Use short paragraphs, descriptive headings, working examples, and direct explanations of why a command or step matters. Prefer standard Markdown: headings, lists, fenced code blocks with language labels, tables only when they improve scanning, and links with meaningful text. Use callouts for emphasis with GitHub-style alerts such as `> [!TIP]`, `> [!NOTE]`, and `> [!WARNING]`. Use Mermaid diagrams with fenced `mermaid` blocks when a flow or architecture is easier to understand visually.
 
 Embed images with clear alt text and store assets under `src/assets/` when they belong to the article set. Use screenshots only when they add instructional value; crop them tightly and keep them readable. If you embed video-like assets or terminal recordings, make sure they support the explanation instead of replacing it. Every visual should have surrounding text that explains what the reader is looking at and why it matters.
+
+## npm dependency security
+
+- Install with `npm ci` from the lockfile (in CI and when setting up environments); `npm install` with version ranges can pull a version published minutes ago.
+- Apply a 7-day cooldown to newly published dependency versions (`minimumReleaseAge` in pnpm/Renovate or equivalent): nearly all malicious npm versions in 2026 were pulled within 41 hours.
+- Check that dependency install scripts do not run unless needed (`npm --version`, `npm config get ignore-scripts`; npm 12 disables them by default).
+- Do not trust the provenance badge as a guarantee: it tells you where a package was built, not whether it is safe to install.
