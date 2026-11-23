@@ -9,7 +9,8 @@ slug: "networking/mtu-mismatch-troubleshooting"
 draft: false
 ---
 
-En el trabajo nos encontramos errores de conexión entre servidores difíciles de explicar: unas conexiones funcionaban y otras se quedaban colgadas sin motivo aparente. Uno de los sospechosos era una MTU distinta entre servidores y puertos del switch. No afirmo que ésa acabara siendo la causa, porque este tipo de fallo solo se confirma midiendo, pero me di cuenta de que no entendía del todo cómo funciona la MTU por dentro, así que me puse a aprenderlo en serio. Este artículo es lo que encontré: qué es la MTU, qué pasa de verdad cuando los dos extremos del camino no coinciden, cómo diagnosticar el problema con herramientas que ya tienes y cómo se arregla.
+En nuestros datacenters nos encontramos errores de conexión entre servidores difíciles de explicar: unas conexiones funcionaban y otras se quedaban colgadas sin motivo aparente. Uno de los sospechosos era valores de MTU distinta entre servidores y puertos del switch. 
+Me di cuenta de que no entendía del todo cómo funciona la MTU, así que me puse a aprenderlo y en este artículo dejo escrito lo que aprendí: qué es la MTU, qué pasa de verdad cuando los dos extremos del camino no coinciden, cómo diagnosticar el problema con herramientas que ya tienes y cómo se arregla.
 
 ## El síntoma
 
@@ -64,9 +65,9 @@ Los culpables habituales son los firewalls excesivamente estrictos: bloquear tod
 Las tramas gigantes (*jumbo frames*, normalmente de 9000 bytes) son habituales en redes de datacenter, porque los paquetes más grandes reducen la sobrecarga por paquete en el tráfico de almacenamiento y replicación. Aquí importan dos cosas:
 
 - 9000 es una convención, no un estándar. Cada equipo elige su propio máximo y no todos coinciden.
-- Todo el dominio de capa 2 (dominio L2) debe ir al mismo valor: cada servidor, puerto de switch y VLAN del camino necesita la misma MTU.
+- Todo el dominio de layer 2 (dominio L2) debe ir al mismo valor: cada servidor, puerto de switch y VLAN del camino necesita la misma MTU.
 
-Si un servidor configurado a 9000 habla con un puerto de switch configurado a 1500, las tramas grandes se descartan en silencio en capa 2. No hay aviso ICMP ni PMTUD, porque un switch no enruta, no fragmenta ni envía errores: simplemente tira lo que no cabe. Es la variante más traicionera del problema, porque nada en los logs la explica.
+Si un servidor configurado a 9000 habla con un puerto de switch configurado a 1500, las tramas grandes se descartan en silencio en layer 2. No hay aviso ICMP ni PMTUD, porque un switch no enruta, no fragmenta ni envía errores: simplemente tira lo que no cabe. Es la variante más traicionera del problema, porque nada en los logs la explica.
 
 ## Diagnóstico paso a paso
 
@@ -76,7 +77,7 @@ Si un servidor configurado a 9000 habla con un puerto de switch configurado a 15
 4. Prueba en los dos sentidos. Arreglar uno no arregla el otro.
 5. Interpreta los resultados. Un error `message too long, mtu=X` es buena noticia: PMTUD funciona y X te da el límite. El silencio total significa que algo filtra ICMP.
 6. Comprueba si los avisos llegan siquiera: `sudo tcpdump -ni <interfaz> icmp` mientras lanzas los pings grandes.
-7. En switches gestionables, revisa la MTU por puerto y por VLAN y los contadores de descartes, que es donde se ven las caídas silenciosas de capa 2.
+7. En switches gestionables, revisa la MTU por puerto y por VLAN y los contadores de descartes, que es donde se ven las caídas silenciosas de layer 2.
 
 | Comando | Qué te dice |
 | --- | --- |
@@ -107,7 +108,7 @@ Las redes overlay gastan parte de la MTU en sus propias cabeceras. Con flannel e
 - **Descubrimiento de MTU de ruta (*Path MTU Discovery*, PMTUD)**: mecanismo (RFC 1191) por el que el emisor aprende la MTU más pequeña del camino a partir de los avisos ICMP y baja el tamaño de sus paquetes.
 - **Agujero negro (*black hole*)**: ruta donde los avisos ICMP se filtran, de modo que el emisor nunca sabe por qué desaparecen sus paquetes grandes.
 - **Tramas gigantes (*jumbo frames*)**: tramas Ethernet más grandes que los 1500 bytes estándar, normalmente de 9000. Una convención, no un estándar; todo el dominio L2 debe coincidir.
-- **Dominio de capa 2 (dominio L2)**: el conjunto de equipos y puertos conectados a nivel Ethernet (switches, VLAN, puertos de servidor) sin enrutado intermedio.
+- **Dominio de layer 2 (dominio L2)**: el conjunto de equipos y puertos conectados a nivel Ethernet (switches, VLAN, puertos de servidor) sin enrutado intermedio.
 - **Limitación del MSS (*MSS clamping*)**: reescritura de la opción de tamaño máximo de segmento de TCP en tránsito, para que las conexiones no intenten paquetes demasiado grandes.
 - **VXLAN**: protocolo de red overlay que encapsula tráfico de capa 2 sobre UDP, añadiendo 50 bytes de cabeceras por paquete.
 
