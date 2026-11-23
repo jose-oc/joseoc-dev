@@ -39,7 +39,15 @@ Typical values:
 
 ## What happens when it does not match
 
-IPv4 could in theory fragment packets on the way, but TCP traffic today almost always carries the DF (Don't Fragment) bit, so routers are not allowed to split it. When a packet with DF arrives at a link whose MTU is too small, the router drops it and is supposed to send back an ICMP Fragmentation Needed message (type 3, code 4) carrying the MTU that would fit. The sender then lowers its packet size for that destination and retries. That mechanism is Path MTU Discovery (PMTUD), defined in RFC 1191.
+IPv4 allows routers to fragment packets along the path, unless the DF (Don't Fragment) bit is set, as is common with TCP using PMTUD. If a packet exceeds the next link's MTU and carries DF, the router cannot split it: it drops the packet and must send an ICMP Fragmentation Needed message to the sender.
+
+ICMP identifies messages by a **type** and a **code**. In IPv4, type **3** means Destination Unreachable; code **4** gives the specific reason: fragmentation is needed, but the DF bit forbids it. It does not mean the destination server is down: this packet cannot continue under those conditions.
+
+According to [RFC 1191, section 4](https://www.rfc-editor.org/rfc/rfc1191#section-4), the notice includes a Next-Hop MTU field: the MTU of the outgoing link over which that router could not forward the packet. **It is not the MTU configured on the final receiver**, and it does not guarantee that another link farther along the path is not smaller still. The value counts the whole IP packet, including its header, not just the TCP data.
+
+For example: a server sends a 1500-byte IP packet with DF set. An intermediate router needs to forward it over a link with MTU 1400. It drops the packet and reports **1400** to the sender, even if the receiver has MTU 1500 configured. If the notice arrives, the sender lowers its MTU estimate for that destination and, with TCP, retransmits the data in smaller packets. That mechanism is Path MTU Discovery (PMTUD).
+
+The protocol says the router **must** send the notice; that does not guarantee the sender will receive it. An implementation or configuration fault may prevent its generation, and a firewall may filter it along the way. That is why the protocol requirement and what happens in practice need to be distinguished.
 
 ```mermaid
 flowchart TD
@@ -51,7 +59,7 @@ flowchart TD
     E -->|"Filtered"| G["Black hole: retransmits until timeout"]
 ```
 
-When PMTUD works, a mismatch costs one retry and the connection carries on, slightly slower. You never notice it.
+When the notices arrive and PMTUD works, the sender adapts its packet size and the connection can continue. It may need several adjustments if successive links along the path have smaller MTUs.
 
 ## The ICMP black hole
 
@@ -97,7 +105,13 @@ If a server configured at 9000 talks to a switch port configured at 1500, the la
 
 ## A note on Kubernetes
 
-Overlay networks spend part of the MTU on their own headers. With flannel in VXLAN mode, the VXLAN encapsulation adds 50 bytes of headers, so the MTU inside a pod ends up 50 bytes below the physical network's: typically 1450 on a standard 1500 network. Compare `ip link show` on the node and inside a pod to see both values. If the pod MTU is larger than what the underlying network actually admits between nodes, you get the same silent drops described above, this time between pods on different nodes.
+An **overlay network** is a virtual network built on another network that carries its packets, the **underlay**. In a tunnel-based overlay, nodes wrap the original traffic inside other packets to cross the underlay, then unwrap it at the other end. Think of putting a letter inside another envelope: the wrapper takes up space too.
+
+VXLAN is one example: it carries Ethernet frames inside UDP/IP packets. In Kubernetes, flannel in VXLAN mode can use it to connect pods on different nodes over the network that connects those nodes. Not every Kubernetes network uses an overlay; it depends on the network plugin and mode.
+
+Encapsulation leaves less room for the inner packet. In the common case of VXLAN over IPv4, without IP options or inner VLAN tags, the difference is **50 bytes**: 20 for outer IP + 8 for UDP + 8 for VXLAN + 14 for inner Ethernet. An underlay with an IP MTU of **1500** therefore allows an inner IP MTU of **1450**. This is not a constant for every overlay: other encapsulations or an IPv6 underlay change the calculation.
+
+Compare `ip link show` on the node and inside a pod to see both values. The pod MTU must leave room for encapsulation along the path between nodes; otherwise large packets may be lost between pods on different nodes.
 
 ## Glossary
 
@@ -109,7 +123,8 @@ Overlay networks spend part of the MTU on their own headers. With flannel in VXL
 - **Jumbo frames**: Ethernet frames larger than the standard 1500 bytes, usually 9000. A convention, not a standard; the whole layer 2 domain must agree.
 - **Layer 2 domain**: the set of devices and ports connected at the Ethernet level (switches, VLANs, server ports) without routing in between.
 - **MSS clamping**: rewriting the TCP Maximum Segment Size option in transit so connections never try oversized packets.
-- **VXLAN**: an overlay network protocol that tunnels layer 2 traffic over UDP, adding 50 bytes of headers per packet.
+- **Overlay / underlay**: a virtual network and the underlying network that carries it. In a tunnel-based overlay, encapsulation uses part of the available MTU.
+- **VXLAN**: a protocol that carries Ethernet frames over UDP/IP. With IPv4 and no IP options or inner VLAN tags, it reduces the available inner IP MTU by 50 bytes.
 
 ## Summary
 
@@ -122,6 +137,8 @@ Overlay networks spend part of the MTU on their own headers. With flannel in VXL
 ## References
 
 - [RFC 1191: Path MTU Discovery](https://www.rfc-editor.org/rfc/rfc1191.html)
+- [RFC 2923: TCP Problems with Path MTU Discovery, section 2.1](https://www.rfc-editor.org/rfc/rfc2923#section-2.1)
+- [RFC 7348: VXLAN, sections 3 and 5](https://www.rfc-editor.org/rfc/rfc7348)
 - [RFC 4821: Packetization Layer Path MTU Discovery](https://www.rfc-editor.org/rfc/rfc4821.html)
 - [RFC 8200: IPv6 (1280-byte minimum MTU)](https://www.rfc-editor.org/rfc/rfc8200.html)
 - [Cloudflare: Path MTU Discovery in practice](https://blog.cloudflare.com/path-mtu-discovery-in-practice/)
